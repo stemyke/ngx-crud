@@ -197,10 +197,10 @@ export interface IUpdateResources {
 // --- Components configuration ---
 
 export interface ICrudComponentTypes {
-    list: Type<any>;
-    add: Type<any>;
-    edit: Type<any>;
-    cell: Type<any>;
+    list?: Type<any>;
+    add?: Type<any>;
+    edit?: Type<any>;
+    cell?: Type<any>;
 }
 
 export const COMPONENT_TYPES = new InjectionToken<ICrudComponentTypes>("crud-component-types");

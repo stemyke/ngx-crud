@@ -13,7 +13,7 @@ import {ICrudList} from "../../common-types";
 
 @Component({
     standalone: false,
-    selector: "crud-cell",
+    selector: "base-crud-cell",
     styleUrls: ["./crud-cell.component.scss"],
     templateUrl: "./crud-cell.component.html"
 })
