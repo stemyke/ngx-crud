@@ -1,7 +1,7 @@
 import {Component, OnInit, Type} from "@angular/core";
 import {StateService} from "@stemy/ngx-utils";
 import {CrudService} from "../../services/crud.service";
-import {CrudRouteRequest, ICrudRouteSettings} from "../../common-types";
+import {ICrudRouteSettings} from "../../common-types";
 
 @Component({
     standalone: false,
@@ -24,6 +24,8 @@ export class CrudWrapperComponent implements OnInit {
 
     ngOnInit() {
         this.component = this.crud.getComponentType(this.settings.primaryRequest);
-        console.log(this.settings, this.component);
+        if (!this.component) {
+            console.log(`Component not defined for: ${this.settings.primaryRequest}`);
+        }
     }
 }
