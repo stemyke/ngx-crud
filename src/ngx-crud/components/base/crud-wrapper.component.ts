@@ -6,7 +6,6 @@ import {CrudRouteRequest, ICrudRouteSettings} from "../../common-types";
 @Component({
     standalone: false,
     template: `
-        HELLO
         <ng-container [ngComponentOutlet]="component"></ng-container>
     `,
     selector: "crud-wrapper"

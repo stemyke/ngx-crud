@@ -75,7 +75,7 @@ export function createCrudSettings(id: string, endpoint: string, requestType: st
     };
 }
 
-export function createCrudRoute(id: string, path: string, component: Type<any>, settings: ICrudRouteSettings, name?: string): IRoute {
+export function createCrudRoute(id: string, path: string, component: Type<any>, settings: ICrudRouteSettings, name?: string, icon?: string): IRoute {
     return {
         path,
         component,
@@ -100,6 +100,7 @@ export function createCrudRoutes(id: string, endpoint: string, requestType: stri
             options?.listComponent || CrudWrapperComponent,
             createCrudSettings(id, endpoint, requestType, "list", options),
             options?.menu !== false && !endpoint?.includes(":") ? `title.${id}` : null,
+            options?.icon
         ),
         createCrudRoute(
             `add-${id}`,

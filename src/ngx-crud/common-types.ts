@@ -150,6 +150,7 @@ export interface ICrudRouteOptions extends ICrudRouteOptionsBase {
     editComponent?: Type<any>;
     editRequest?: CrudRouteRequest;
     menu?: boolean;
+    icon?: string;
 }
 
 export interface ICrudRouteSettings extends Required<ICrudRouteOptionsBase> {
@@ -161,7 +162,6 @@ export interface ICrudRouteSettings extends Required<ICrudRouteOptionsBase> {
 
 export interface ICrudList {
     readonly settings: ICrudRouteSettings;
-
     callAction(action: string, item: any): Promise<IAsyncMessage>;
 }
 
