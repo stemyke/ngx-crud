@@ -83,6 +83,7 @@ export function createCrudRoute(id: string, path: string, component: Type<any>, 
         data: {
             id,
             name,
+            icon,
             guards: settings.guards || [],
             settings
         },
