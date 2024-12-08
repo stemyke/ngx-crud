@@ -6,9 +6,10 @@ import {CrudRouteRequest, ICrudRouteSettings} from "../../common-types";
 @Component({
     standalone: false,
     template: `
+        HELLO
         <ng-container [ngComponentOutlet]="component"></ng-container>
     `,
-    selector: "crud-base-component"
+    selector: "crud-wrapper"
 })
 export class CrudWrapperComponent implements OnInit {
 
@@ -23,6 +24,7 @@ export class CrudWrapperComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.component = this.crud.getComponentType(this.settings.requestType as CrudRouteRequest);
+        this.component = this.crud.getComponentType(this.settings.primaryRequest);
+        console.log(this.settings, this.component);
     }
 }

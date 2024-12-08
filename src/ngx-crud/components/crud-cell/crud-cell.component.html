@@ -28,11 +28,10 @@
             <div class="crud-actions">
                 <a class="btn btn-transparent crud-action"
                    [ngClass]="[!action.status ? '' : 'status status-' + action.status]"
-                   [attr.title]="action.title | translate"
                    [async-method]="action.action"
                    [context]="item"
                    *ngFor="let action of value">
-                    <i [icon]="action.icon"></i>
+                    {{ action.title | translate }}
                 </a>
             </div>
         </ng-container>
