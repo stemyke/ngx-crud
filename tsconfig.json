@@ -1,0 +1,32 @@
+{
+    "compileOnSave": false,
+    "angularCompilerOptions": {
+        "enableIvy": true,
+        "compilationMode": "partial",
+        "strictMetadataEmit": true
+    },
+    "compilerOptions": {
+        "module": "esnext",
+        "outDir": "./dist/out-tsc",
+        "baseUrl": ".",
+        "sourceMap": true,
+        "declaration": false,
+        "moduleResolution": "node",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "target": "es2018",
+        "useDefineForClassFields": false,
+        "typeRoots": [
+            "node_modules/@types"
+        ],
+        "paths": {
+            "jszip": [
+                "node_modules/jszip/dist/jszip.js"
+            ]
+        },
+        "lib": [
+            "es2017",
+            "dom"
+        ]
+    }
+}

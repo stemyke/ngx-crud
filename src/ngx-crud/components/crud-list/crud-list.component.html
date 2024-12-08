@@ -1,0 +1,44 @@
+<div [ngClass]="[state.data.id + '-editor', 'editor-card', 'crud-card']" *ngIf="settings">
+    <div class="crud-card-header">
+        <span class="title">{{ 'title.' + state.data.id | translate:context }}</span>
+    </div>
+    <div class="crud-card-body">
+        <ng-container *ngIf="dataLoader">
+            <dynamic-table class="table mb-lg"
+                           [columns]="tableColumns"
+                           [dataLoader]="dataLoader"
+                           [itemsPerPage]="settings.itemsPerPage"
+                           #table>
+                <ng-template [pure]="true" [column]="columnNames" let-col="column" let-item="item">
+                    <td [ngClass]="'column-' + col" (click)="callAction(settings.rowAction, item)">
+                        <ng-container [ngComponentOutlet]="cellComponent"
+                                      [ngComponentOutletInputs]="{
+                                        value: item | getValue: col,
+                                        item: item,
+                                        list: this,
+                                        id: col,
+                                        property: tableColumns[col].property
+                                      }"></ng-container>
+                    </td>
+                </ng-template>
+            </dynamic-table>
+        </ng-container>
+        <div class="text-center mt-lg">
+            <ng-container *ngIf="addButton">
+                <button class="btn btn-primary" (click)="addItem()">
+                    <i [icon]="addButton"></i>
+                </button>
+                &nbsp;
+            </ng-container>
+            <ng-container *ngFor="let button of buttons">
+                <button class="btn btn-primary" [async-method]="callButton" [context]="button">
+                    {{ settings.id + '.' + button.button | translate }}
+                </button>
+                &nbsp;
+            </ng-container>
+        </div>
+    </div>
+    <div class="crud-card-footer">
+
+    </div>
+</div>

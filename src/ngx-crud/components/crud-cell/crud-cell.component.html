@@ -1,0 +1,54 @@
+<ng-template #defaultTemplate>
+    <ng-container [ngSwitch]="property?.type">
+        <div *ngSwitchCase="'file'" class="upload">
+            <ul class="images" *ngIf="!multi">
+                <li class="image" *ngIf="value" [ngStyle]="{backgroundImage: value}"></li>
+            </ul>
+            <ul class="images" *ngIf="multi">
+                <li class="image" *ngFor="let image of value; let i = index" [ngStyle]="{backgroundImage: image}"></li>
+            </ul>
+        </div>
+        <div *ngSwitchCase="'boolean'" class="checkbox">
+            <div style="text-align: center">
+                <i [icon]="value ? 'checkmark' : 'close'"></i>
+            </div>
+        </div>
+        <ng-container *ngSwitchCase="'date'">
+            {{ value | date: dateFormat }}
+        </ng-container>
+        <ng-container *ngSwitchCase="'list'">
+            <ng-template #defaultList>
+                {{ value[property.labelField] || value.label || value.id }}
+            </ng-template>
+            <ng-container *ngIf="!value; else defaultList">
+                -
+            </ng-container>
+        </ng-container>
+        <ng-container *ngSwitchCase="'actions'">
+            <div class="crud-actions">
+                <a class="btn btn-transparent crud-action"
+                   [ngClass]="[!action.status ? '' : 'status status-' + action.status]"
+                   [attr.title]="action.title | translate"
+                   [async-method]="action.action"
+                   [context]="item"
+                   *ngFor="let action of value">
+                    <i [icon]="action.icon"></i>
+                </a>
+            </div>
+        </ng-container>
+        <ng-container *ngSwitchDefault>
+            <ng-container [ngSwitch]="property?.format">
+                <ng-container *ngSwitchCase="'date'">
+                    {{ value | date: dateFormat }}
+                </ng-container>
+                <ng-container *ngSwitchDefault>
+                    {{ value }}
+                </ng-container>
+            </ng-container>
+        </ng-container>
+    </ng-container>
+</ng-template>
+<div class="custom-template" *ngIf="template; else defaultTemplate">
+    <ng-container [ngTemplateOutlet]="template"
+                  [ngTemplateOutletContext]="{property, value, item, list, defaultTemplate}"></ng-container>
+</div>
