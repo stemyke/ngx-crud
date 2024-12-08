@@ -181,7 +181,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnDestroy, A
                 },
                 {
                     subjects: [this.events.languageChanged, this.auth.userChanged],
-                    cb: () => this.updateSettings.run()
+                    cb: () => this.updateSettings?.run()
                 }
             )
         );
