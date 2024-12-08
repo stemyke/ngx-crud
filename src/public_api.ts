@@ -24,7 +24,9 @@ export {
     ISerializedDataCustomizer,
     IUpdateResources,
     ICrudComponentTypes,
+    CrudActionIcons,
     COMPONENT_TYPES,
+    ACTION_ICONS,
     FILTER_QUERY_NAME,
     ICrudModuleConfig
 } from "./ngx-crud/common-types";

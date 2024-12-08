@@ -125,19 +125,19 @@ export class CrudListComponent extends BaseCrudComponent implements OnDestroy, A
                     {
                         id: "view",
                         button: settings.viewButton,
-                        icon: "eye-outline",
+                        icon: this.crud.getIcon("view"),
                         title: `action.${labelPrefix}.view`
                     },
                     {
                         id: "edit",
                         button: settings.editButton,
-                        icon: "edit-outline",
+                        icon: this.crud.getIcon("edit"),
                         title: `action.${labelPrefix}.edit`
                     },
                     {
                         id: "delete",
                         button: settings.deleteButton,
-                        icon: "trash-outline",
+                        icon: this.crud.getIcon("delete"),
                         title: `action.${labelPrefix}.delete`
                     },
                     ...settings.customActions,
@@ -181,7 +181,13 @@ export class CrudListComponent extends BaseCrudComponent implements OnDestroy, A
                 },
                 {
                     subjects: [this.events.languageChanged, this.auth.userChanged],
-                    cb: () => this.updateSettings?.run()
+                    cb: () => {
+                        if (!this.updateSettings) {
+                            console.error(`UpdateSettings is not defined for some reason`, this.updateSettings);
+                            return;
+                        }
+                        this.updateSettings.run();
+                    }
                 }
             )
         );

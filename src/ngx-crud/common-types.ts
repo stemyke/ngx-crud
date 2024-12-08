@@ -203,7 +203,11 @@ export interface ICrudComponentTypes {
     cell?: Type<any>;
 }
 
+export type CrudActionIcons = Record<string, string>;
+
 export const COMPONENT_TYPES = new InjectionToken<ICrudComponentTypes>("crud-component-types");
+
+export const ACTION_ICONS = new InjectionToken<ICrudComponentTypes>("crud-action-icons");
 
 // --- Module Configuration ---
 
@@ -212,4 +216,5 @@ export const FILTER_QUERY_NAME = new InjectionToken<string>("filter-query-name")
 export interface ICrudModuleConfig {
     filterName?: string;
     componentTypes?: ICrudComponentTypes;
+    actionIcons?: CrudActionIcons;
 }
