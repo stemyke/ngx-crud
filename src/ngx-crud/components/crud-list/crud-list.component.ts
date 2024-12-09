@@ -99,6 +99,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnDestroy, A
                         title,
                         sort: name,
                         filter: settings.filter && property.type === "string" && property.format !== "date" && !property.disableFilter,
+                        filterType: property.fitlerType,
                         property,
                     },
                     this.injector, property, this.state.params, this.context
