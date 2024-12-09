@@ -156,6 +156,8 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                             : `message.${action}.error`,
                         {reason: res.error}
                     );
+                } else {
+                    console.log(`Error happened in form, should navigate back`, res);
                 }
                 await this.navigateBack();
                 return;
