@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnChanges, OnDestroy, Type, ViewChild} from "@angular/core";
+import {AfterViewInit, Component, OnChanges, OnInit, Type, ViewChild} from "@angular/core";
 import {FormGroup} from "@angular/forms";
 import {
     DynamicTableComponent,
@@ -20,7 +20,7 @@ import {BaseCrudComponent} from "../base/base-crud.component";
     selector: "crud-list",
     templateUrl: "./crud-list.component.html"
 })
-export class CrudListComponent extends BaseCrudComponent implements OnDestroy, AfterViewInit, OnChanges, ICrudList {
+export class CrudListComponent extends BaseCrudComponent implements OnInit, AfterViewInit, OnChanges, ICrudList {
 
     dataLoader: TableDataLoader;
     filterModel: DynamicFormModel;
@@ -166,6 +166,11 @@ export class CrudListComponent extends BaseCrudComponent implements OnDestroy, A
                 return data;
             };
         }, 10);
+        console.log("Crud list initialized");
+    }
+
+    ngOnInit(): void {
+        this.updateSettings?.run();
     }
 
     ngAfterViewInit(): void {
