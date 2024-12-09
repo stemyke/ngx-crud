@@ -99,7 +99,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                         title,
                         sort: name,
                         filter: settings.filter && property.type === "string" && property.format !== "date" && !property.disableFilter,
-                        filterType: property.fitlerType,
+                        filterType: property.filterType,
                         property,
                     },
                     this.injector, property, this.state.params, this.context
@@ -184,7 +184,6 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                 {
                     subjects: [this.events.languageChanged, this.auth.userChanged],
                     cb: () => {
-                        console.log(this);
                         if (!this.updateSettings) {
                             console.error(`UpdateSettings is not defined for some reason`, this.updateSettings);
                             return;
