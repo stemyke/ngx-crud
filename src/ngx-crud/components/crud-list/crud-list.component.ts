@@ -188,6 +188,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                 {
                     subjects: [this.events.languageChanged, this.auth.userChanged],
                     cb: () => {
+                        console.log(this);
                         if (!this.updateSettings) {
                             console.error(`UpdateSettings is not defined for some reason`, this.updateSettings);
                             return;
