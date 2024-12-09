@@ -75,7 +75,7 @@ export function createCrudSettings(id: string, endpoint: string, requestType: st
     };
 }
 
-export function createCrudRoute(id: string, path: string, component: Type<any>, settings: ICrudRouteSettings, name?: string, icon?: string): IRoute {
+export function createCrudRoute(id: string, path: string, component: Type<any>, settings: ICrudRouteSettings, name?: string, icon?: string, defaultPath?: string): IRoute {
     return {
         path,
         component,
@@ -84,6 +84,7 @@ export function createCrudRoute(id: string, path: string, component: Type<any>, 
             id,
             name,
             icon,
+            defaultPath,
             guards: settings.guards || [],
             settings
         },
@@ -94,14 +95,20 @@ export function createCrudRoute(id: string, path: string, component: Type<any>, 
 }
 
 export function createCrudRoutes(id: string, endpoint: string, requestType: string | ICrudRequestType, options?: ICrudRouteOptions): IRoute[] {
+    const params = Object.entries(options?.defaultParams || {});
+    let defaultPath = `${endpoint}`;
+    params.forEach(([key, value]) => {
+        defaultPath = defaultPath.replace(`:${key}`, `${value}`);
+    });
     return [
         createCrudRoute(
             id,
             endpoint,
             options?.listComponent || CrudWrapperComponent,
             createCrudSettings(id, endpoint, requestType, "list", options),
-            options?.menu !== false && !endpoint?.includes(":") ? `title.${id}` : null,
-            options?.icon
+            options?.menu !== false && !defaultPath.includes(":") ? `title.${id}` : null,
+            options?.icon,
+            defaultPath
         ),
         createCrudRoute(
             `add-${id}`,

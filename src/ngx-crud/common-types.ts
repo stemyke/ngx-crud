@@ -151,6 +151,7 @@ export interface ICrudRouteOptions extends ICrudRouteOptionsBase {
     editRequest?: CrudRouteRequest;
     menu?: boolean;
     icon?: string;
+    defaultParams?: Record<string, any>;
 }
 
 export interface ICrudRouteSettings extends Required<ICrudRouteOptionsBase> {
