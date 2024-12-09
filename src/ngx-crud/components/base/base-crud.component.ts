@@ -34,6 +34,7 @@ import {CrudService} from "../../services/crud.service";
 })
 export class BaseCrudComponent implements OnInit, OnDestroy {
 
+    context: ICrudRouteContext;
     buttons: ICrudRouteButton[];
 
     protected subscription: Subscription;
@@ -61,10 +62,6 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
         }, this.settings.endpoint);
     }
 
-    get context(): ICrudRouteContext {
-        return this.state.data.context;
-    }
-
     constructor(readonly cdr: ChangeDetectorRef,
                 readonly state: StateService,
                 readonly injector: Injector,
@@ -79,6 +76,7 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        this.context = this.state.data.context;
         this.subscription = ObservableUtils.multiSubscription(
             this.auth.userChanged.subscribe(() => this.generateButtons())
         );

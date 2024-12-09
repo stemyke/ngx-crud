@@ -4,6 +4,7 @@ import {
     DynamicTableComponent,
     IAsyncMessage,
     IOpenApiSchema,
+    IPaginationData,
     ITableColumns,
     ITimer,
     ObjectUtils,
@@ -12,7 +13,7 @@ import {
     TimerUtils
 } from "@stemy/ngx-utils";
 import {DynamicFormModel, IDynamicFormEvent} from "@stemy/ngx-dynamic-form";
-import {CrudButtonIconSetting, ICrudList, ICrudRouteButtonContext} from "../../common-types"
+import {CrudButtonActionSetting, CrudButtonIconSetting, ICrudList, ICrudRouteButtonContext} from "../../common-types"
 import {BaseCrudComponent} from "../base/base-crud.component";
 
 @Component({
@@ -23,6 +24,7 @@ import {BaseCrudComponent} from "../base/base-crud.component";
 export class CrudListComponent extends BaseCrudComponent implements OnInit, AfterViewInit, OnChanges, ICrudList {
 
     dataLoader: TableDataLoader;
+    data: IPaginationData;
     filterModel: DynamicFormModel;
     filterGroup: FormGroup;
     tableColumns: ITableColumns;
@@ -118,10 +120,10 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             this.tableColumns = columns;
             this.columnNames = Object.keys(columns);
             // --- Create data loader ---
-            const endpoint = this.endpoint + await settings.getRequestPath(
-                null, settings.primaryRequest, "request", this.injector
-            );
             this.dataLoader = async (page, rowsPerPage, orderBy, orderDescending, filter, query) => {
+                const endpoint = this.endpoint + await settings.getRequestPath(
+                    null, settings.primaryRequest, "request", this.injector
+                );
                 const actions = [
                     {
                         id: "view",
@@ -148,9 +150,8 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                 params.query = query;
 
                 const data = await this.api.list(endpoint, params);
-                const items = data.items || [];
-
-                items.forEach(item => {
+                let {total, items, meta} = Object.assign({total: 0, items: [], meta: {}}, data);
+                items?.forEach(item => {
                     item[actionsKey] = actions.map(action => {
                         const icon = selectActionProp(action.button, action.id, action.icon, item);
                         const status = selectActionProp(action.status, action.id, null, item);
@@ -163,7 +164,19 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                     }).filter(Boolean);
                 });
                 await settings.itemsListed(items, this.injector, this.context);
+                this.data = data;
+                this.context = Object.assign(
+                    {},
+                    this.state.data.context,
+                    {page: {total, items, meta}}
+                );
+                this.generateButtons();
                 return data;
+            };
+            this.data = {
+                total: 0,
+                items: [],
+                meta: {}
             };
         }, 10);
         this.updateSettings?.run();
@@ -178,7 +191,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             this.subscription,
             ObservableUtils.subscribe(
                 {
-                    subjects: subjects ?? [],
+                    subjects: [this.state.$observable, ...(subjects ?? [])],
                     cb: () => this.table?.refresh()
                 },
                 {
@@ -209,7 +222,10 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
         });
     }
 
-    async callAction(action: string, item?: any): Promise<IAsyncMessage> {
+    async callAction(setting: CrudButtonActionSetting, item?: any): Promise<IAsyncMessage> {
+        const action = !setting
+            ? null
+            : (ObjectUtils.isFunction(setting) ? setting(this.injector, this.getButtonContext(), item) : setting);
         if (!action) return null;
         try {
             let message: any = null;
@@ -281,7 +297,8 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
     protected getButtonContext(): ICrudRouteButtonContext {
         return {
             ...super.getButtonContext(),
-            dataSource: this.table
+            dataSource: this.table,
+            data: this.data
         };
     }
 }

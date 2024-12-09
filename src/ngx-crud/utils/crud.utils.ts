@@ -4,14 +4,13 @@ import {DynamicFormControlComponent} from "@stemy/ngx-dynamic-form";
 
 import {
     CrudRouteRequest,
-    ICrudRequestType, ICrudRouteButtonContext,
+    ICrudRequestType,
+    ICrudRouteButtonContext,
     ICrudRouteOptions,
     ICrudRouteSettings
 } from "../common-types";
 import {getRequestPath} from "./route.utils";
 import {ContextResolverService} from "../services/context-resolver.service";
-import {CrudListComponent} from "../components/crud-list/crud-list.component";
-import {CrudFormComponent} from "../components/crud-form/crud-form.component";
 import {CrudWrapperComponent} from "../components/base/crud-wrapper.component";
 
 export async function defaultCrudAction(injector: Injector, button: string, context: ICrudRouteButtonContext, item?: any) {
@@ -106,7 +105,7 @@ export function createCrudRoutes(id: string, endpoint: string, requestType: stri
             endpoint,
             options?.listComponent || CrudWrapperComponent,
             createCrudSettings(id, endpoint, requestType, "list", options),
-            options?.menu !== false && !defaultPath.includes(":") ? `title.${id}` : null,
+            options?.menu !== false && !defaultPath.includes(":") ? `menu.${id}` : null,
             options?.icon,
             defaultPath
         ),

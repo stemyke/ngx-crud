@@ -9,7 +9,7 @@ import {
 } from "@stemy/ngx-utils";
 import {
     DynamicFormModel,
-    DynamicFormOptionConfig, FormModelCustomizer,
+    FormModelCustomizer,
     GetFormControlComponentType,
     IDynamicFormEvent
 } from "@stemy/ngx-dynamic-form";
@@ -35,6 +35,7 @@ export interface ICrudDataSource {
 export interface ICrudRouteContext {
     params: Params;
     data: Data;
+    page: IPaginationData;
     [key: string]: any;
 }
 
@@ -59,6 +60,8 @@ export type CrudButtonCheckFunc<T = string> =
 
 export type CrudButtonIconSetting<T = string> = boolean | T | CrudButtonCheckFunc<T>;
 
+export type CrudButtonActionSetting = string | ((injector: Injector, context: ICrudRouteButtonContext, item?: any) => string);
+
 export type CrudDataCustomizerFunc = (data: any, injector: Injector, model: DynamicFormModel, params: Params, context: ICrudRouteContext) => Promise<any>;
 
 export type CrudColumnCustomizerFunc = (column: ICrudListColumn, injector: Injector, property: IOpenApiSchemaProperty, params: Params, context: ICrudRouteContext)
@@ -72,6 +75,7 @@ export interface ICrudRouteButton {
     button: string;
     hidden: boolean | CrudButtonCheckFunc<boolean>;
     function: CrudButtonFunc;
+    icon?: string;
 }
 
 export interface ICrudRouteCustomAction {
@@ -116,7 +120,7 @@ export interface ICrudRouteOptionsBase {
     // This can be used to define custom components for each model
     getFormComponent?: GetFormControlComponentType;
     // Run this action when the whole row is clicked
-    rowAction?: string;
+    rowAction?: CrudButtonActionSetting;
     // Additional context to be sent for admin user when saving an entity
     formContext?: any;
     // Get the request path for the specified request type
