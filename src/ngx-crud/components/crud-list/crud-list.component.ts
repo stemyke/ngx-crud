@@ -37,8 +37,8 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
     @ViewChild("table")
     protected table: DynamicTableComponent;
 
-    ctrInit(): void {
-        super.ctrInit();
+    ngOnInit(): void {
+        super.ngOnInit();
         this.tableColumns = null;
         this.cellComponent = this.crud.getComponentType("cell");
         this.updateSettings = TimerUtils.createTimeout(async () => {
@@ -166,10 +166,6 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                 return data;
             };
         }, 10);
-        console.log("Crud list initialized");
-    }
-
-    ngOnInit(): void {
         this.updateSettings?.run();
     }
 

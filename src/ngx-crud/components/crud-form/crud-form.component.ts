@@ -1,8 +1,10 @@
 import {Component, OnInit} from "@angular/core";
 import {FormGroup} from "@angular/forms";
 import {HttpErrorResponse} from "@angular/common/http";
+import {Subscription} from "rxjs";
 import {DynamicFormGroupModel, DynamicFormModel, IDynamicForm} from "@stemy/ngx-dynamic-form";
 import {FileUtils, IAsyncMessage, ObjectUtils, ObservableUtils} from "@stemy/ngx-utils";
+
 import {ICrudRouteButtonContext} from "../../common-types";
 import {BaseCrudComponent} from "../base/base-crud.component";
 
@@ -23,49 +25,19 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     formModel: DynamicFormModel;
     formGroup: FormGroup;
 
-    ctrInit(): void {
-        super.ctrInit();
+    ngOnInit() {
+        super.ngOnInit();
         this.data = {};
         this.files = {};
-    }
-
-    async ngOnInit() {
-        this.formGroupModel = await this.forms.getFormGroupModelForSchema(this.requestType, this.settings.customizeFormModel);
-        this.formModel = this.formGroupModel.group;
-        this.formGroup = this.forms.createFormGroup(this.formModel, {updateOn: "blur"});
-        this.subscription = ObservableUtils.multiSubscription(
-            this.subscription,
-            this.state.subscribe(async () => {
-                const btnContext = this.getButtonContext();
-                const btn = ObjectUtils.isFunction(this.settings.saveButton)
-                    ? this.settings.saveButton(this.injector, "save", btnContext) : this.settings.saveButton;
-                this.id = this.state.params.id;
-                this.saveButton = !btn ? null : (ObjectUtils.isString(btn) ? btn : "save");
-                try {
-                    const path = this.endpoint + await this.settings.getRequestPath(
-                        this.id, this.settings.primaryRequest, "request", this.injector
-                    );
-                    const data = await this.api.get(path);
-                    this.data = await this.settings.customizeFormData(data, this.injector, this.formModel, this.state.params, this.context) ?? data;
-                    this.generateButtons();
-                } catch (res) {
-                    if (res instanceof HttpErrorResponse) {
-                        const errorObj = res.message || res.error;
-                        const error = ObjectUtils.isObject(errorObj) ? `${errorObj.message}` : `${res.error}`;
-                        const action = `load-${this.id}`;
-                        this.toaster.error(error
-                                ? (error.indexOf("Error") > -1 ? `message.${action}.error` : error)
-                                : `message.${action}.error`,
-                            {reason: res.error}
-                        );
-                    }
-                    await this.navigateBack();
-                    return;
-                }
-                this.forms.patchGroup(this.data, this.formModel, this.formGroup);
-                this.cdr.detectChanges();
-            }),
-        )
+        this.forms.getFormGroupModelForSchema(this.requestType, this.settings.customizeFormModel).then(model => {
+            this.formGroupModel = model;
+            this.formModel = model.group;
+            this.formGroup = this.forms.createFormGroup(this.formModel, {updateOn: "blur"});
+            this.subscription = ObservableUtils.multiSubscription(
+                this.subscription,
+                this.subToState()
+            );
+        });
     }
 
     importFile = async (ie: string): Promise<IAsyncMessage> => {
@@ -158,5 +130,38 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
             snapshot = snapshot.parent;
         }
         await this.state.navigate(path);
+    }
+
+    protected subToState(): Subscription {
+        return this.state.subscribe(async () => {
+            const btnContext = this.getButtonContext();
+            const btn = ObjectUtils.isFunction(this.settings.saveButton)
+                ? this.settings.saveButton(this.injector, "save", btnContext) : this.settings.saveButton;
+            this.id = this.state.params.id;
+            this.saveButton = !btn ? null : (ObjectUtils.isString(btn) ? btn : "save");
+            try {
+                const path = this.endpoint + await this.settings.getRequestPath(
+                    this.id, this.settings.primaryRequest, "request", this.injector
+                );
+                const data = await this.api.get(path);
+                this.data = await this.settings.customizeFormData(data, this.injector, this.formModel, this.state.params, this.context) ?? data;
+                this.generateButtons();
+            } catch (res) {
+                if (res instanceof HttpErrorResponse) {
+                    const errorObj = res.message || res.error;
+                    const error = ObjectUtils.isObject(errorObj) ? `${errorObj.message}` : `${res.error}`;
+                    const action = `load-${this.id}`;
+                    this.toaster.error(error
+                            ? (error.indexOf("Error") > -1 ? `message.${action}.error` : error)
+                            : `message.${action}.error`,
+                        {reason: res.error}
+                    );
+                }
+                await this.navigateBack();
+                return;
+            }
+            this.forms.patchGroup(this.data, this.formModel, this.formGroup);
+            this.cdr.detectChanges();
+        });
     }
 }

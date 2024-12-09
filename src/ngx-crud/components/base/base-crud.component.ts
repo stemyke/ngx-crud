@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, Inject, Injector, OnDestroy} from "@angular/core";
+import {ChangeDetectorRef, Component, Inject, Injector, OnDestroy, OnInit} from "@angular/core";
 import {Subscription} from "rxjs";
 import {
     API_SERVICE,
@@ -32,7 +32,7 @@ import {CrudService} from "../../services/crud.service";
     template: "",
     selector: "crud-base-component"
 })
-export class BaseCrudComponent implements OnDestroy {
+export class BaseCrudComponent implements OnInit, OnDestroy {
 
     buttons: ICrudRouteButton[];
 
@@ -76,10 +76,9 @@ export class BaseCrudComponent implements OnDestroy {
                 @Inject(AUTH_SERVICE) readonly auth: IAuthService,
                 @Inject(TOASTER_SERVICE) readonly toaster: IToasterService,
                 @Inject(FILTER_QUERY_NAME) protected filterName: string) {
-        this.ctrInit();
     }
 
-    ctrInit(): void {
+    ngOnInit(): void {
         this.subscription = ObservableUtils.multiSubscription(
             this.auth.userChanged.subscribe(() => this.generateButtons())
         );
