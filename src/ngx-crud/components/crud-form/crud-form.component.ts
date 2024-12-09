@@ -145,6 +145,11 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                 );
                 const data = await this.api.get(path);
                 this.data = await this.settings.customizeFormData(data, this.injector, this.formModel, this.state.params, this.context) ?? data;
+                this.context = Object.assign(
+                    {},
+                    this.state.data.context,
+                    {entity: this.data}
+                );
                 this.generateButtons();
             } catch (res) {
                 if (res instanceof HttpErrorResponse) {
