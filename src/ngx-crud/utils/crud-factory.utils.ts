@@ -1,20 +1,19 @@
-import {Type} from "@angular/core";
 import {cachedFactory, CachedProvider} from "@stemy/ngx-utils";
-import {GetFormControlComponentType} from "@stemy/ngx-dynamic-form";
 
 import {
     CrudDataCustomizerFunc,
     CrudUpdateResourcesFunc,
     IFormDataCustomizer,
-    ISerializedDataCustomizer, IUpdateResources
+    ISerializedDataCustomizer,
+    IUpdateResources
 } from "../common-types";
 
 export function customizeFormData(...providers: CachedProvider<IFormDataCustomizer>[]): CrudDataCustomizerFunc {
     const factory = cachedFactory(providers);
-    return async (data, injector, model, params, context) => {
+    return async (data, injector, model, context) => {
         const customizers = factory(injector);
         for (const customizer of customizers) {
-            await customizer.customizeFormData(data, model, params, context);
+            await customizer.customizeFormData(data, model, context);
         }
         return data;
     }
@@ -22,11 +21,11 @@ export function customizeFormData(...providers: CachedProvider<IFormDataCustomiz
 
 export function customizeSerializedData(...providers: CachedProvider<ISerializedDataCustomizer>[]): CrudDataCustomizerFunc {
     const factory = cachedFactory(providers);
-    return async (data, injector, model, params, context) => {
+    return async (data, injector, model, context) => {
         const customizers = factory(injector);
         const target = {} as any;
         for (const customizer of customizers) {
-            await customizer.customizeSerializedData(target, data, model, params, context);
+            await customizer.customizeSerializedData(target, data, model, context);
         }
         return target;
     }

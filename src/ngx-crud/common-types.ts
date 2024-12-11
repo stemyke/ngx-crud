@@ -1,4 +1,4 @@
-import {Data, Params} from "@angular/router";
+import {Data, Params, UrlSegment} from "@angular/router";
 import {
     IAsyncMessage,
     IOpenApiSchemaProperty,
@@ -36,11 +36,12 @@ export interface ICrudRouteContext {
     params: Params;
     data: Data;
     page?: IPaginationData;
-    entity?: any;
+    entity?: Record<string, any>;
     [key: string]: any;
 }
 
 export interface ICrudRouteButtonContext {
+    injector: Injector;
     context: ICrudRouteContext;
     params: Params;
     endpoint: string;
@@ -57,13 +58,13 @@ export type CrudButtonFunc = (injector: Injector, button: string, context: ICrud
     => void | Promise<null | void | IAsyncMessage>;
 
 export type CrudButtonCheckFunc<T = string> =
-    (injector: Injector, button: string, context: ICrudRouteButtonContext, item?: any) => boolean | T;
+    (context: ICrudRouteButtonContext, button: string, item?: any) => boolean | T;
 
-export type CrudButtonIconSetting<T = string> = boolean | T | CrudButtonCheckFunc<T>;
+export type CrudButtonPropSetting<T = string> = boolean | T | CrudButtonCheckFunc<T>;
 
-export type CrudButtonActionSetting = string | ((injector: Injector, context: ICrudRouteButtonContext, item?: any) => string);
+export type CrudButtonActionSetting = string | ((context: ICrudRouteButtonContext, injector: Injector, item?: any) => string);
 
-export type CrudDataCustomizerFunc = (data: any, injector: Injector, model: DynamicFormModel, params: Params, context: ICrudRouteContext) => Promise<any>;
+export type CrudDataCustomizerFunc = (data: any, injector: Injector, model: DynamicFormModel, context: ICrudRouteContext) => Promise<any>;
 
 export type CrudColumnCustomizerFunc = (column: ICrudListColumn, injector: Injector, property: IOpenApiSchemaProperty, params: Params, context: ICrudRouteContext)
     => Promise<ICrudListColumn | ICrudListColumn[]>;
@@ -72,16 +73,16 @@ export type CrudUpdateResourcesFunc = (resources: any, injector: Injector, respo
 
 export type CrudButtonStatus = "primary" | "info" | "success" | "warning" | "danger" | "default";
 
-export interface ICrudRouteButton {
+export interface ICrudRouteButton<IT = CrudButtonPropSetting> {
     button: string;
-    hidden: boolean | CrudButtonCheckFunc<boolean>;
     function: CrudButtonFunc;
-    icon?: string;
+    hidden?: boolean | CrudButtonCheckFunc<boolean>;
+    icon?: IT;
 }
 
 export interface ICrudRouteCustomAction {
     id: string;
-    button: CrudButtonIconSetting;
+    button: CrudButtonPropSetting;
     action?: CrudButtonFunc;
     status?: CrudButtonStatus | CrudButtonCheckFunc<CrudButtonStatus>;
     title?: string;
@@ -93,29 +94,36 @@ export type CrudRouteRequest = "list" | "add" | "edit";
 export type CrudRouteMethod = "request" | "save" | "delete" | "import" | "export";
 
 export type GetRequestPath = (
-    id: string, reqType: CrudRouteRequest, method: CrudRouteMethod, injector: Injector, importExport?: string
+    endpoint: string, item: Record<string, any>, reqType: CrudRouteRequest, method: CrudRouteMethod, injector: Injector, importExport?: string
 ) => Promise<string>;
 
+export type GetBackPath = (
+    endpoint: string, reqType: CrudRouteRequest, context: ICrudRouteContext, injector: Injector
+) => Promise<Array<string | UrlSegment>>;
+
 export interface ICrudRouteOptionsBase {
-    addButton?: CrudButtonIconSetting;
+    addButton?: CrudButtonPropSetting;
     addAction?: CrudButtonFunc;
-    viewButton?: CrudButtonIconSetting;
+    viewButton?: CrudButtonPropSetting;
     viewAction?: CrudButtonFunc;
-    editButton?: CrudButtonIconSetting;
+    editButton?: CrudButtonPropSetting;
     editAction?: CrudButtonFunc;
-    deleteButton?: CrudButtonIconSetting;
+    deleteButton?: CrudButtonPropSetting;
     deleteAction?: CrudButtonFunc;
-    saveButton?: CrudButtonIconSetting;
+    saveButton?: CrudButtonPropSetting;
     // Custom actions to display for each item in list component
     customActions?: ICrudRouteCustomAction[];
     // Custom buttons to display under the table in list component
     customButtons?: ICrudRouteButton[];
     labelPrefix?: string;
+    // Defines if filtering for list fields are enabled in general
     filter?: boolean;
+    // Defines custom auth guards for the child routes
     guards?: Array<IResolveFactory | RouteValidator>;
+    // Defines small forms for import/export partial data with the specified identifiers
     importExports?: string[];
     // Loads an additional context for the route
-    loadContext?: (injector: Injector, context: ICrudRouteContext) => Promise<ICrudRouteContext>;
+    loadContext?: (context: ICrudRouteContext, injector: Injector) => Promise<ICrudRouteContext>;
     // Called when form value changes
     formValueChange?: (ev: IDynamicFormEvent, injector: Injector) => void;
     // This can be used to define custom components for each model
@@ -126,6 +134,8 @@ export interface ICrudRouteOptionsBase {
     formContext?: any;
     // Get the request path for the specified request type
     getRequestPath?: GetRequestPath;
+    // Get the route back path after editing/adding an entity
+    getBackPath?: GetBackPath;
     // Customize list columns, if it returns null/undefined it will be removed
     customizeListColumn?: CrudColumnCustomizerFunc;
     // Customize the form model generated based on swagger schema
@@ -139,7 +149,7 @@ export interface ICrudRouteOptionsBase {
     // Dependency subjects to be checked if we should refresh the list
     listDependencies?: Subject<any>[] | ((injector: Injector) => Subject<any>[]);
     // Listener when list data is arrived
-    itemsListed?: (items: Array<any>, injector: Injector, context: ICrudRouteContext) => Promise<void>;
+    itemsListed?: (context: ICrudRouteContext, injector: Injector) => Promise<void>;
     // How many items should be listed
     itemsPerPage?: number;
     // Displays an extra form based on the specified JSON schema in list component
@@ -177,7 +187,6 @@ export interface IFormDataCustomizer {
     customizeFormData(
         data: any,
         model: DynamicFormModel,
-        params: Params,
         context: ICrudRouteContext
     ): Promise<void>;
 }
@@ -187,7 +196,6 @@ export interface ISerializedDataCustomizer {
         target: any,
         data: any,
         model: DynamicFormModel,
-        params: Params,
         context: ICrudRouteContext
     ): Promise<void>;
 }

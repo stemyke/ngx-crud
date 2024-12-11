@@ -1,19 +1,20 @@
 import {Injector, Type} from "@angular/core";
-import {AuthGuard, IRoute, StateService} from "@stemy/ngx-utils";
+import {AuthGuard, IRoute, ObjectUtils, StateService} from "@stemy/ngx-utils";
 import {DynamicFormControlComponent} from "@stemy/ngx-dynamic-form";
 
 import {
+    CrudButtonPropSetting,
     CrudRouteRequest,
     ICrudRequestType,
     ICrudRouteButtonContext,
     ICrudRouteOptions,
     ICrudRouteSettings
 } from "../common-types";
-import {getRequestPath} from "./route.utils";
+import {getNavigateBackPath, getRequestPath} from "./route.utils";
 import {ContextResolverService} from "../services/context-resolver.service";
 import {CrudWrapperComponent} from "../components/base/crud-wrapper.component";
 
-export async function defaultCrudAction(injector: Injector, button: string, context: ICrudRouteButtonContext, item?: any) {
+export async function defaultCrudAction(injector: Injector, button: string, _c: ICrudRouteButtonContext, item?: any) {
     const state = injector.get(StateService);
     const path = !item ? [button] : [button, item._id];
     let snapshot = state.snapshot;
@@ -24,14 +25,20 @@ export async function defaultCrudAction(injector: Injector, button: string, cont
     await state.navigate(path);
 }
 
-export async function customizeData(data?: any): Promise<any> {
+async function returnCb(data?: any): Promise<any> {
     return data;
 }
 
-export function noopCb(): any {}
+function noopCb(): any {}
 
 function getNullFormComponent(): Type<DynamicFormControlComponent> {
     return null;
+}
+
+export function selectBtnProp<T extends string>(prop: CrudButtonPropSetting<T>, ctx: ICrudRouteButtonContext, action: string, value: T, item?: any): T {
+    prop = ObjectUtils.isFunction(prop) ? prop(ctx, action, item) : prop;
+    return ObjectUtils.isString(prop) && prop
+        ? prop as T : prop !== false ? value : null;
 }
 
 export function createCrudSettings(id: string, endpoint: string, requestType: string | ICrudRequestType, primaryRequest: CrudRouteRequest = "list", options?: ICrudRouteOptions): ICrudRouteSettings {
@@ -40,34 +47,35 @@ export function createCrudSettings(id: string, endpoint: string, requestType: st
         endpoint,
         requestType,
         primaryRequest,
-        addButton: options?.addButton !== false,
+        addButton: options?.addButton,
         addAction: options?.addAction || defaultCrudAction,
         viewButton: options?.viewButton || false,
         viewAction: options?.viewAction || defaultCrudAction,
-        editButton: options?.editButton || options?.editButton !== false,
+        editButton: options?.editButton,
         editAction: options?.editAction || defaultCrudAction,
-        deleteButton: options?.deleteButton || options?.deleteButton !== false,
+        deleteButton: options?.deleteButton,
         deleteAction: options?.deleteAction,
-        saveButton: options?.saveButton || options?.saveButton !== false,
+        saveButton: options?.saveButton,
         customActions: options?.customActions || [],
         customButtons: options?.customButtons || [],
         labelPrefix: options?.labelPrefix || "",
         filter: options?.filter !== false,
         guards: options?.guards || [],
         importExports: primaryRequest == "edit" ? (options?.importExports || []) : [],
-        loadContext: options?.loadContext || customizeData,
+        loadContext: options?.loadContext || returnCb,
         formValueChange: options?.formValueChange || noopCb,
         getFormComponent: options?.getFormComponent || getNullFormComponent,
         rowAction: options?.rowAction || null,
         formContext: options?.formContext || null,
         getRequestPath: options?.getRequestPath || getRequestPath,
-        customizeListColumn: options?.customizeListColumn || customizeData,
+        getBackPath: options?.getBackPath || getNavigateBackPath,
+        customizeListColumn: options?.customizeListColumn || returnCb,
         customizeFormModel: options?.customizeFormModel,
-        customizeFormData: options?.customizeFormData || customizeData,
-        customizeSerializedData: options?.customizeSerializedData || customizeData,
-        updateAdditionalResources: options?.updateAdditionalResources || customizeData,
+        customizeFormData: options?.customizeFormData || returnCb,
+        customizeSerializedData: options?.customizeSerializedData || returnCb,
+        updateAdditionalResources: options?.updateAdditionalResources || noopCb,
         listDependencies: options?.listDependencies || [],
-        itemsListed: options?.itemsListed || customizeData,
+        itemsListed: options?.itemsListed || noopCb,
         itemsPerPage: options?.itemsPerPage || 12,
         filterForm: options?.filterForm || false,
         displayMeta: options?.displayMeta || false,

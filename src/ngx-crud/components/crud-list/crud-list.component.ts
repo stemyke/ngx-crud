@@ -13,7 +13,8 @@ import {
     TimerUtils
 } from "@stemy/ngx-utils";
 import {DynamicFormModel, IDynamicFormEvent} from "@stemy/ngx-dynamic-form";
-import {CrudButtonActionSetting, CrudButtonIconSetting, ICrudList, ICrudRouteButtonContext} from "../../common-types"
+import {CrudButtonActionSetting, ICrudList, ICrudRouteButtonContext} from "../../common-types"
+import {selectBtnProp} from "../../utils/crud.utils";
 import {BaseCrudComponent} from "../base/base-crud.component";
 
 @Component({
@@ -55,18 +56,12 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                 console.log(`Schema by name '${requestType}' not found`);
                 return;
             }
-            // --- Button checker ---
-            const selectActionProp = <T = string>(prop: CrudButtonIconSetting<T>, action: string, value: T, item: any): T => {
-                prop = ObjectUtils.isFunction(prop) ? prop(this.injector, action, this.getButtonContext(), item) : prop;
-                if (!prop) return null;
-                return ObjectUtils.isString(prop) ? prop : value
-            };
             // --- Check if we can add a new entity ---
             let canAdd = settings.addButton;
             if (canAdd || this.filterGroup) {
                 try {
-                    const path = this.endpoint + await settings.getRequestPath(
-                        null, settings.primaryRequest, "save", this.injector
+                    const path = await settings.getRequestPath(
+                        this.endpoint, null, settings.primaryRequest, "save", this.injector
                     );
                     const data = await this.api.get(path);
                     if (this.filterGroup) {
@@ -76,7 +71,8 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                     canAdd = false;
                 }
             }
-            this.addButton = selectActionProp(canAdd, "add", "plus-outline", null);
+            const btnContext = this.getButtonContext();
+            this.addButton = selectBtnProp(canAdd, btnContext, "add", "plus-outline", null);
             // --- Start creating table settings ---
             const columns = {} as ITableColumns;
             const actionsKey = `${settings.id}-actions`;
@@ -121,8 +117,8 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             this.columnNames = Object.keys(columns);
             // --- Create data loader ---
             this.dataLoader = async (page, rowsPerPage, orderBy, orderDescending, filter, query) => {
-                const endpoint = this.endpoint + await settings.getRequestPath(
-                    null, settings.primaryRequest, "request", this.injector
+                const endpoint = await settings.getRequestPath(
+                    this.endpoint, null, settings.primaryRequest, "request", this.injector
                 );
                 const actions = [
                     {
@@ -153,8 +149,8 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                 let {total, items, meta} = Object.assign({total: 0, items: [], meta: {}}, data);
                 items?.forEach(item => {
                     item[actionsKey] = actions.map(action => {
-                        const icon = selectActionProp(action.button, action.id, action.icon, item);
-                        const status = selectActionProp(action.status, action.id, null, item);
+                        const icon = selectBtnProp(action.button, btnContext, action.id, action.icon, item);
+                        const status = selectBtnProp(action.status, btnContext, action.id, null, item);
                         return !icon ? null : {
                             title: action.title,
                             icon,
@@ -163,13 +159,13 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                         };
                     }).filter(Boolean);
                 });
-                await settings.itemsListed(items, this.injector, this.context);
                 this.data = data;
                 this.context = Object.assign(
                     {},
                     this.state.data.context,
                     {page: {total, items, meta}}
                 );
+                await settings.itemsListed(this.context, this.injector);
                 this.generateButtons();
                 return data;
             };
@@ -225,7 +221,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
     async callAction(setting: CrudButtonActionSetting, item?: any): Promise<IAsyncMessage> {
         const action = !setting
             ? null
-            : (ObjectUtils.isFunction(setting) ? setting(this.injector, this.getButtonContext(), item) : setting);
+            : (ObjectUtils.isFunction(setting) ? setting(this.getButtonContext(), this.injector, item) : setting);
         if (!action) return null;
         try {
             let message: any = null;
@@ -276,8 +272,8 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             messageContext: item,
             method: async () => {
                 try {
-                    const path = this.endpoint + await this.settings.getRequestPath(
-                        item._id || item.id, this.settings.primaryRequest, "delete", this.injector
+                    const path = await this.settings.getRequestPath(
+                        this.endpoint, item, this.settings.primaryRequest, "delete", this.injector
                     );
                     await this.api.delete(path);
                     this.table?.refresh();

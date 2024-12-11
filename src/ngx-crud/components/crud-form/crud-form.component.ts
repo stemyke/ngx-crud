@@ -6,6 +6,7 @@ import {DynamicFormGroupModel, DynamicFormModel, IDynamicForm} from "@stemy/ngx-
 import {FileUtils, IAsyncMessage, ObjectUtils, ObservableUtils} from "@stemy/ngx-utils";
 
 import {ICrudRouteButtonContext} from "../../common-types";
+import {selectBtnProp} from "../../utils/crud.utils";
 import {BaseCrudComponent} from "../base/base-crud.component";
 
 @Component({
@@ -18,7 +19,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
 
     id: string;
     saveButton: string;
-    data: any;
+    data: Record<string, any>;
     files: any;
 
     formGroupModel: DynamicFormGroupModel;
@@ -42,8 +43,8 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
 
     importFile = async (ie: string): Promise<IAsyncMessage> => {
         try {
-            const path = this.endpoint + await this.settings.getRequestPath(
-                this.id, this.settings.primaryRequest, "import", this.injector, ie
+            const path = await this.settings.getRequestPath(
+                this.endpoint, this.data, this.settings.primaryRequest, "import", this.injector, ie
             );
             const response = await this.api.post(path, {file: this.files[ie]});
             this.forms.patchGroup(response, this.formModel, this.formGroup);
@@ -60,8 +61,8 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
 
     exportFile = async (ie: string): Promise<IAsyncMessage> => {
         try {
-            const path = this.endpoint + await this.settings.getRequestPath(
-                this.id, this.settings.primaryRequest, "export", this.injector, ie
+            const path = await this.settings.getRequestPath(
+                this.endpoint, this.data, this.settings.primaryRequest, "export", this.injector, ie
             );
             const response = await this.api.get(path, {responseType: "blob"});
             FileUtils.saveBlob(response, `export-${this.id}-${ie}.zip`);
@@ -85,7 +86,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         }
         let additionalResources = {};
         try {
-            additionalResources = await this.settings.customizeSerializedData(data, this.injector, this.formModel, this.state.params, this.context);
+            additionalResources = await this.settings.customizeSerializedData(data, this.injector, this.formModel, this.context);
         } catch (error) {
             throw {
                 message: `${error}`
@@ -94,8 +95,8 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         const action = this.state.data.id;
         try {
             data = ObjectUtils.assign(context, data);
-            const path = this.endpoint + await this.settings.getRequestPath(
-                this.id, this.settings.primaryRequest, "save", this.injector
+            const path = await this.settings.getRequestPath(
+                this.endpoint, this.data, this.settings.primaryRequest, "save", this.injector
             );
             const response = this.settings.primaryRequest === "edit"
                 ? await this.api.patch(path, data)
@@ -123,28 +124,20 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     }
 
     protected async navigateBack(): Promise<void> {
-        const path = [this.endpoint];
-        let snapshot = this.state.snapshot?.parent;
-        while (snapshot) {
-            path.unshift(...snapshot.url.map(s => s.path));
-            snapshot = snapshot.parent;
-        }
+        const path = await this.settings.getBackPath(this.endpoint, this.settings.primaryRequest, this.context, this.injector);
         await this.state.navigate(path);
     }
 
     protected subToState(): Subscription {
         return this.state.subscribe(async () => {
-            const btnContext = this.getButtonContext();
-            const btn = ObjectUtils.isFunction(this.settings.saveButton)
-                ? this.settings.saveButton(this.injector, "save", btnContext) : this.settings.saveButton;
             this.id = this.state.params.id;
-            this.saveButton = !btn ? null : (ObjectUtils.isString(btn) ? btn : "save");
+            this.saveButton = selectBtnProp(this.settings.saveButton, this.getButtonContext(), "save", "save");
             try {
-                const path = this.endpoint + await this.settings.getRequestPath(
-                    this.id, this.settings.primaryRequest, "request", this.injector
+                const path = await this.settings.getRequestPath(
+                    this.endpoint, {id: this.id, ...this.data}, this.settings.primaryRequest, "request", this.injector
                 );
                 const data = await this.api.get(path);
-                this.data = await this.settings.customizeFormData(data, this.injector, this.formModel, this.state.params, this.context) ?? data;
+                this.data = await this.settings.customizeFormData(data, this.injector, this.formModel, this.context) ?? data;
                 this.context = Object.assign(
                     {},
                     this.state.data.context,

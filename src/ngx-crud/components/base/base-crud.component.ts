@@ -26,6 +26,7 @@ import {
 } from "../../common-types";
 import {getRequestType} from "../../utils/route.utils";
 import {CrudService} from "../../services/crud.service";
+import {selectBtnProp} from "../../utils/crud.utils";
 
 @Component({
     standalone: false,
@@ -35,7 +36,7 @@ import {CrudService} from "../../services/crud.service";
 export class BaseCrudComponent implements OnInit, OnDestroy {
 
     context: ICrudRouteContext;
-    buttons: ICrudRouteButton[];
+    buttons: ICrudRouteButton<string>[];
 
     protected subscription: Subscription;
 
@@ -88,11 +89,10 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
 
     callButton = async (context: ICrudRouteButton): Promise<IAsyncMessage> => {
         try {
-            const message = context.function(this.injector, context.button, this.getButtonContext()) as any;
-            if (ObjectUtils.isObject(message) && message?.message) {
-                return message;
-            }
-            return null;
+            const message = await context.function(this.injector, context.button, this.getButtonContext()) as IAsyncMessage;
+            this.generateButtons();
+            return ObjectUtils.isObject(message) && message?.message
+                ? message: null;
         } catch (e) {
             const msg = `message.${this.settings.id}-${context.button}.error`;
             throw {
@@ -104,6 +104,7 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
 
     protected getButtonContext(): ICrudRouteButtonContext {
         return {
+            injector: this.injector,
             context: this.context,
             params: this.state.params,
             endpoint: this.endpoint
@@ -112,11 +113,16 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
 
     protected generateButtons(): void {
         if (!this.settings) return;
-        this.buttons = this.settings.customButtons?.filter(b => {
-            if (ObjectUtils.isFunction(b.hidden)) {
-                return !b.hidden(this.injector, b.button, this.getButtonContext());
+        const btnContext = this.getButtonContext();
+        this.buttons = this.settings.customButtons?.filter(btn => {
+            if (ObjectUtils.isFunction(btn.hidden)) {
+                return !btn.hidden(btnContext, btn.button);
             }
-            return b.hidden !== true;
+            return btn.hidden !== true;
+        }).map(btn => {
+            const res = {...btn} as ICrudRouteButton<string>;
+            res.icon = selectBtnProp(btn.icon, btnContext, btn.button, "");
+            return res;
         }) || [];
     }
 }

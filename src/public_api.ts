@@ -6,7 +6,7 @@ export {
     ICrudListColumn,
     CrudButtonFunc,
     CrudButtonCheckFunc,
-    CrudButtonIconSetting,
+    CrudButtonPropSetting,
     CrudDataCustomizerFunc,
     CrudColumnCustomizerFunc,
     CrudUpdateResourcesFunc,
@@ -16,6 +16,7 @@ export {
     CrudRouteRequest,
     CrudRouteMethod,
     GetRequestPath,
+    GetBackPath,
     ICrudRouteOptionsBase,
     ICrudRouteOptions,
     ICrudRouteSettings,
@@ -39,8 +40,8 @@ export {CrudListComponent} from "./ngx-crud/components/crud-list/crud-list.compo
 
 export {CrudService} from "./ngx-crud/services/crud.service";
 
-export {defaultCrudAction, customizeData, createCrudSettings, createCrudRoute, createCrudRoutes} from "./ngx-crud/utils/crud.utils";
+export {defaultCrudAction, selectBtnProp, createCrudSettings, createCrudRoute, createCrudRoutes} from "./ngx-crud/utils/crud.utils";
 export {customizeFormData, customizeSerializedData, updateAdditionalResources} from "./ngx-crud/utils/crud-factory.utils";
-export {defaultRouteMatcher, getRequestPath, getRequestType} from "./ngx-crud/utils/route.utils";
+export {defaultRouteMatcher, getRequestPath, getRequestType, getNavigateBackPath} from "./ngx-crud/utils/route.utils";
 
 export {NgxCrudModule} from "./ngx-crud/ngx-crud.module";
