@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-crud",
-    "version": "19.0.14",
+    "version": "19.0.15",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
@@ -27,11 +27,11 @@
         "invokable": "^1.0.3",
         "ngx-device-detector": "^5.0.1 || ^8.0.0",
         "json5": "^2.2.3",
-        "@stemy/ngx-utils": "^19.0.6",
+        "@stemy/ngx-utils": "^19.0.9",
         "@ng-dynamic-forms/core": "^18.0.0",
         "@ng-dynamic-forms/ui-basic": "^18.0.0",
         "ngx-mask": "^17.1.8",
-        "@stemy/ngx-dynamic-form": "^19.0.5"
+        "@stemy/ngx-dynamic-form": "^19.0.8"
     },
     "devDependencies": {
         "@angular/animations": "19.0.3",
@@ -77,11 +77,11 @@
         "del": "7.0.0",
         "node-watch": "0.7.3",
         "commander": "9.4.1",
-        "@stemy/ngx-utils": "19.0.6",
+        "@stemy/ngx-utils": "19.0.9",
         "@ng-dynamic-forms/core": "^18.0.0",
         "@ng-dynamic-forms/ui-basic": "^18.0.0",
         "ngx-mask": "^17.1.8",
-        "@stemy/ngx-dynamic-form": "^19.0.5",
+        "@stemy/ngx-dynamic-form": "19.0.8",
         "jasmine": "3.1.0",
         "jasmine-core": "3.1.0",
         "jasmine-spec-reporter": "4.2.1",

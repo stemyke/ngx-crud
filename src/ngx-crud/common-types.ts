@@ -15,6 +15,7 @@ import {
 } from "@stemy/ngx-dynamic-form";
 import {InjectionToken, Injector, Type} from "@angular/core";
 import {Subject} from "rxjs";
+import {ITableDragEvent} from "@stemy/ngx-utils/ngx-utils/common-types";
 
 // --- CRUD ---
 export interface ICrudRequestType {
@@ -101,6 +102,8 @@ export type GetBackPath = (
     endpoint: string, reqType: CrudRouteRequest, context: ICrudRouteContext, injector: Injector
 ) => Promise<Array<string | UrlSegment>>;
 
+export type CrudDragHandler = (ev: ITableDragEvent, context: ICrudRouteContext, injector: Injector) => boolean;
+
 export interface ICrudRouteOptionsBase {
     addButton?: CrudButtonPropSetting;
     addAction?: CrudButtonFunc;
@@ -115,6 +118,7 @@ export interface ICrudRouteOptionsBase {
     customActions?: ICrudRouteCustomAction[];
     // Custom buttons to display under the table in list component
     customButtons?: ICrudRouteButton[];
+    // Defines prefix for label translations
     labelPrefix?: string;
     // Defines if filtering for list fields are enabled in general
     filter?: boolean;
@@ -156,6 +160,12 @@ export interface ICrudRouteOptionsBase {
     filterForm?: boolean;
     // Sets if list metadata should be displayed
     displayMeta?: boolean;
+    // Drag start handler in list component
+    onDragStart?: CrudDragHandler;
+    // Drag enter handler in list component
+    onDragEnter?: CrudDragHandler;
+    // Drop handler in list component
+    onDrop?: CrudDragHandler;
 }
 
 export interface ICrudRouteOptions extends ICrudRouteOptionsBase {

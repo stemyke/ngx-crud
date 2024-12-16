@@ -30,15 +30,9 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         super.ngOnInit();
         this.data = {};
         this.files = {};
-        this.forms.getFormGroupModelForSchema(this.requestType, this.settings.customizeFormModel).then(model => {
-            this.formGroupModel = model;
-            this.formModel = model.group;
-            this.formGroup = this.forms.createFormGroup(this.formModel, {updateOn: "blur"});
-            this.subscription = ObservableUtils.multiSubscription(
-                this.subscription,
-                this.subToState()
-            );
-        });
+        this.forms.getFormGroupModelForSchema(this.requestType, this.settings.customizeFormModel)
+            .then(m => this.initForm(m))
+            .catch(console.warn);
     }
 
     importFile = async (ie: string): Promise<IAsyncMessage> => {
@@ -126,6 +120,16 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     protected async navigateBack(): Promise<void> {
         const path = await this.settings.getBackPath(this.endpoint, this.settings.primaryRequest, this.context, this.injector);
         await this.state.navigate(path);
+    }
+
+    protected initForm(model: DynamicFormGroupModel): void {
+        this.formGroupModel = model;
+        this.formModel = model.group;
+        this.formGroup = this.forms.createFormGroup(this.formModel, {updateOn: "blur"});
+        this.subscription = ObservableUtils.multiSubscription(
+            this.subscription,
+            this.subToState()
+        );
     }
 
     protected subToState(): Subscription {

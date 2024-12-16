@@ -10,7 +10,8 @@ import {
     ObjectUtils,
     ObservableUtils,
     TableDataLoader,
-    TimerUtils
+    TimerUtils,
+    DynamicTableDragHandler
 } from "@stemy/ngx-utils";
 import {DynamicFormModel, IDynamicFormEvent} from "@stemy/ngx-dynamic-form";
 import {CrudButtonActionSetting, ICrudList, ICrudRouteButtonContext} from "../../common-types"
@@ -28,8 +29,13 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
     data: IPaginationData;
     filterModel: DynamicFormModel;
     filterGroup: FormGroup;
+
     tableColumns: ITableColumns;
     cellComponent: Type<any>;
+    dragStartFn: DynamicTableDragHandler;
+    dragEnterFn: DynamicTableDragHandler;
+    dropFn: DynamicTableDragHandler;
+
     columnNames: string[];
     addButton: string;
 
@@ -44,6 +50,15 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
         super.ngOnInit();
         this.tableColumns = null;
         this.cellComponent = this.crud.getComponentType("cell");
+        this.dragStartFn = (ev) => {
+            return this.settings.onDragStart(ev, this.context, this.injector);
+        };
+        this.dragEnterFn = (ev) => {
+            return this.settings.onDragEnter(ev, this.context, this.injector);
+        };
+        this.dropFn = (ev) => {
+            return this.settings.onDrop(ev, this.context, this.injector);
+        };
         this.updateSettings = TimerUtils.createTimeout(async () => {
             const settings = this.settings;
             const requestType = this.requestType;

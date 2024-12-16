@@ -31,6 +31,10 @@ async function returnCb(data?: any): Promise<any> {
 
 function noopCb(): any {}
 
+function dragCb(): boolean {
+    return false;
+}
+
 function getNullFormComponent(): Type<DynamicFormControlComponent> {
     return null;
 }
@@ -79,6 +83,9 @@ export function createCrudSettings(id: string, endpoint: string, requestType: st
         itemsPerPage: options?.itemsPerPage || 12,
         filterForm: options?.filterForm || false,
         displayMeta: options?.displayMeta || false,
+        onDragStart: options?.onDragStart || dragCb,
+        onDragEnter: options?.onDragEnter || dragCb,
+        onDrop: options?.onDrop || dragCb,
     };
 }
 

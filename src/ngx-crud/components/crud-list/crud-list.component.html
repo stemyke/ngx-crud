@@ -8,6 +8,9 @@
                            [columns]="tableColumns"
                            [dataLoader]="dataLoader"
                            [itemsPerPage]="settings.itemsPerPage"
+                           [dragStartFn]="dragStartFn"
+                           [dragEnterFn]="dragEnterFn"
+                           [dropFn]="dropFn"
                            #table>
                 <ng-template [pure]="true" [column]="columnNames" let-col="column" let-item="item">
                     <td [ngClass]="'column-' + col" (click)="callAction(settings.rowAction, item)">
