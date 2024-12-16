@@ -6,7 +6,7 @@ import {
     CrudButtonPropSetting,
     CrudRouteRequest,
     ICrudRequestType,
-    ICrudRouteButtonContext,
+    ICrudRouteActionContext,
     ICrudRouteOptions,
     ICrudRouteSettings
 } from "../common-types";
@@ -14,7 +14,7 @@ import {getNavigateBackPath, getRequestPath} from "./route.utils";
 import {ContextResolverService} from "../services/context-resolver.service";
 import {CrudWrapperComponent} from "../components/base/crud-wrapper.component";
 
-export async function defaultCrudAction(injector: Injector, button: string, _c: ICrudRouteButtonContext, item?: any) {
+export async function defaultCrudAction(injector: Injector, button: string, _c: ICrudRouteActionContext, item?: any) {
     const state = injector.get(StateService);
     const path = !item ? [button] : [button, item._id];
     let snapshot = state.snapshot;
@@ -39,7 +39,7 @@ function getNullFormComponent(): Type<DynamicFormControlComponent> {
     return null;
 }
 
-export function selectBtnProp<T extends string>(prop: CrudButtonPropSetting<T>, ctx: ICrudRouteButtonContext, action: string, value: T, item?: any): T {
+export function selectBtnProp<T extends string>(prop: CrudButtonPropSetting<T>, ctx: ICrudRouteActionContext, action: string, value: T, item?: any): T {
     prop = ObjectUtils.isFunction(prop) ? prop(ctx, action, item) : prop;
     return ObjectUtils.isString(prop) && prop
         ? prop as T : prop !== false ? value : null;

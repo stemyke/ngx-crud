@@ -20,7 +20,7 @@ import {DynamicFormService} from "@stemy/ngx-dynamic-form";
 import {
     FILTER_QUERY_NAME,
     ICrudRouteButton,
-    ICrudRouteButtonContext,
+    ICrudRouteActionContext,
     ICrudRouteContext,
     ICrudRouteSettings
 } from "../../common-types";
@@ -89,7 +89,7 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
 
     callButton = async (context: ICrudRouteButton): Promise<IAsyncMessage> => {
         try {
-            const message = await context.function(this.injector, context.button, this.getButtonContext()) as IAsyncMessage;
+            const message = await context.function(this.injector, context.button, this.getActionContext()) as IAsyncMessage;
             this.generateButtons();
             return ObjectUtils.isObject(message) && message?.message
                 ? message: null;
@@ -102,26 +102,27 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
         }
     }
 
-    protected getButtonContext(): ICrudRouteButtonContext {
+    protected getActionContext(): ICrudRouteActionContext {
         return {
+            params: this.state.params,
+            routeData: this.state.data,
             injector: this.injector,
             context: this.context,
-            params: this.state.params,
             endpoint: this.endpoint
         };
     }
 
     protected generateButtons(): void {
         if (!this.settings) return;
-        const btnContext = this.getButtonContext();
+        const actionCtx = this.getActionContext();
         this.buttons = this.settings.customButtons?.filter(btn => {
             if (ObjectUtils.isFunction(btn.hidden)) {
-                return !btn.hidden(btnContext, btn.button);
+                return !btn.hidden(actionCtx, btn.button);
             }
             return btn.hidden !== true;
         }).map(btn => {
             const res = {...btn} as ICrudRouteButton<string>;
-            res.icon = selectBtnProp(btn.icon, btnContext, btn.button, "");
+            res.icon = selectBtnProp(btn.icon, actionCtx, btn.button, "");
             return res;
         }) || [];
     }

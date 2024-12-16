@@ -5,7 +5,8 @@ import {
     IPaginationData,
     IResolveFactory,
     ITableColumn,
-    RouteValidator
+    RouteValidator,
+    ITableDragEvent
 } from "@stemy/ngx-utils";
 import {
     DynamicFormModel,
@@ -15,7 +16,6 @@ import {
 } from "@stemy/ngx-dynamic-form";
 import {InjectionToken, Injector, Type} from "@angular/core";
 import {Subject} from "rxjs";
-import {ITableDragEvent} from "@stemy/ngx-utils/ngx-utils/common-types";
 
 // --- CRUD ---
 export interface ICrudRequestType {
@@ -33,22 +33,22 @@ export interface ICrudDataSource {
     updateQuery(col: string, value: string): void;
 }
 
-export interface ICrudRouteContext {
+export interface ICrudRouteContextBase {
     params: Params;
-    data: Data;
-    dataSource?: ICrudDataSource;
+    routeData: Data;
     page?: IPaginationData;
     entity?: Record<string, any>;
+}
+
+export interface ICrudRouteContext extends ICrudRouteContextBase {
     [key: string]: any;
 }
 
-export interface ICrudRouteButtonContext {
+export interface ICrudRouteActionContext extends ICrudRouteContextBase {
     injector: Injector;
     context: ICrudRouteContext;
-    params: Params;
     endpoint: string;
     dataSource?: ICrudDataSource;
-    data?: any;
 }
 
 export interface ICrudListColumn extends ITableColumn {
@@ -56,15 +56,15 @@ export interface ICrudListColumn extends ITableColumn {
     property?: IOpenApiSchemaProperty;
 }
 
-export type CrudButtonFunc = (injector: Injector, button: string, context: ICrudRouteButtonContext, item?: any)
+export type CrudButtonFunc = (injector: Injector, button: string, context: ICrudRouteActionContext, item?: any)
     => void | Promise<null | void | IAsyncMessage>;
 
 export type CrudButtonCheckFunc<T = string> =
-    (context: ICrudRouteButtonContext, button: string, item?: any) => boolean | T;
+    (context: ICrudRouteActionContext, button: string, item?: any) => boolean | T;
 
 export type CrudButtonPropSetting<T = string> = boolean | T | CrudButtonCheckFunc<T>;
 
-export type CrudButtonActionSetting = string | ((context: ICrudRouteButtonContext, injector: Injector, item?: any) => string);
+export type CrudButtonActionSetting = string | ((context: ICrudRouteActionContext, injector: Injector, item?: any) => string);
 
 export type CrudDataCustomizerFunc = (data: any, injector: Injector, model: DynamicFormModel, context: ICrudRouteContext) => Promise<any>;
 
@@ -103,7 +103,7 @@ export type GetBackPath = (
     endpoint: string, reqType: CrudRouteRequest, context: ICrudRouteContext, injector: Injector
 ) => Promise<Array<string | UrlSegment>>;
 
-export type CrudDragHandler = (ev: ITableDragEvent, context: ICrudRouteContext, injector: Injector) => boolean;
+export type CrudDragHandler = (ev: ITableDragEvent, context: ICrudRouteActionContext, injector: Injector) => boolean;
 
 export interface ICrudRouteOptionsBase {
     addButton?: CrudButtonPropSetting;

@@ -1,8 +1,9 @@
 export {
     ICrudRequestType,
     ICrudDataSource,
+    ICrudRouteContextBase,
     ICrudRouteContext,
-    ICrudRouteButtonContext,
+    ICrudRouteActionContext,
     ICrudListColumn,
     CrudButtonFunc,
     CrudButtonCheckFunc,

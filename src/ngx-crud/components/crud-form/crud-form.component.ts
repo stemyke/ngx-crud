@@ -5,7 +5,7 @@ import {Subscription} from "rxjs";
 import {DynamicFormGroupModel, DynamicFormModel, IDynamicForm} from "@stemy/ngx-dynamic-form";
 import {FileUtils, IAsyncMessage, ObjectUtils, ObservableUtils} from "@stemy/ngx-utils";
 
-import {ICrudRouteButtonContext} from "../../common-types";
+import {ICrudRouteActionContext} from "../../common-types";
 import {selectBtnProp} from "../../utils/crud.utils";
 import {BaseCrudComponent} from "../base/base-crud.component";
 
@@ -110,10 +110,10 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         }
     }
 
-    protected getButtonContext(): ICrudRouteButtonContext {
+    protected getActionContext(): ICrudRouteActionContext {
         return {
-            ...super.getButtonContext(),
-            data: this.data,
+            ...super.getActionContext(),
+            entity: this.data,
         };
     }
 
@@ -135,7 +135,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     protected subToState(): Subscription {
         return this.state.subscribe(async () => {
             this.id = this.state.params.id;
-            this.saveButton = selectBtnProp(this.settings.saveButton, this.getButtonContext(), "save", "save");
+            this.saveButton = selectBtnProp(this.settings.saveButton, this.getActionContext(), "save", "save");
             try {
                 const path = await this.settings.getRequestPath(
                     this.endpoint, {id: this.id, ...this.data}, this.settings.primaryRequest, "request", this.injector
