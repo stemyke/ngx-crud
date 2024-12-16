@@ -26,12 +26,12 @@ import {BaseCrudComponent} from "../base/base-crud.component";
 export class CrudListComponent extends BaseCrudComponent implements OnInit, AfterViewInit, OnChanges, ICrudList {
 
     dataLoader: TableDataLoader;
-    data: IPaginationData;
     filterModel: DynamicFormModel;
     filterGroup: FormGroup;
 
     tableColumns: ITableColumns;
     cellComponent: Type<any>;
+    data: IPaginationData;
     dragStartFn: DynamicTableDragHandler;
     dragEnterFn: DynamicTableDragHandler;
     dropFn: DynamicTableDragHandler;
@@ -50,6 +50,11 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
         super.ngOnInit();
         this.tableColumns = null;
         this.cellComponent = this.crud.getComponentType("cell");
+        this.data = {
+            total: 0,
+            items: [],
+            meta: {}
+        };
         this.dragStartFn = (ev) => {
             return this.settings.onDragStart(ev, this.getActionContext(), this.injector);
         };
@@ -186,11 +191,6 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                 await settings.itemsListed(this.context, this.injector);
                 this.generateButtons();
                 return data;
-            };
-            this.data = {
-                total: 0,
-                items: [],
-                meta: {}
             };
         }, 10);
         this.updateSettings?.run();

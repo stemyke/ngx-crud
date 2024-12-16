@@ -108,7 +108,9 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
             routeData: this.state.data,
             injector: this.injector,
             context: this.context,
-            endpoint: this.endpoint
+            endpoint: this.endpoint,
+            page: {total: 0, items: []},
+            entity: {}
         };
     }
 
