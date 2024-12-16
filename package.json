@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-crud",
-    "version": "19.0.15",
+    "version": "19.0.16",
     "license": "MIT",
     "scripts": {
         "ng": "ng",

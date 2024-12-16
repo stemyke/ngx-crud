@@ -36,6 +36,7 @@ export interface ICrudDataSource {
 export interface ICrudRouteContext {
     params: Params;
     data: Data;
+    dataSource?: ICrudDataSource;
     page?: IPaginationData;
     entity?: Record<string, any>;
     [key: string]: any;

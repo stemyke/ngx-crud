@@ -178,7 +178,10 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                 this.context = Object.assign(
                     {},
                     this.state.data.context,
-                    {page: {total, items, meta}}
+                    {
+                        dataSource: this.table,
+                        page: {total, items, meta}
+                    }
                 );
                 await settings.itemsListed(this.context, this.injector);
                 this.generateButtons();
