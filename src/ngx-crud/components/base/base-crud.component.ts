@@ -27,6 +27,7 @@ import {
 import {getRequestType} from "../../utils/route.utils";
 import {CrudService} from "../../services/crud.service";
 import {selectBtnProp} from "../../utils/crud.utils";
+import {ActivatedRoute, ActivatedRouteSnapshot, Router} from "@angular/router";
 
 @Component({
     standalone: false,
@@ -40,6 +41,10 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
 
     protected subscription: Subscription;
 
+    get snapshot(): ActivatedRouteSnapshot {
+        return this.route.snapshot;
+    }
+
     get language(): ILanguageService {
         return this.api.language;
     }
@@ -49,7 +54,7 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
     }
 
     get settings(): ICrudRouteSettings {
-        return this.state.data.settings;
+        return this.snapshot.data.settings;
     }
 
     get requestType(): string {
@@ -57,14 +62,15 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
     }
 
     get endpoint(): string {
-        const params = this.state.params || {};
+        const params = this.snapshot.params || {};
         return Object.entries(params).reduce((ep, [key, value]) => {
             return ep.replace(`/:${key}`, `/${value}`);
         }, this.settings.endpoint);
     }
 
     constructor(readonly cdr: ChangeDetectorRef,
-                readonly state: StateService,
+                readonly route: ActivatedRoute,
+                readonly router: Router,
                 readonly injector: Injector,
                 readonly forms: DynamicFormService,
                 readonly events: EventsService,
@@ -77,7 +83,7 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.context = this.state.data.context;
+        this.context = this.snapshot.data.context;
         this.subscription = ObservableUtils.multiSubscription(
             this.auth.userChanged.subscribe(() => this.generateButtons())
         );
@@ -89,7 +95,7 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
 
     callButton = async (context: ICrudRouteButton): Promise<IAsyncMessage> => {
         try {
-            const message = await context.function(this.injector, context.button, this.getActionContext()) as IAsyncMessage;
+            const message = await context.function(this.getActionContext(), null, context.button) as IAsyncMessage;
             this.generateButtons();
             return ObjectUtils.isObject(message) && message?.message
                 ? message: null;
@@ -103,9 +109,11 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
     }
 
     protected getActionContext(): ICrudRouteActionContext {
+        const snapshot = this.snapshot;
         return {
-            params: this.state.params,
-            routeData: this.state.data,
+            snapshot,
+            params: snapshot.params,
+            routeData: snapshot.data,
             injector: this.injector,
             context: this.context,
             endpoint: this.endpoint,
@@ -119,7 +127,7 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
         const actionCtx = this.getActionContext();
         this.buttons = this.settings.customButtons?.filter(btn => {
             if (ObjectUtils.isFunction(btn.hidden)) {
-                return !btn.hidden(actionCtx, btn.button);
+                return !btn.hidden(actionCtx, null, btn.button);
             }
             return btn.hidden !== true;
         }).map(btn => {

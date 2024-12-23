@@ -1,4 +1,4 @@
-import {Data, Params, UrlSegment} from "@angular/router";
+import {ActivatedRouteSnapshot, Data, Params, UrlSegment} from "@angular/router";
 import {
     IAsyncMessage,
     IOpenApiSchemaProperty,
@@ -6,7 +6,7 @@ import {
     IResolveFactory,
     ITableColumn,
     RouteValidator,
-    ITableDragEvent
+    ITableDragEvent, IRoute
 } from "@stemy/ngx-utils";
 import {
     DynamicFormModel,
@@ -34,6 +34,7 @@ export interface ICrudDataSource {
 }
 
 export interface ICrudRouteContextBase {
+    snapshot: ActivatedRouteSnapshot;
     params: Params;
     routeData: Data;
     page?: IPaginationData;
@@ -56,11 +57,11 @@ export interface ICrudListColumn extends ITableColumn {
     property?: IOpenApiSchemaProperty;
 }
 
-export type CrudButtonFunc = (injector: Injector, button: string, context: ICrudRouteActionContext, item?: any)
+export type CrudButtonFunc = (context: ICrudRouteActionContext, item: any, button: string)
     => void | Promise<null | void | IAsyncMessage>;
 
 export type CrudButtonCheckFunc<T = string> =
-    (context: ICrudRouteActionContext, button: string, item?: any) => boolean | T;
+    (context: ICrudRouteActionContext, item: any, button: string) => boolean | T;
 
 export type CrudButtonPropSetting<T = string> = boolean | T | CrudButtonCheckFunc<T>;
 
@@ -100,10 +101,17 @@ export type GetRequestPath = (
 ) => Promise<string>;
 
 export type GetBackPath = (
-    endpoint: string, reqType: CrudRouteRequest, context: ICrudRouteContext, injector: Injector
-) => Promise<Array<string | UrlSegment>>;
+    context: ICrudRouteContext, endpoint: string, reqType: CrudRouteRequest
+) => Promise<string>;
 
-export type CrudDragHandler = (ev: ITableDragEvent, context: ICrudRouteActionContext, injector: Injector) => boolean;
+export type CrudDragHandler<R = boolean> = (ev: ITableDragEvent, context: ICrudRouteActionContext, injector: Injector) => R;
+
+export interface ICrudRouteData {
+    name?: string;
+    icon?: string;
+    defaultPath?: string;
+    [key: string]: any;
+}
 
 export interface ICrudRouteOptionsBase {
     addButton?: CrudButtonPropSetting;
@@ -166,7 +174,7 @@ export interface ICrudRouteOptionsBase {
     // Drag enter handler in list component
     onDragEnter?: CrudDragHandler;
     // Drop handler in list component
-    onDrop?: CrudDragHandler;
+    onDrop?: CrudDragHandler<void>;
 }
 
 export interface ICrudRouteOptions extends ICrudRouteOptionsBase {
@@ -178,6 +186,9 @@ export interface ICrudRouteOptions extends ICrudRouteOptionsBase {
     menu?: boolean;
     icon?: string;
     defaultParams?: Record<string, any>;
+    outlet?: string;
+    listChildren?: IRoute[];
+    formChildren?: IRoute[];
 }
 
 export interface ICrudRouteSettings extends Required<ICrudRouteOptionsBase> {

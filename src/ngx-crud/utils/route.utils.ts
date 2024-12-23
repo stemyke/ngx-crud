@@ -1,8 +1,29 @@
 import {Injector} from "@angular/core";
-import {Route, UrlMatchResult, UrlSegment, UrlSegmentGroup} from "@angular/router";
-import {ObjectUtils, StateService, StringUtils} from "@stemy/ngx-utils";
+import {ActivatedRouteSnapshot, Route, UrlMatchResult, UrlSegment, UrlSegmentGroup} from "@angular/router";
+import {ObjectUtils, StringUtils} from "@stemy/ngx-utils";
 
 import {CrudRouteMethod, CrudRouteRequest, ICrudRequestType, ICrudRouteContext} from "../common-types";
+
+export function getSnapshotPath(snapshot: ActivatedRouteSnapshot, additional: string = "", replace: boolean = false): string {
+    let path = "";
+    while (snapshot) {
+        const segments = snapshot.url.map(s => s.path);
+        if (additional) {
+            if (replace) {
+                segments.length = 0;
+            }
+            segments.push(additional);
+        }
+        let subPath = segments.join('/');
+        if (snapshot.outlet && snapshot.outlet !== "primary") {
+            subPath = `(${snapshot.outlet}:${subPath})`;
+        }
+        path = !path ? subPath : `${subPath}/${path}`;
+        snapshot = snapshot.parent;
+        additional = "";
+    }
+    return path;
+}
 
 export function defaultRouteMatcher(segments: UrlSegment[], group: UrlSegmentGroup, route: Route): UrlMatchResult {
     const firstSegment = group.segments[0];
@@ -36,13 +57,6 @@ export function getRequestType(requestType: string | ICrudRequestType, primary: 
     return reqType;
 }
 
-export async function getNavigateBackPath(endpoint: string, reqType: CrudRouteRequest, context: ICrudRouteContext, injector: Injector): Promise<Array<string | UrlSegment>> {
-    const state = injector.get(StateService);
-    const path: Array<string | UrlSegment> = [endpoint];
-    let snapshot = state.snapshot?.parent;
-    while (snapshot) {
-        path.unshift(...snapshot.url.map(s => s.path));
-        snapshot = snapshot.parent;
-    }
-    return path;
+export async function getNavigateBackPath(context: ICrudRouteContext, endpoint: string): Promise<string> {
+    return getSnapshotPath(context.snapshot, endpoint, true);
 }

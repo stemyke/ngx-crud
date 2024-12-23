@@ -1,5 +1,6 @@
-import {Injector, Type} from "@angular/core";
-import {AuthGuard, IRoute, ObjectUtils, StateService} from "@stemy/ngx-utils";
+import {Type} from "@angular/core";
+import {Router} from "@angular/router";
+import {AuthGuard, IRoute, ObjectUtils} from "@stemy/ngx-utils";
 import {DynamicFormControlComponent} from "@stemy/ngx-dynamic-form";
 
 import {
@@ -7,22 +8,24 @@ import {
     CrudRouteRequest,
     ICrudRequestType,
     ICrudRouteActionContext,
+    ICrudRouteData,
     ICrudRouteOptions,
     ICrudRouteSettings
 } from "../common-types";
-import {getNavigateBackPath, getRequestPath} from "./route.utils";
+import {getNavigateBackPath, getRequestPath, getSnapshotPath} from "./route.utils";
 import {ContextResolverService} from "../services/context-resolver.service";
+
+import {CrudChildWrapperComponent} from "../components/base/crud-child-wrapper.component";
 import {CrudWrapperComponent} from "../components/base/crud-wrapper.component";
 
-export async function defaultCrudAction(injector: Injector, button: string, _c: ICrudRouteActionContext, item?: any) {
-    const state = injector.get(StateService);
-    const path = !item ? [button] : [button, item._id];
-    let snapshot = state.snapshot;
-    while (snapshot) {
-        path.unshift(...snapshot.url.map(s => s.path));
-        snapshot = snapshot.parent;
-    }
-    await state.navigate(path);
+export async function defaultCrudAction(ctx: ICrudRouteActionContext, item: any, button: string) {
+    const router = ctx.injector.get(Router);
+    const snapshot = ctx.context.snapshot;
+    const path = getSnapshotPath(snapshot, !item ? button : `${button}/${item._id || item.id}`);
+
+    console.log(path);
+
+    await router.navigateByUrl(path);
 }
 
 async function returnCb(data?: any): Promise<any> {
@@ -40,7 +43,7 @@ function getNullFormComponent(): Type<DynamicFormControlComponent> {
 }
 
 export function selectBtnProp<T extends string>(prop: CrudButtonPropSetting<T>, ctx: ICrudRouteActionContext, action: string, value: T, item?: any): T {
-    prop = ObjectUtils.isFunction(prop) ? prop(ctx, action, item) : prop;
+    prop = ObjectUtils.isFunction(prop) ? prop(ctx, item, action) : prop;
     return ObjectUtils.isString(prop) && prop
         ? prop as T : prop !== false ? value : null;
 }
@@ -89,27 +92,36 @@ export function createCrudSettings(id: string, endpoint: string, requestType: st
     };
 }
 
-export function createCrudRoute(id: string, path: string, component: Type<any>, settings: ICrudRouteSettings, name?: string, icon?: string, defaultPath?: string): IRoute {
+export function createCrudRoute(id: string,
+                                path: string,
+                                component: Type<any>,
+                                settings: ICrudRouteSettings,
+                                data?: ICrudRouteData,
+                                children?: IRoute[],
+                                outlet?: string): IRoute {
     return {
         path,
         component,
         canActivate: [AuthGuard],
         data: {
             id,
-            name,
-            icon,
-            defaultPath,
             guards: settings.guards || [],
-            settings
+            settings,
+            ...(data || {})
         },
         resolve: {
             context: ContextResolverService
-        }
+        },
+        children,
+        outlet
     };
 }
 
 export function createCrudRoutes(id: string, endpoint: string, requestType: string | ICrudRequestType, options?: ICrudRouteOptions): IRoute[] {
     const params = Object.entries(options?.defaultParams || {});
+    const listWrapper = options?.listChildren ? CrudChildWrapperComponent : CrudWrapperComponent;
+    const formWrapper = options?.formChildren ? CrudChildWrapperComponent : CrudWrapperComponent;
+
     let defaultPath = `${endpoint}`;
     params.forEach(([key, value]) => {
         defaultPath = defaultPath.replace(`:${key}`, `${value}`);
@@ -118,23 +130,33 @@ export function createCrudRoutes(id: string, endpoint: string, requestType: stri
         createCrudRoute(
             id,
             endpoint,
-            options?.listComponent || CrudWrapperComponent,
+            options?.listComponent || listWrapper,
             createCrudSettings(id, endpoint, requestType, "list", options),
-            options?.menu !== false && !defaultPath.includes(":") ? `menu.${id}` : null,
-            options?.icon,
-            defaultPath
+            {
+                name: options?.menu !== false && !defaultPath.includes(":") ? `menu.${id}` : null,
+                icon: options?.icon,
+                defaultPath
+            },
+            options?.listChildren,
+            options?.outlet
         ),
         createCrudRoute(
             `add-${id}`,
             `${endpoint}/add`,
-            options?.addComponent || CrudWrapperComponent,
-            createCrudSettings(id, endpoint, requestType, options?.addRequest || "add", options)
+            options?.addComponent || formWrapper,
+            createCrudSettings(id, endpoint, requestType, options?.addRequest || "add", options),
+            {},
+            options?.formChildren,
+            options?.outlet
         ),
         createCrudRoute(
             `edit-${id}`,
             `${endpoint}/edit/:id`,
-            options?.editComponent || CrudWrapperComponent,
-            createCrudSettings(id, endpoint, requestType, options?.editRequest || "edit", options)
+            options?.editComponent || formWrapper,
+            createCrudSettings(id, endpoint, requestType, options?.editRequest || "edit", options),
+            {},
+            options?.formChildren,
+            options?.outlet
         )
     ];
 }

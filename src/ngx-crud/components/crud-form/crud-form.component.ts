@@ -86,7 +86,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                 message: `${error}`
             }
         }
-        const action = this.state.data.id;
+        const action = this.snapshot.data.id;
         try {
             data = ObjectUtils.assign(context, data);
             const path = await this.settings.getRequestPath(
@@ -118,8 +118,8 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     }
 
     protected async navigateBack(): Promise<void> {
-        const path = await this.settings.getBackPath(this.endpoint, this.settings.primaryRequest, this.context, this.injector);
-        await this.state.navigate(path);
+        const path = await this.settings.getBackPath(this.context, this.endpoint, this.settings.primaryRequest);
+        await this.router.navigateByUrl(path);
     }
 
     protected initForm(model: DynamicFormGroupModel): void {
@@ -133,39 +133,42 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     }
 
     protected subToState(): Subscription {
-        return this.state.subscribe(async () => {
-            this.id = this.state.params.id;
-            this.saveButton = selectBtnProp(this.settings.saveButton, this.getActionContext(), "save", "save");
-            try {
-                const path = await this.settings.getRequestPath(
-                    this.endpoint, {id: this.id, ...this.data}, this.settings.primaryRequest, "request", this.injector
-                );
-                const data = await this.api.get(path);
-                this.data = await this.settings.customizeFormData(data, this.injector, this.formModel, this.context) ?? data;
-                this.context = Object.assign(
-                    {},
-                    this.state.data.context,
-                    {entity: this.data}
-                );
-                this.generateButtons();
-            } catch (res) {
-                if (res instanceof HttpErrorResponse) {
-                    const errorObj = res.message || res.error;
-                    const error = ObjectUtils.isObject(errorObj) ? `${errorObj.message}` : `${res.error}`;
-                    const action = `load-${this.id}`;
-                    this.toaster.error(error
-                            ? (error.indexOf("Error") > -1 ? `message.${action}.error` : error)
-                            : `message.${action}.error`,
-                        {reason: res.error}
+        return ObservableUtils.subscribe({
+            subjects: [this.route.data, this.route.params],
+            cb: async () => {
+                this.id = this.snapshot.params.id;
+                this.saveButton = selectBtnProp(this.settings.saveButton, this.getActionContext(), "save", "save");
+                try {
+                    const path = await this.settings.getRequestPath(
+                        this.endpoint, {id: this.id, ...this.data}, this.settings.primaryRequest, "request", this.injector
                     );
-                } else {
-                    console.log(`Error happened in form, should navigate back`, res);
+                    const data = await this.api.get(path);
+                    this.data = await this.settings.customizeFormData(data, this.injector, this.formModel, this.context) ?? data;
+                    this.context = Object.assign(
+                        {},
+                        this.snapshot.data.context,
+                        {entity: this.data}
+                    );
+                    this.generateButtons();
+                } catch (res) {
+                    if (res instanceof HttpErrorResponse) {
+                        const errorObj = res.message || res.error;
+                        const error = ObjectUtils.isObject(errorObj) ? `${errorObj.message}` : `${res.error}`;
+                        const action = `load-${this.id}`;
+                        this.toaster.error(error
+                                ? (error.indexOf("Error") > -1 ? `message.${action}.error` : error)
+                                : `message.${action}.error`,
+                            {reason: res.error}
+                        );
+                    } else {
+                        console.log(`Error happened in form, should navigate back`, res);
+                    }
+                    await this.navigateBack();
+                    return;
                 }
-                await this.navigateBack();
-                return;
+                this.forms.patchGroup(this.data, this.formModel, this.formGroup);
+                this.cdr.detectChanges();
             }
-            this.forms.patchGroup(this.data, this.formModel, this.formGroup);
-            this.cdr.detectChanges();
         });
     }
 }

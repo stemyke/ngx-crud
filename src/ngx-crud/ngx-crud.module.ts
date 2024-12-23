@@ -1,6 +1,7 @@
 import {ModuleWithProviders, NgModule} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
+import {RouterModule} from "@angular/router";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
 
 import {
@@ -27,7 +28,8 @@ import {CrudFormComponent} from "./components/crud-form/crud-form.component";
     imports: [
         CommonModule,
         FormsModule,
-        NgxUtilsModule
+        NgxUtilsModule,
+        RouterModule
     ],
     exports: [
         ...components,

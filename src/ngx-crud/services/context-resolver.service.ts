@@ -8,11 +8,12 @@ export class ContextResolverService implements Resolve<ICrudRouteContext> {
 
     }
 
-    async resolve(route: ActivatedRouteSnapshot): Promise<ICrudRouteContext> {
-        const settings = route.data.settings as ICrudRouteSettings;
+    async resolve(snapshot: ActivatedRouteSnapshot): Promise<ICrudRouteContext> {
+        const settings = snapshot.data.settings as ICrudRouteSettings;
         const context = {
-            routeData: route.data,
-            params: route.params
+            snapshot,
+            routeData: snapshot.data,
+            params: snapshot.params
         } as ICrudRouteContext;
         return await settings.loadContext(context, this.injector) ?? context;
     }

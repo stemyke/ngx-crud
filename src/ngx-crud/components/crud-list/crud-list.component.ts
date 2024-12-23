@@ -34,7 +34,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
     data: IPaginationData;
     dragStartFn: DynamicTableDragHandler;
     dragEnterFn: DynamicTableDragHandler;
-    dropFn: DynamicTableDragHandler;
+    dropFn: DynamicTableDragHandler<void>;
 
     columnNames: string[];
     addButton: string;
@@ -62,7 +62,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             return this.settings.onDragEnter(ev, this.getActionContext(), this.injector);
         };
         this.dropFn = (ev) => {
-            return this.settings.onDrop(ev, this.getActionContext(), this.injector);
+            this.settings.onDrop(ev, this.getActionContext(), this.injector);
         };
         this.updateSettings = TimerUtils.createTimeout(async () => {
             const settings = this.settings;
@@ -120,7 +120,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                         filterType: property.filterType,
                         property,
                     },
-                    this.injector, property, this.state.params, this.context
+                    this.injector, property, this.snapshot.params, this.context
                 );
                 if (!column) {
                     continue;
@@ -182,7 +182,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                 this.data = data;
                 this.context = Object.assign(
                     {},
-                    this.state.data.context,
+                    this.snapshot.data.context,
                     {
                         dataSource: this.table,
                         page: {total, items, meta}
@@ -205,7 +205,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             this.subscription,
             ObservableUtils.subscribe(
                 {
-                    subjects: [this.state.$observable, ...(subjects ?? [])],
+                    subjects: [this.route.data, this.route.params, ...(subjects ?? [])],
                     cb: () => this.table?.refresh()
                 },
                 {
@@ -246,17 +246,17 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             const actionCtx = this.getActionContext();
             switch (action) {
                 case "add":
-                    message = await this.settings.addAction(this.injector, action, actionCtx, item);
+                    message = await this.settings.addAction(actionCtx, item, action);
                     break;
                 case "view":
-                    message = await this.settings.viewAction(this.injector, action, actionCtx, item);
+                    message = await this.settings.viewAction(actionCtx, item, action);
                     break;
                 case "edit":
-                    message = await this.settings.editAction(this.injector, action, actionCtx, item);
+                    message = await this.settings.editAction(actionCtx, item, action);
                     break;
                 case "delete":
                     if (this.settings.deleteAction) {
-                        message = await this.settings.deleteAction(this.injector, action, actionCtx, item);
+                        message = await this.settings.deleteAction(actionCtx, item, action);
                         break;
                     }
                     this.deleteItem(item);
@@ -267,7 +267,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                         console.error(`Custom action '${custom.id} ${action}' is not a function`);
                         return null;
                     }
-                    message = await custom.action(this.injector, custom.id, actionCtx, item);
+                    message = await custom.action(actionCtx, item, custom.id);
                     break;
             }
             if (ObjectUtils.isObject(message) && message?.message) {

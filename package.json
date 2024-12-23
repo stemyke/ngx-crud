@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-crud",
-    "version": "19.0.17",
+    "version": "19.1.0",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
@@ -27,7 +27,7 @@
         "invokable": "^1.0.3",
         "ngx-device-detector": "^5.0.1 || ^8.0.0",
         "json5": "^2.2.3",
-        "@stemy/ngx-utils": "^19.0.9",
+        "@stemy/ngx-utils": "^19.0.12",
         "@ng-dynamic-forms/core": "^18.0.0",
         "@ng-dynamic-forms/ui-basic": "^18.0.0",
         "ngx-mask": "^17.1.8",
@@ -77,7 +77,7 @@
         "del": "7.0.0",
         "node-watch": "0.7.3",
         "commander": "9.4.1",
-        "@stemy/ngx-utils": "19.0.9",
+        "@stemy/ngx-utils": "19.0.12",
         "@ng-dynamic-forms/core": "^18.0.0",
         "@ng-dynamic-forms/ui-basic": "^18.0.0",
         "ngx-mask": "^17.1.8",
