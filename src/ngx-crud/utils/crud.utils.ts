@@ -22,9 +22,6 @@ export async function defaultCrudAction(ctx: ICrudRouteActionContext, item: any,
     const router = ctx.injector.get(Router);
     const snapshot = ctx.context.snapshot;
     const path = getSnapshotPath(snapshot, !item ? button : `${button}/${item._id || item.id}`);
-
-    console.log(path);
-
     await router.navigateByUrl(path);
 }
 
