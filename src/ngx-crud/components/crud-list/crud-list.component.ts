@@ -105,7 +105,8 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                     type: "actions",
                     format: "array",
                     column: true,
-                    disableFilter: true
+                    disableSort: true,
+                    disableFilter: true,
                 };
                 if (property.column === false) continue;
                 const title = name === actionsKey
@@ -115,7 +116,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                     {
                         name,
                         title,
-                        sort: name,
+                        sort: property.disableSort ? null : name,
                         filter: settings.query && property.type === "string" && property.format !== "date" && !property.disableFilter,
                         filterType: property.filterType,
                         property,
