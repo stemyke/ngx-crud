@@ -129,8 +129,10 @@ export interface ICrudRouteOptionsBase {
     customButtons?: ICrudRouteButton[];
     // Defines prefix for label translations
     labelPrefix?: string;
-    // Defines if filtering for list fields are enabled in general
+    // Defines if filtering with basic keywords in the list if enabled
     filter?: boolean;
+    // Defines if querying for list fields are enabled in general
+    query?: boolean;
     // Defines custom auth guards for the child routes
     guards?: Array<IResolveFactory | RouteValidator>;
     // Defines small forms for import/export partial data with the specified identifiers
@@ -165,8 +167,8 @@ export interface ICrudRouteOptionsBase {
     itemsListed?: (context: ICrudRouteContext, injector: Injector) => Promise<void>;
     // How many items should be listed
     itemsPerPage?: number;
-    // Displays an extra form based on the specified JSON schema in list component
-    filterForm?: boolean;
+    // Displays an extra form based on the specified JSON schema in list component that helps in complex query
+    queryForm?: boolean;
     // Sets if list metadata should be displayed
     displayMeta?: boolean;
     // Drag start handler in list component
@@ -247,10 +249,10 @@ export const ACTION_ICONS = new InjectionToken<ICrudComponentTypes>("crud-action
 
 // --- Module Configuration ---
 
-export const FILTER_QUERY_NAME = new InjectionToken<string>("filter-query-name");
+export const QUERY_PARAM_NAME = new InjectionToken<string>("query-param-name");
 
 export interface ICrudModuleConfig {
-    filterName?: string;
+    queryParamName?: string;
     componentTypes?: ICrudComponentTypes;
     actionIcons?: CrudActionIcons;
 }

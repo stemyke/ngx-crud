@@ -6,6 +6,7 @@
         <ng-container *ngIf="dataLoader">
             <dynamic-table class="table mb-lg"
                            [columns]="tableColumns"
+                           [showFilter]="settings.filter"
                            [dataLoader]="dataLoader"
                            [itemsPerPage]="settings.itemsPerPage"
                            [dragStartFn]="dragStartFn"

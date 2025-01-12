@@ -26,8 +26,8 @@ import {BaseCrudComponent} from "../base/base-crud.component";
 export class CrudListComponent extends BaseCrudComponent implements OnInit, AfterViewInit, OnChanges, ICrudList {
 
     dataLoader: TableDataLoader;
-    filterModel: DynamicFormModel;
-    filterGroup: FormGroup;
+    queryModel: DynamicFormModel;
+    queryGroup: FormGroup;
 
     tableColumns: ITableColumns;
     cellComponent: Type<any>;
@@ -68,9 +68,9 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             const settings = this.settings;
             const requestType = this.requestType;
             if (!settings) return;
-            // --- Update filter models ---
-            this.filterModel = settings.filterForm ? await this.forms.getFormModelForSchema(requestType) : null;
-            this.filterGroup = this.filterModel ? this.forms.createFormGroup(this.filterModel, {updateOn: "blur"}) : null;
+            // --- Update query models ---
+            this.queryModel = settings.queryForm ? await this.forms.getFormModelForSchema(requestType) : null;
+            this.queryGroup = this.queryModel ? this.forms.createFormGroup(this.queryModel, {updateOn: "blur"}) : null;
             this.schema = await this.openApi.getSchema(requestType);
             if (!this.schema) {
                 console.log(`Schema by name '${requestType}' not found`);
@@ -78,14 +78,14 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             }
             // --- Check if we can add a new entity ---
             let canAdd = settings.addButton;
-            if (canAdd || this.filterGroup) {
+            if (canAdd || this.queryGroup) {
                 try {
                     const path = await settings.getRequestPath(
                         this.endpoint, null, settings.primaryRequest, "save", this.injector
                     );
                     const data = await this.api.get(path);
-                    if (this.filterGroup) {
-                        this.forms.patchGroup(data, this.filterModel, this.filterGroup);
+                    if (this.queryGroup) {
+                        this.forms.patchGroup(data, this.queryModel, this.queryGroup);
                     }
                 } catch (e) {
                     canAdd = false;
@@ -116,7 +116,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                         name,
                         title,
                         sort: name,
-                        filter: settings.filter && property.type === "string" && property.format !== "date" && !property.disableFilter,
+                        filter: settings.query && property.type === "string" && property.format !== "date" && !property.disableFilter,
                         filterType: property.filterType,
                         property,
                     },
