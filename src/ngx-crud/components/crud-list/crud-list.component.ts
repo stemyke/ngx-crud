@@ -2,6 +2,7 @@ import {AfterViewInit, Component, OnChanges, OnInit, Type, ViewChild} from "@ang
 import {FormGroup} from "@angular/forms";
 import {
     DynamicTableComponent,
+    DynamicTableDragHandler,
     IAsyncMessage,
     IOpenApiSchema,
     IPaginationData,
@@ -10,8 +11,7 @@ import {
     ObjectUtils,
     ObservableUtils,
     TableDataLoader,
-    TimerUtils,
-    DynamicTableDragHandler
+    TimerUtils
 } from "@stemy/ngx-utils";
 import {DynamicFormModel, IDynamicFormEvent} from "@stemy/ngx-dynamic-form";
 import {CrudButtonActionSetting, ICrudList, ICrudRouteActionContext} from "../../common-types"
@@ -163,8 +163,8 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                     ...settings.customActions,
                 ];
                 const params = this.api.makeListParams(page, rowsPerPage, orderBy, orderDescending);
-                params[this.filterName] = filter;
-                params.query = query;
+                params[this.filterParamName] = filter;
+                params[this.queryParamName] = query;
 
                 const data = await this.api.list(endpoint, params);
                 let {total, items, meta} = Object.assign({total: 0, items: [], meta: {}}, data);

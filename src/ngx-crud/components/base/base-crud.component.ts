@@ -2,27 +2,29 @@ import {ChangeDetectorRef, Component, Inject, Injector, OnDestroy, OnInit} from 
 import {Subscription} from "rxjs";
 import {
     API_SERVICE,
-    AUTH_SERVICE, DIALOG_SERVICE,
+    AUTH_SERVICE,
+    DIALOG_SERVICE,
     EventsService,
     IApiService,
     IAsyncMessage,
-    IAuthService, IDialogService,
+    IAuthService,
+    IDialogService,
     ILanguageService,
     IToasterService,
     ObjectUtils,
     ObservableUtils,
     OpenApiService,
-    StateService,
     TOASTER_SERVICE
 } from "@stemy/ngx-utils";
 import {DynamicFormService} from "@stemy/ngx-dynamic-form";
 
 import {
-    QUERY_PARAM_NAME,
-    ICrudRouteButton,
+    FILTER_PARAM_NAME,
     ICrudRouteActionContext,
+    ICrudRouteButton,
     ICrudRouteContext,
-    ICrudRouteSettings
+    ICrudRouteSettings,
+    QUERY_PARAM_NAME
 } from "../../common-types";
 import {getRequestType} from "../../utils/route.utils";
 import {CrudService} from "../../services/crud.service";
@@ -79,7 +81,8 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
                 @Inject(API_SERVICE) readonly api: IApiService,
                 @Inject(AUTH_SERVICE) readonly auth: IAuthService,
                 @Inject(TOASTER_SERVICE) readonly toaster: IToasterService,
-                @Inject(QUERY_PARAM_NAME) protected filterName: string) {
+                @Inject(FILTER_PARAM_NAME) protected filterParamName: string,
+                @Inject(QUERY_PARAM_NAME) protected queryParamName: string) {
     }
 
     ngOnInit(): void {

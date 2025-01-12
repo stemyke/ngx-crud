@@ -249,9 +249,12 @@ export const ACTION_ICONS = new InjectionToken<ICrudComponentTypes>("crud-action
 
 // --- Module Configuration ---
 
+export const FILTER_PARAM_NAME = new InjectionToken<string>("filter-param-name");
+
 export const QUERY_PARAM_NAME = new InjectionToken<string>("query-param-name");
 
 export interface ICrudModuleConfig {
+    filterParamName?: string;
     queryParamName?: string;
     componentTypes?: ICrudComponentTypes;
     actionIcons?: CrudActionIcons;

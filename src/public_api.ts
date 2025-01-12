@@ -30,6 +30,7 @@ export {
     CrudActionIcons,
     COMPONENT_TYPES,
     ACTION_ICONS,
+    FILTER_PARAM_NAME,
     QUERY_PARAM_NAME,
     ICrudModuleConfig
 } from "./ngx-crud/common-types";

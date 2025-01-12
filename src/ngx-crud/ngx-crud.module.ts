@@ -8,9 +8,10 @@ import {
     ACTION_ICONS,
     COMPONENT_TYPES,
     CrudActionIcons,
-    QUERY_PARAM_NAME,
+    FILTER_PARAM_NAME,
     ICrudComponentTypes,
-    ICrudModuleConfig
+    ICrudModuleConfig,
+    QUERY_PARAM_NAME,
 } from "./common-types";
 import {ContextResolverService} from "./services/context-resolver.service";
 import {CrudService} from "./services/crud.service";
@@ -48,6 +49,10 @@ export class NgxCrudModule {
         return [
             CrudService,
             ContextResolverService,
+            {
+                provide: FILTER_PARAM_NAME,
+                useValue: (config?.filterParamName || "filter")
+            },
             {
                 provide: QUERY_PARAM_NAME,
                 useValue: (config?.queryParamName || "query")
