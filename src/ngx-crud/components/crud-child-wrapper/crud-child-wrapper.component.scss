@@ -1,0 +1,96 @@
+.crud-wrapper {
+    .child-wrapper.hidden {
+        display: none;
+    }
+}
+
+.crud-wrapper.mode-inline {
+    display: flex;
+    gap: 10px;
+
+    .child-wrapper {
+        flex: 1;
+    }
+}
+
+.crud-wrapper.mode-dialog {
+    position: relative;
+
+    --close-bg: rgba(0, 0, 0, 0.2);
+    --close-size: 14px;
+    --close-distance: 16px;
+    --close-top-distance: var(--close-distance);
+    --close-right-distance: var(--close-distance);
+
+    .child-wrapper {
+        width: 100%;
+        top: 0;
+        height: 100vh;
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        pointer-events: none;
+        overflow: auto;
+        z-index: 1;
+    }
+
+    .child-content {
+        position: relative;
+        z-index: 11;
+        pointer-events: auto;
+
+        a.close-btn {
+
+            --rotation: 45deg;
+
+            position: absolute;
+            top: var(--close-top-distance);
+            right: var(--close-right-distance);
+            width: var(--close-size);
+            height: var(--close-size);
+            cursor: pointer;
+            transition: 0.2s ease;
+            background-color: transparent;
+            border-radius: 3px;
+
+            &:before, &:after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 80%;
+                transform: translate(-50%, -50%) rotate(var(--rotation));
+                height: 1px;
+                background: gray;
+                transition: 0.2s ease;
+            }
+
+            &:after {
+                --rotation: -45deg;
+            }
+
+            &:hover {
+                background-color: var(--close-bg);
+
+                &:before, &:after {
+                    background: black;
+                }
+            }
+        }
+    }
+
+    .child-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.3);
+        z-index: 10;
+        cursor: pointer;
+        pointer-events: auto;
+    }
+}

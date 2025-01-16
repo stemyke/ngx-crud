@@ -1,32 +1,52 @@
-import {Component, OnDestroy, OnInit, Type} from "@angular/core";
-import {Subscription} from "rxjs";
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, Type} from "@angular/core";
+import {ActivatedRoute, Data, Router} from "@angular/router";
+import {BehaviorSubject, Subscription} from "rxjs";
 
-import {ICrudRouteSettings} from "../../common-types";
+import {ICrudOutletState, ICrudRouteSettings} from "../../common-types";
 import {CrudService} from "../../services/crud.service";
-import {ActivatedRoute} from "@angular/router";
+
+export const defaultOutletState = {
+    dialog: false,
+    isActive: false,
+    data: {},
+    params: {},
+};
 
 @Component({
     standalone: false,
-    template: `<ng-container [ngComponentOutlet]="component"></ng-container>`,
+    template: `
+        <ng-container [ngComponentOutlet]="componentType"></ng-container>`,
     selector: "crud-wrapper"
 })
 export class CrudWrapperComponent implements OnInit, OnDestroy {
 
-    component: Type<any>;
+    data: Data;
+    settings: ICrudRouteSettings;
+    beforeState: BehaviorSubject<ICrudOutletState>;
+    afterState: BehaviorSubject<ICrudOutletState>;
+    componentType: Type<any>;
+    component: any;
 
     protected subscription: Subscription;
 
-    constructor(protected route: ActivatedRoute, protected crud: CrudService) {
-
+    constructor(protected route: ActivatedRoute,
+                protected router: Router,
+                protected crud: CrudService,
+                protected cdr: ChangeDetectorRef) {
+        this.data = {};
+        this.settings = {} as any;
+        this.beforeState = new BehaviorSubject(defaultOutletState);
+        this.afterState = new BehaviorSubject(defaultOutletState);
     }
 
     ngOnInit() {
         this.subscription = this.route.data.subscribe(data => {
-            const settings = data.settings as ICrudRouteSettings;
-            if (!settings) return;
-            this.component = this.crud.getComponentType(settings.primaryRequest);
-            if (!this.component) {
-                console.log(`Component not defined for: ${settings.primaryRequest}`);
+            this.data = data;
+            this.settings = data.settings as ICrudRouteSettings;
+            if (!this.settings) return;
+            this.componentType = this.crud.getComponentType(this.settings.primaryRequest);
+            if (!this.componentType) {
+                console.log(`Component not defined for: ${this.settings.primaryRequest}`);
             }
         });
     }

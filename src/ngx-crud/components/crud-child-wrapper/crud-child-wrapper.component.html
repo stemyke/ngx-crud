@@ -1,0 +1,23 @@
+<div class="crud-wrapper" [ngClass]="['mode-' + (data.mode || 'none'), settings.id + '-wrapper']">
+    <div class="child-wrapper before" [ngClass]="{hidden: !beforeState.value.isActive}">
+        <div class="child-content">
+            <router-outlet name="before" #before="outlet"></router-outlet>
+            <a class="close-btn" (click)="close(before)" *ngIf="beforeState.value.dialog"></a>
+        </div>
+        <div class="child-overlay" (click)="close(before)" *ngIf="beforeState.value.dialog">
+
+        </div>
+    </div>
+    <div class="main-wrapper">
+        <ng-container [ngComponentOutlet]="componentType"></ng-container>
+    </div>
+    <div class="child-wrapper after" [ngClass]="{hidden: !afterState.value.isActive}">
+        <div class="child-content">
+            <router-outlet name="after" #after="outlet"></router-outlet>
+            <a class="close-btn" (click)="close(after)" *ngIf="afterState.value.dialog"></a>
+        </div>
+        <div class="child-overlay" (click)="close(after)" *ngIf="afterState.value.dialog">
+
+        </div>
+    </div>
+</div>

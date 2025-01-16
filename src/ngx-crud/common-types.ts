@@ -1,12 +1,15 @@
-import {ActivatedRouteSnapshot, Data, Params, UrlSegment} from "@angular/router";
+import {InjectionToken, Injector, Type} from "@angular/core";
+import {ActivatedRouteSnapshot, Data, Params} from "@angular/router";
+import {Subject} from "rxjs";
 import {
     IAsyncMessage,
     IOpenApiSchemaProperty,
     IPaginationData,
     IResolveFactory,
+    IRoute,
     ITableColumn,
-    RouteValidator,
-    ITableDragEvent, IRoute
+    ITableDragEvent,
+    RouteValidator
 } from "@stemy/ngx-utils";
 import {
     DynamicFormModel,
@@ -14,10 +17,20 @@ import {
     GetFormControlComponentType,
     IDynamicFormEvent
 } from "@stemy/ngx-dynamic-form";
-import {InjectionToken, Injector, Type} from "@angular/core";
-import {Subject} from "rxjs";
 
 // --- CRUD ---
+export interface ICrudOutletState {
+    dialog?: boolean;
+    isActive?: boolean;
+    data?: Data;
+    params?: Params;
+}
+
+export interface ICrudTreeItem {
+    snapshot: ActivatedRouteSnapshot;
+    component: any;
+}
+
 export interface ICrudRequestType {
     list?: string;
     add?: string;
@@ -50,6 +63,7 @@ export interface ICrudRouteActionContext extends ICrudRouteContextBase {
     context: ICrudRouteContext;
     endpoint: string;
     dataSource?: ICrudDataSource;
+    onLeave?: (tree: ICrudTreeItem[]) => Promise<boolean>;
 }
 
 export interface ICrudListColumn extends ITableColumn {
@@ -74,6 +88,8 @@ export type CrudColumnCustomizerFunc = (column: ICrudListColumn, injector: Injec
 
 export type CrudUpdateResourcesFunc = (resources: any, injector: Injector, response: any, context: ICrudRouteContext) => Promise<void>;
 
+export type CrudRouteLeaveFunc = (context: ICrudRouteActionContext, tree: ICrudTreeItem[]) => Promise<boolean>;
+
 export type CrudButtonStatus = "primary" | "info" | "success" | "warning" | "danger" | "default";
 
 export interface ICrudRouteButton<IT = CrudButtonPropSetting> {
@@ -92,6 +108,8 @@ export interface ICrudRouteCustomAction {
     icon?: string;
 }
 
+export type CrudDisplayMode = "routes" | "inline" | "dialog";
+
 export type CrudRouteRequest = "list" | "add" | "edit";
 
 export type CrudRouteMethod = "request" | "save" | "delete" | "import" | "export";
@@ -101,7 +119,7 @@ export type GetRequestPath = (
 ) => Promise<string>;
 
 export type GetBackPath = (
-    context: ICrudRouteContext, endpoint: string, reqType: CrudRouteRequest
+    context: ICrudRouteContext, endpoint: string
 ) => Promise<string>;
 
 export type CrudDragHandler<R = boolean> = (ev: ITableDragEvent, context: ICrudRouteActionContext, injector: Injector) => R;
@@ -114,6 +132,9 @@ export interface ICrudRouteData {
 }
 
 export interface ICrudRouteOptionsBase {
+    // Setting of crud display mode
+    mode?: CrudDisplayMode;
+    // Add button
     addButton?: CrudButtonPropSetting;
     addAction?: CrudButtonFunc;
     viewButton?: CrudButtonPropSetting;
@@ -135,6 +156,8 @@ export interface ICrudRouteOptionsBase {
     query?: boolean;
     // Defines custom auth guards for the child routes
     guards?: Array<IResolveFactory | RouteValidator>;
+    // A leave handler for any child rute
+    onLeave?: CrudRouteLeaveFunc;
     // Defines small forms for import/export partial data with the specified identifiers
     importExports?: string[];
     // Loads an additional context for the route
@@ -200,8 +223,13 @@ export interface ICrudRouteSettings extends Required<ICrudRouteOptionsBase> {
     id: string;
 }
 
-export interface ICrudList {
+export interface ICrudComponent {
+    readonly context: ICrudRouteContext;
     readonly settings: ICrudRouteSettings;
+    getActionContext(): ICrudRouteActionContext;
+}
+
+export interface ICrudList extends ICrudComponent {
     callAction(action: string, item: any): Promise<IAsyncMessage>;
 }
 

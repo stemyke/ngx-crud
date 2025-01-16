@@ -1,5 +1,5 @@
 import {Type} from "@angular/core";
-import {Router} from "@angular/router";
+import {Route, Router} from "@angular/router";
 import {AuthGuard, IRoute, ObjectUtils} from "@stemy/ngx-utils";
 import {DynamicFormControlComponent} from "@stemy/ngx-dynamic-form";
 
@@ -7,22 +7,33 @@ import {
     CrudButtonPropSetting,
     CrudRouteRequest,
     ICrudRequestType,
-    ICrudRouteActionContext,
+    ICrudRouteActionContext, ICrudRouteContext,
     ICrudRouteData,
     ICrudRouteOptions,
-    ICrudRouteSettings
+    ICrudRouteSettings, ICrudTreeItem
 } from "../common-types";
 import {getNavigateBackPath, getRequestPath, getSnapshotPath} from "./route.utils";
 import {ContextResolverService} from "../services/context-resolver.service";
 
-import {CrudChildWrapperComponent} from "../components/base/crud-child-wrapper.component";
 import {CrudWrapperComponent} from "../components/base/crud-wrapper.component";
+import {EmptyComponent} from "../components/base/empty.component";
+import {CrudChildWrapperComponent} from "../components/crud-child-wrapper/crud-child-wrapper.component";
+import {CrudService} from "../services/crud.service";
 
 export async function defaultCrudAction(ctx: ICrudRouteActionContext, item: any, button: string) {
     const router = ctx.injector.get(Router);
     const snapshot = ctx.context.snapshot;
-    const path = getSnapshotPath(snapshot, !item ? button : `${button}/${item._id || item.id}`);
+    const route = !item ? button : `${button}/${item._id || item.id}`;
+    const outlet = snapshot.data.actionOutlet;
+    const path = getSnapshotPath(snapshot, !outlet ? route : `(${outlet}:${route})`);
     await router.navigateByUrl(path);
+}
+
+export async function defaultLeaveFunction(ctx: ICrudRouteActionContext, tree: ICrudTreeItem[]): Promise<boolean> {
+    if (ctx && ObjectUtils.isFunction(ctx.onLeave)) {
+        return ctx.onLeave(tree);
+    }
+    return true;
 }
 
 async function returnCb(data?: any): Promise<any> {
@@ -32,6 +43,10 @@ async function returnCb(data?: any): Promise<any> {
 function noopCb(): any {}
 
 function dragCb(): boolean {
+    return false;
+}
+
+function leaveCb(): boolean {
     return false;
 }
 
@@ -51,6 +66,7 @@ export function createCrudSettings(id: string, endpoint: string, requestType: st
         endpoint,
         requestType,
         primaryRequest,
+        mode: options?.mode || "routes",
         addButton: options?.addButton,
         addAction: options?.addAction || defaultCrudAction,
         viewButton: options?.viewButton || false,
@@ -68,6 +84,7 @@ export function createCrudSettings(id: string, endpoint: string, requestType: st
         // if not then it should be explicitly disabled to make it disappear
         query: options?.filter ? options.query || false : options?.query !== false,
         guards: options?.guards || [],
+        onLeave: options?.onLeave || defaultLeaveFunction,
         importExports: primaryRequest == "edit" ? (options?.importExports || []) : [],
         loadContext: options?.loadContext || returnCb,
         formValueChange: options?.formValueChange || noopCb,
@@ -103,6 +120,7 @@ export function createCrudRoute(id: string,
         path,
         component,
         canActivate: [AuthGuard],
+        canDeactivate: [CrudService],
         data: {
             id,
             guards: settings.guards || [],
@@ -118,10 +136,61 @@ export function createCrudRoute(id: string,
 }
 
 export function createCrudRoutes(id: string, endpoint: string, requestType: string | ICrudRequestType, options?: ICrudRouteOptions): IRoute[] {
-    const params = Object.entries(options?.defaultParams || {});
-    const listWrapper = options?.listChildren ? CrudChildWrapperComponent : CrudWrapperComponent;
-    const formWrapper = options?.formChildren ? CrudChildWrapperComponent : CrudWrapperComponent;
-
+    options = options || {};
+    const params = Object.entries(options.defaultParams || {});
+    const mode = options.mode || 'routes';
+    const isInline = mode !== 'routes';
+    const listWrapper = isInline || options.listChildren
+        ? CrudChildWrapperComponent : CrudWrapperComponent;
+    const formWrapper = options.formChildren
+        ? CrudChildWrapperComponent : CrudWrapperComponent;
+    const listOutlet = isInline ? 'primary' : options.outlet;
+    const formOutlet = isInline ? options.outlet || 'after' : options.outlet;
+    const routeBase = mode !== 'routes' ? `` : `${endpoint}/`;
+    const listRoutes: Route[] = mode === 'dialog'
+        ? [
+            {
+                path: '',
+                pathMatch: 'full',
+                redirectTo: 'list',
+                outlet: formOutlet
+            },
+            {
+                path: 'list',
+                outlet: formOutlet,
+                component: EmptyComponent,
+                data: {
+                    empty: true
+                }
+            }
+        ] : [
+            {
+                path: '',
+                pathMatch: 'full',
+                redirectTo: 'add',
+                outlet: formOutlet
+            }
+        ];
+    const formRoutes = [
+        createCrudRoute(
+            `add-${id}`,
+            `${routeBase}add`,
+            options.addComponent || formWrapper,
+            createCrudSettings(id, endpoint, requestType, options.addRequest || "add", options),
+            {},
+            options.formChildren,
+            formOutlet
+        ),
+        createCrudRoute(
+            `edit-${id}`,
+            `${routeBase}edit/:id`,
+            options.editComponent || formWrapper,
+            createCrudSettings(id, endpoint, requestType, options.editRequest || "edit", options),
+            {},
+            options.formChildren,
+            formOutlet
+        )
+    ];
     let defaultPath = `${endpoint}`;
     params.forEach(([key, value]) => {
         defaultPath = defaultPath.replace(`:${key}`, `${value}`);
@@ -130,33 +199,21 @@ export function createCrudRoutes(id: string, endpoint: string, requestType: stri
         createCrudRoute(
             id,
             endpoint,
-            options?.listComponent || listWrapper,
+            options.listComponent || listWrapper,
             createCrudSettings(id, endpoint, requestType, "list", options),
             {
-                name: options?.menu !== false && !defaultPath.includes(":") ? `menu.${id}` : null,
-                icon: options?.icon,
+                name: options.menu !== false && !defaultPath.includes(":") ? `menu.${id}` : null,
+                icon: options.icon,
+                actionOutlet: formOutlet,
+                mode,
                 defaultPath
             },
-            options?.listChildren,
-            options?.outlet
+            isInline ? [
+                ...listRoutes,
+                ...formRoutes
+            ] : options.listChildren,
+            listOutlet
         ),
-        createCrudRoute(
-            `add-${id}`,
-            `${endpoint}/add`,
-            options?.addComponent || formWrapper,
-            createCrudSettings(id, endpoint, requestType, options?.addRequest || "add", options),
-            {},
-            options?.formChildren,
-            options?.outlet
-        ),
-        createCrudRoute(
-            `edit-${id}`,
-            `${endpoint}/edit/:id`,
-            options?.editComponent || formWrapper,
-            createCrudSettings(id, endpoint, requestType, options?.editRequest || "edit", options),
-            {},
-            options?.formChildren,
-            options?.outlet
-        )
+        ...(isInline ? [] : formRoutes)
     ];
 }

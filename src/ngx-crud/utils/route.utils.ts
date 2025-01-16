@@ -2,7 +2,13 @@ import {Injector} from "@angular/core";
 import {ActivatedRouteSnapshot, Route, UrlMatchResult, UrlSegment, UrlSegmentGroup} from "@angular/router";
 import {ObjectUtils, StringUtils} from "@stemy/ngx-utils";
 
-import {CrudRouteMethod, CrudRouteRequest, ICrudRequestType, ICrudRouteContext} from "../common-types";
+import {
+    CrudRouteMethod,
+    CrudRouteRequest,
+    ICrudRequestType,
+    ICrudRouteContext,
+    ICrudRouteSettings
+} from "../common-types";
 
 export function getSnapshotPath(snapshot: ActivatedRouteSnapshot, additional: string = "", replace: boolean = false): string {
     let path = "";
@@ -15,10 +21,10 @@ export function getSnapshotPath(snapshot: ActivatedRouteSnapshot, additional: st
             segments.push(additional);
         }
         let subPath = segments.join('/');
-        if (snapshot.outlet && snapshot.outlet !== "primary") {
-            subPath = `(${snapshot.outlet}:${subPath})`;
-        }
         path = !path ? subPath : `${subPath}/${path}`;
+        if (snapshot.outlet && snapshot.outlet !== "primary") {
+            path = `(${snapshot.outlet}:${path})`;
+        }
         snapshot = snapshot.parent;
         additional = "";
     }
@@ -58,5 +64,12 @@ export function getRequestType(requestType: string | ICrudRequestType, primary: 
 }
 
 export async function getNavigateBackPath(context: ICrudRouteContext, endpoint: string): Promise<string> {
+    const settings = context.routeData.settings as ICrudRouteSettings;
+    switch (settings.mode) {
+        case 'dialog':
+            return getSnapshotPath(context.snapshot, 'list', true);
+        case 'inline':
+            return getSnapshotPath(context.snapshot, 'add', true);
+    }
     return getSnapshotPath(context.snapshot, endpoint, true);
 }

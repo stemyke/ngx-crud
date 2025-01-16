@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, Inject, Injector, OnDestroy, OnInit} from "@angular/core";
+import {ChangeDetectorRef, Component, Inject, Injector, OnDestroy, OnInit, Optional} from "@angular/core";
 import {Subscription} from "rxjs";
 import {
     API_SERVICE,
@@ -23,13 +23,14 @@ import {
     ICrudRouteActionContext,
     ICrudRouteButton,
     ICrudRouteContext,
-    ICrudRouteSettings,
+    ICrudRouteSettings, ICrudTreeItem,
     QUERY_PARAM_NAME
 } from "../../common-types";
 import {getRequestType} from "../../utils/route.utils";
 import {CrudService} from "../../services/crud.service";
 import {selectBtnProp} from "../../utils/crud.utils";
 import {ActivatedRoute, ActivatedRouteSnapshot, Router} from "@angular/router";
+import {CrudWrapperComponent} from "./crud-wrapper.component";
 
 @Component({
     standalone: false,
@@ -82,14 +83,16 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
                 @Inject(AUTH_SERVICE) readonly auth: IAuthService,
                 @Inject(TOASTER_SERVICE) readonly toaster: IToasterService,
                 @Inject(FILTER_PARAM_NAME) protected filterParamName: string,
-                @Inject(QUERY_PARAM_NAME) protected queryParamName: string) {
+                @Inject(QUERY_PARAM_NAME) protected queryParamName: string,
+                @Optional() protected wrapper: CrudWrapperComponent) {
     }
 
     ngOnInit(): void {
         this.context = this.snapshot.data.context;
-        this.subscription = ObservableUtils.multiSubscription(
-            this.auth.userChanged.subscribe(() => this.generateButtons())
-        );
+        this.subscription = this.auth.userChanged
+            .subscribe(() => this.generateButtons());
+        if (!this.wrapper) return;
+        this.wrapper.component = this;
     }
 
     ngOnDestroy(): void {
@@ -111,7 +114,7 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
         }
     }
 
-    protected getActionContext(): ICrudRouteActionContext {
+    getActionContext(): ICrudRouteActionContext {
         const snapshot = this.snapshot;
         return {
             snapshot,
@@ -121,8 +124,13 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
             context: this.context,
             endpoint: this.endpoint,
             page: {total: 0, items: []},
-            entity: {}
+            entity: {},
+            onLeave: tree => this.onLeave(tree)
         };
+    }
+
+    protected async onLeave(tree: ICrudTreeItem[]): Promise<boolean> {
+        return true;
     }
 
     protected generateButtons(): void {

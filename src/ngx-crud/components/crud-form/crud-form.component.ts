@@ -5,7 +5,7 @@ import {Subscription} from "rxjs";
 import {DynamicFormGroupModel, DynamicFormModel, IDynamicForm} from "@stemy/ngx-dynamic-form";
 import {FileUtils, IAsyncMessage, ObjectUtils, ObservableUtils} from "@stemy/ngx-utils";
 
-import {ICrudRouteActionContext} from "../../common-types";
+import {ICrudComponent, ICrudRouteActionContext, ICrudTreeItem} from "../../common-types";
 import {selectBtnProp} from "../../utils/crud.utils";
 import {BaseCrudComponent} from "../base/base-crud.component";
 
@@ -25,6 +25,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     formGroupModel: DynamicFormGroupModel;
     formModel: DynamicFormModel;
     formGroup: FormGroup;
+    formChanged: boolean;
 
     ngOnInit() {
         super.ngOnInit();
@@ -102,6 +103,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                 context: response
             };
         } catch (res) {
+            console.log(res);
             const error = ObjectUtils.isObject(res.error) ? res.error.message : res.error;
             throw {
                 message: error ? ((error as string).indexOf("Error") > -1 ? `message.${action}.error` : error) : `message.${action}.error`,
@@ -110,15 +112,44 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         }
     }
 
-    protected getActionContext(): ICrudRouteActionContext {
+    getActionContext(): ICrudRouteActionContext {
         return {
             ...super.getActionContext(),
             entity: this.data,
         };
     }
 
+    protected async onLeave(tree: ICrudTreeItem[]): Promise<boolean> {
+        if (this.formChanged) {
+            const ctx = await this.forms.serialize(this.formModel, this.formGroup);
+            const result = await new Promise<boolean>(resolve => {
+                this.dialog.confirm({
+                    message: 'message.leave-without-changes.confirm',
+                    messageContext: ctx,
+                    method: async () => {
+                        resolve(true);
+                        return null;
+                    },
+                    cancelMethod: async () => {
+                        resolve(false);
+                        return null;
+                    }
+                })
+            });
+            if (!result) return false;
+        }
+        for (let item of tree) {
+            const comp = item.component as ICrudComponent;
+            if (!comp.getActionContext) continue;
+            const context = comp.getActionContext();
+            if (!context.dataSource) continue;
+            context.dataSource.refresh();
+        }
+        return true;
+    }
+
     protected async navigateBack(): Promise<void> {
-        const path = await this.settings.getBackPath(this.context, this.endpoint, this.settings.primaryRequest);
+        const path = await this.settings.getBackPath(this.context, this.endpoint);
         await this.router.navigateByUrl(path);
     }
 
@@ -128,6 +159,9 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         this.formGroup = this.forms.createFormGroup(this.formModel, {updateOn: "blur"});
         this.subscription = ObservableUtils.multiSubscription(
             this.subscription,
+            this.formGroup.valueChanges.subscribe(() => {
+                this.formChanged = this.formGroup.touched;
+            }),
             this.subToState()
         );
     }
@@ -140,15 +174,19 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                 this.saveButton = selectBtnProp(this.settings.saveButton, this.getActionContext(), "save", "save");
                 try {
                     const path = await this.settings.getRequestPath(
-                        this.endpoint, {id: this.id, ...this.data}, this.settings.primaryRequest, "request", this.injector
+                        this.endpoint, {...this.data, id: this.id}, this.settings.primaryRequest, "request", this.injector
                     );
+                    // Get basic data
                     const data = await this.api.get(path);
+                    delete data._id;
+                    // Customize data
                     this.data = await this.settings.customizeFormData(data, this.injector, this.formModel, this.context) ?? data;
                     this.context = Object.assign(
                         {},
                         this.snapshot.data.context,
                         {entity: this.data}
                     );
+                    this.formChanged = false;
                     this.generateButtons();
                 } catch (res) {
                     if (res instanceof HttpErrorResponse) {

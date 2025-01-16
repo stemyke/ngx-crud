@@ -14,7 +14,7 @@ import {
     TimerUtils
 } from "@stemy/ngx-utils";
 import {DynamicFormModel, IDynamicFormEvent} from "@stemy/ngx-dynamic-form";
-import {CrudButtonActionSetting, ICrudList, ICrudRouteActionContext} from "../../common-types"
+import {CrudButtonActionSetting, ICrudList, ICrudRouteActionContext, ICrudRouteSettings} from "../../common-types"
 import {selectBtnProp} from "../../utils/crud.utils";
 import {BaseCrudComponent} from "../base/base-crud.component";
 
@@ -38,6 +38,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
 
     columnNames: string[];
     addButton: string;
+    selectedItem: any;
 
     protected schema: IOpenApiSchema;
     protected updateSettings: ITimer;
@@ -181,6 +182,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                     }).filter(Boolean);
                 });
                 this.data = data;
+                this.updateSelected();
                 this.context = Object.assign(
                     {},
                     this.snapshot.data.context,
@@ -218,6 +220,10 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                         }
                         this.updateSettings.run();
                     }
+                },
+                {
+                    subjects: !this.wrapper ? [] : [this.wrapper.beforeState, this.wrapper.afterState],
+                    cb: () => this.updateSelected()
                 }
             )
         );
@@ -276,6 +282,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             }
             return null;
         } catch (e) {
+            console.warn(e);
             const msg = `message.${this.settings.id}-${action}.error`;
             throw {
                 message: `${e.message || msg}`,
@@ -309,11 +316,28 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
         });
     }
 
-    protected getActionContext(): ICrudRouteActionContext {
+    getActionContext(): ICrudRouteActionContext {
         return {
             ...super.getActionContext(),
             dataSource: this.table,
             page: this.data
         };
+    }
+
+    protected updateSelected(): void {
+        if (!this.wrapper || !this.settings) {
+            this.selectedItem = null;
+            return;
+        }
+        const {beforeState, afterState} = this.wrapper;
+        const requestType = this.settings.requestType;
+        const state = [beforeState.value, afterState.value].find(s => {
+            const settings = s.data.settings as ICrudRouteSettings;
+            return settings && settings.requestType === requestType;
+        });
+        const id = !state ? null : state.params.id || null;
+        this.selectedItem = !state || !this.data
+            ? null
+            : this.data.items.find(t => t.id === id || t._id === id);
     }
 }
