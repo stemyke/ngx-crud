@@ -211,7 +211,8 @@ export function createCrudRoutes(id: string, endpoint: string, requestType: stri
             },
             isInline ? [
                 ...listRoutes,
-                ...formRoutes
+                ...formRoutes,
+                ...(options.listChildren || [])
             ] : options.listChildren,
             listOutlet
         ),
