@@ -31,7 +31,10 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         super.ngOnInit();
         this.data = {};
         this.files = {};
-        this.forms.getFormGroupModelForSchema(this.requestType, this.settings.customizeFormModel)
+        this.forms.getFormGroupModelForSchema(this.requestType, {
+            labelPrefix: this.settings.id,
+            customizer: this.settings.customizeFormModel
+        })
             .then(m => this.initForm(m))
             .catch(console.warn);
     }
@@ -97,6 +100,9 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                 ? await this.api.patch(path, data)
                 : await this.api.post(path, data);
             await this.settings.updateAdditionalResources(additionalResources, this.injector, response, this.context);
+            // Form not changed anymore
+            this.formChanged = false;
+            // Navigate to where its needed
             await this.navigateBack();
             return {
                 message: `message.${action}.success`,
@@ -154,9 +160,11 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     }
 
     protected initForm(model: DynamicFormGroupModel): void {
+        const value = this.formGroup?.value || {};
         this.formGroupModel = model;
         this.formModel = model.group;
         this.formGroup = this.forms.createFormGroup(this.formModel, {updateOn: "blur"});
+        this.forms.patchGroup(value, this.formModel, this.formGroup);
         this.subscription = ObservableUtils.multiSubscription(
             this.subscription,
             this.formGroup.valueChanges.subscribe(() => {
@@ -186,7 +194,6 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                         this.snapshot.data.context,
                         {entity: this.data}
                     );
-                    this.formChanged = false;
                     this.generateButtons();
                 } catch (res) {
                     if (res instanceof HttpErrorResponse) {
@@ -205,6 +212,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                     return;
                 }
                 this.forms.patchGroup(this.data, this.formModel, this.formGroup);
+                this.formChanged = false;
                 this.cdr.detectChanges();
             }
         });
