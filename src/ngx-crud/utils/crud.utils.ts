@@ -146,7 +146,8 @@ export function createCrudRoutes(id: string, endpoint: string, requestType: stri
         ? CrudChildWrapperComponent : CrudWrapperComponent;
     const listOutlet = isInline ? 'primary' : options.outlet;
     const formOutlet = isInline ? options.outlet || 'after' : options.outlet;
-    const routeBase = mode !== 'routes' ? `` : `${endpoint}/`;
+    const path = endpoint.includes(':') ? endpoint : id;
+    const subPath = mode !== 'routes' ? `` : `${path}/`;
     const listRoutes: Route[] = mode === 'dialog'
         ? [
             {
@@ -174,7 +175,7 @@ export function createCrudRoutes(id: string, endpoint: string, requestType: stri
     const formRoutes = [
         createCrudRoute(
             `add-${id}`,
-            `${routeBase}add`,
+            `${subPath}add`,
             options.addComponent || formWrapper,
             createCrudSettings(id, endpoint, requestType, options.addRequest || "add", options),
             {},
@@ -183,7 +184,7 @@ export function createCrudRoutes(id: string, endpoint: string, requestType: stri
         ),
         createCrudRoute(
             `edit-${id}`,
-            `${routeBase}edit/:id`,
+            `${subPath}edit/:id`,
             options.editComponent || formWrapper,
             createCrudSettings(id, endpoint, requestType, options.editRequest || "edit", options),
             {},
@@ -191,14 +192,14 @@ export function createCrudRoutes(id: string, endpoint: string, requestType: stri
             formOutlet
         )
     ];
-    let defaultPath = `${endpoint}`;
+    let defaultPath = `${path}`;
     params.forEach(([key, value]) => {
         defaultPath = defaultPath.replace(`:${key}`, `${value}`);
     });
     return [
         createCrudRoute(
             id,
-            endpoint,
+            path,
             options.listComponent || listWrapper,
             createCrudSettings(id, endpoint, requestType, "list", options),
             {
