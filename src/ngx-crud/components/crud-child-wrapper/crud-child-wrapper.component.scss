@@ -22,27 +22,37 @@
     --close-top-distance: var(--close-distance);
     --close-right-distance: var(--close-distance);
 
-    .child-wrapper {
-        width: 100%;
-        top: 0;
-        height: 100vh;
+    .child-wrapper, .child-wrapper.dialog:before {
         position: fixed;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    .child-wrapper {
+        z-index: 50;
+        display: grid;
+        place-items: center;
         pointer-events: none;
         overflow: auto;
-        z-index: 1;
+    }
+
+    .child-wrapper.dialog {
+        pointer-events: auto;
+
+        &:before {
+            content: "";
+            background-color: rgba(0, 0, 0, 0.3);
+        }
     }
 
     .child-content {
         position: relative;
-        z-index: 11;
         pointer-events: auto;
+        z-index: 1;
 
-        a.close-btn {
+        a.child-close-btn {
 
             --rotation: 45deg;
 
@@ -80,17 +90,5 @@
                 }
             }
         }
-    }
-
-    .child-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.3);
-        z-index: 10;
-        cursor: pointer;
-        pointer-events: auto;
     }
 }

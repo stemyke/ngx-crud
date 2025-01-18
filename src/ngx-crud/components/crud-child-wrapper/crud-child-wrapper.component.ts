@@ -94,10 +94,16 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
             isActive: true,
             data: data || {},
             params: params || {},
+            snapshot: outlet.activatedRoute.snapshot
         };
     }
 
-    close(outlet: RouterOutlet): void {
+    close(event: MouseEvent, outlet: RouterOutlet): void {
+        if (this.settings?.mode !== 'dialog') return;
+        const classList = event.target instanceof HTMLElement
+            ? Array.from(event.target.classList) : [];
+        if (!classList.includes('child-wrapper') && !classList.includes('child-close-btn')) return;
+        event.preventDefault();
         const url = getSnapshotPath(outlet.activatedRoute.snapshot, 'list', true);
         this.router.navigateByUrl(url);
     }

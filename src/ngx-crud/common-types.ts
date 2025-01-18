@@ -24,6 +24,7 @@ export interface ICrudOutletState {
     isActive?: boolean;
     data?: Data;
     params?: Params;
+    snapshot?: ActivatedRouteSnapshot;
 }
 
 export interface ICrudTreeItem {

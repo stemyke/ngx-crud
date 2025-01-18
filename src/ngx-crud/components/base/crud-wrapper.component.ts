@@ -10,7 +10,8 @@ export const defaultOutletState = {
     isActive: false,
     data: {},
     params: {},
-};
+    snapshot: null
+} as ICrudOutletState;
 
 @Component({
     standalone: false,
