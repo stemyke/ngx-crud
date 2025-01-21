@@ -69,7 +69,8 @@ export async function getNavigateBackPath(context: ICrudRouteContext, endpoint: 
         case 'dialog':
             return getSnapshotPath(context.snapshot, 'list', true);
         case 'inline':
-            return getSnapshotPath(context.snapshot, 'add', true);
+            const id = context.entity?.id || context.entity?._id;
+            return getSnapshotPath(context.snapshot, !id ? 'list' : `edit/${id}`, true);
     }
     return getSnapshotPath(context.snapshot, endpoint, true);
 }

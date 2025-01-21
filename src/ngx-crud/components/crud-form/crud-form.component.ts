@@ -102,6 +102,13 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
             await this.settings.updateAdditionalResources(additionalResources, this.injector, response, this.context);
             // Form not changed anymore
             this.formChanged = false;
+            // Update context
+            this.data = response;
+            this.context = Object.assign(
+                {},
+                this.snapshot.data.context,
+                {entity: this.data}
+            );
             // Navigate to where its needed
             await this.navigateBack();
             return {
@@ -144,6 +151,11 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
             });
             if (!result) return false;
         }
+        this.refreshList(tree);
+        return true;
+    }
+
+    protected refreshList(tree: ICrudTreeItem[]): void {
         for (let item of tree) {
             const comp = item.component as ICrudComponent;
             if (!comp.getActionContext) continue;
@@ -151,10 +163,14 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
             if (!context.dataSource) continue;
             context.dataSource.refresh();
         }
-        return true;
     }
 
     protected async navigateBack(): Promise<void> {
+        if (this.settings.mode === 'inline' && this.id) {
+            const tree = this.crud.getTree(this.snapshot);
+            this.refreshList(tree);
+            return;
+        }
         const path = await this.settings.getBackPath(this.context, this.endpoint);
         await this.router.navigateByUrl(path);
     }
