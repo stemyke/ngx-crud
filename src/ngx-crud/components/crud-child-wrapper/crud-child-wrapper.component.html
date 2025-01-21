@@ -1,6 +1,7 @@
 <div class="crud-wrapper" [ngClass]="['mode-' + (data.mode || 'none'), settings.id + '-wrapper']">
     <div class="child-wrapper before"
          [ngClass]="{hidden: !beforeState.value.isActive, dialog: beforeState.value.dialog}"
+         (mousedown)="beforeClose($event)"
          (click)="close($event, before)">
         <div class="child-content">
             <router-outlet name="before" #before="outlet"></router-outlet>
@@ -12,6 +13,7 @@
     </div>
     <div class="child-wrapper after"
          [ngClass]="{hidden: !afterState.value.isActive, dialog: afterState.value.dialog}"
+         (mousedown)="beforeClose($event)"
          (click)="close($event, after)">
         <div class="child-content">
             <router-outlet name="after" #after="outlet"></router-outlet>
