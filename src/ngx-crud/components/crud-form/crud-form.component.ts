@@ -158,7 +158,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     protected refreshList(tree: ICrudTreeItem[]): void {
         for (let item of tree) {
             const comp = item.component as ICrudComponent;
-            if (!comp.getActionContext) continue;
+            if (!comp?.getActionContext) continue;
             const context = comp.getActionContext();
             if (!context.dataSource) continue;
             context.dataSource.refresh();
