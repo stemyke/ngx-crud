@@ -28,10 +28,13 @@ export class CrudService implements CanDeactivate<any> {
 
     getTree(snapshot: ActivatedRouteSnapshot): ICrudTreeItem[] {
         let contexts = this.contexts;
-        return snapshot.pathFromRoot.slice(1).map(snapshot => {
-            const context = contexts?.getContext(snapshot.outlet);
-            contexts = context?.children;
-            const component = context?.outlet.component as any;
+        return snapshot.pathFromRoot.map(snapshot => {
+            let component: any = null;
+            if (snapshot.component && contexts) {
+                const context = contexts.getContext(snapshot.outlet);
+                contexts = context?.children;
+                component = context?.outlet.component as any;
+            }
             return {
                 snapshot,
                 component: component?.component || component || null
