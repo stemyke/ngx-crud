@@ -12,7 +12,6 @@ import {
     ILanguageService,
     IToasterService,
     ObjectUtils,
-    ObservableUtils,
     OpenApiService,
     TOASTER_SERVICE
 } from "@stemy/ngx-utils";
@@ -23,10 +22,10 @@ import {
     ICrudRouteActionContext,
     ICrudRouteButton,
     ICrudRouteContext,
-    ICrudRouteSettings, ICrudTreeItem,
+    ICrudRouteSettings,
+    ICrudTreeItem,
     QUERY_PARAM_NAME
 } from "../../common-types";
-import {getRequestType} from "../../utils/route.utils";
 import {CrudService} from "../../services/crud.service";
 import {selectBtnProp} from "../../utils/crud.utils";
 import {ActivatedRoute, ActivatedRouteSnapshot, Router} from "@angular/router";
@@ -58,10 +57,6 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
 
     get settings(): ICrudRouteSettings {
         return this.snapshot.data.settings;
-    }
-
-    get requestType(): string {
-        return !this.settings ? "" : getRequestType(this.settings.requestType, this.settings.primaryRequest);
     }
 
     get endpoint(): string {

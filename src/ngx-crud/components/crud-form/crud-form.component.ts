@@ -47,8 +47,8 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
 
     importFile = async (ie: string): Promise<IAsyncMessage> => {
         try {
-            const path = await this.settings.getRequestPath(
-                this.endpoint, this.data, this.settings.primaryRequest, "import", this.injector, ie
+            const path = this.settings.getRequestPath(
+                this.getActionContext(), this.settings.primaryRequest, "import", ie
             );
             const response = await this.api.post(path, {file: this.files[ie]});
             this.forms.patchGroup(response, this.formModel, this.formGroup);
@@ -65,8 +65,8 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
 
     exportFile = async (ie: string): Promise<IAsyncMessage> => {
         try {
-            const path = await this.settings.getRequestPath(
-                this.endpoint, this.data, this.settings.primaryRequest, "export", this.injector, ie
+            const path = this.settings.getRequestPath(
+                this.getActionContext(), this.settings.primaryRequest, "export", ie
             );
             const response = await this.api.get(path, {responseType: "blob"});
             FileUtils.saveBlob(response, `export-${this.id}-${ie}.zip`);
@@ -99,8 +99,8 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         const action = this.snapshot.data.id;
         try {
             data = ObjectUtils.assign(context, data);
-            const path = await this.settings.getRequestPath(
-                this.endpoint, this.data, this.settings.primaryRequest, "save", this.injector
+            const path = this.settings.getRequestPath(
+                this.getActionContext(), this.settings.primaryRequest, "save"
             );
             const response = this.settings.primaryRequest === "edit"
                 ? await this.api.patch(path, data)
@@ -134,7 +134,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     getActionContext(): ICrudRouteActionContext {
         return {
             ...super.getActionContext(),
-            entity: this.data,
+            entity: {...this.data, id: this.id},
         };
     }
 
@@ -177,15 +177,18 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
             this.refreshList(tree);
             return;
         }
-        const path = await this.settings.getBackPath(this.context, this.endpoint);
+        const path = this.settings.getBackPath(this.context, this.endpoint);
         await this.router.navigateByUrl(path);
     }
 
     protected async initForm() {
+        const settings = this.settings;
+        if (!settings) return;
         const value = Object.assign({}, this.data, this.formGroup?.value || {});
-        this.formGroupModel = await this.forms.getFormGroupModelForSchema(this.requestType, {
-            labelPrefix: this.settings.id,
-            customizer: this.settings.customizeFormModel
+        const dataType = this.settings.getDataType(this.context, this.injector);
+        this.formGroupModel = await this.forms.getFormGroupModelForSchema(dataType, {
+            labelPrefix: settings.id,
+            customizer: settings.customizeFormModel
         });
         this.formModel = this.formGroupModel.group;
         this.formGroup = this.forms.createFormGroup(this.formModel, {updateOn: "blur"});
@@ -205,8 +208,8 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                     this.id = this.snapshot.params.id;
                     this.saveButton = selectBtnProp(this.settings.saveButton, this.getActionContext(), "save", "save");
                     try {
-                        const path = await this.settings.getRequestPath(
-                            this.endpoint, {...this.data, id: this.id}, this.settings.primaryRequest, "request", this.injector
+                        const path = this.settings.getRequestPath(
+                            this.getActionContext(), this.settings.primaryRequest, "request"
                         );
                         // Get basic data
                         const data = await this.api.get(path);

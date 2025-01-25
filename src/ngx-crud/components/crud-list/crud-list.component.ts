@@ -67,9 +67,9 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
         };
         this.updateSettings = TimerUtils.createTimeout(async () => {
             const settings = this.settings;
-            const requestType = this.requestType;
             if (!settings) return;
             // --- Update query models ---
+            const requestType = settings.getDataType(this.context, this.injector);
             this.queryModel = settings.queryForm ? await this.forms.getFormModelForSchema(requestType) : null;
             this.queryGroup = this.queryModel ? this.forms.createFormGroup(this.queryModel, {updateOn: "blur"}) : null;
             this.schema = await this.openApi.getSchema(requestType);
@@ -82,7 +82,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             if (canAdd || this.queryGroup) {
                 try {
                     const path = await settings.getRequestPath(
-                        this.endpoint, null, settings.primaryRequest, "save", this.injector
+                        this.getActionContext(), settings.primaryRequest, "save"
                     );
                     const data = await this.api.get(path);
                     if (this.queryGroup) {
@@ -140,7 +140,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             // --- Create data loader ---
             this.dataLoader = async (page, rowsPerPage, orderBy, orderDescending, filter, query) => {
                 const endpoint = await settings.getRequestPath(
-                    this.endpoint, null, settings.primaryRequest, "request", this.injector
+                    this.getActionContext(), settings.primaryRequest, "request"
                 );
                 const actions = [
                     {
@@ -298,8 +298,8 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             messageContext: item,
             method: async () => {
                 try {
-                    const path = await this.settings.getRequestPath(
-                        this.endpoint, item, this.settings.primaryRequest, "delete", this.injector
+                    const path = this.settings.getRequestPath(
+                        this.getActionContext(), this.settings.primaryRequest, "delete"
                     );
                     await this.api.delete(path);
                     this.table?.refresh();
@@ -330,10 +330,10 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             return;
         }
         const {beforeState, afterState} = this.wrapper;
-        const requestType = this.settings.requestType;
+        const dataType = this.settings.getDataType;
         const state = [beforeState.value, afterState.value].find(s => {
             const settings = s.data.settings as ICrudRouteSettings;
-            return settings && settings.requestType === requestType;
+            return settings && settings.getDataType === dataType;
         });
         const id = !state ? null : state.params.id || null;
         this.selectedItem = !state || !this.data

@@ -6,13 +6,15 @@ import {DynamicFormControlComponent} from "@stemy/ngx-dynamic-form";
 import {
     CrudButtonPropSetting,
     CrudRouteRequest,
-    ICrudRequestType,
-    ICrudRouteActionContext, ICrudRouteContext,
+    GetDataType,
+    ICrudDataType,
+    ICrudRouteActionContext,
     ICrudRouteData,
     ICrudRouteOptions,
-    ICrudRouteSettings, ICrudTreeItem
+    ICrudRouteSettings,
+    ICrudTreeItem
 } from "../common-types";
-import {getNavigateBackPath, getRequestPath, getSnapshotPath} from "./route.utils";
+import {getDataTransferType, getNavigateBackPath, getRequestPath, getSnapshotPath} from "./route.utils";
 import {ContextResolverService} from "../services/context-resolver.service";
 
 import {CrudWrapperComponent} from "../components/base/crud-wrapper.component";
@@ -60,11 +62,14 @@ export function selectBtnProp<T extends string>(prop: CrudButtonPropSetting<T>, 
         ? prop as T : prop !== false ? value : null;
 }
 
-export function createCrudSettings(id: string, endpoint: string, requestType: string | ICrudRequestType, primaryRequest: CrudRouteRequest = "list", options?: ICrudRouteOptions): ICrudRouteSettings {
+export function createCrudSettings(
+    id: string, endpoint: string, primaryRequest: CrudRouteRequest,
+    getDataType: GetDataType, options?: ICrudRouteOptions
+): ICrudRouteSettings {
     return {
         id,
         endpoint,
-        requestType,
+        getDataType,
         primaryRequest,
         mode: options?.mode || "routes",
         addButton: options?.addButton,
@@ -135,7 +140,7 @@ export function createCrudRoute(id: string,
     };
 }
 
-export function createCrudRoutes(id: string, endpoint: string, requestType: string | ICrudRequestType, options?: ICrudRouteOptions): IRoute[] {
+export function createCrudRoutes(id: string, endpoint: string, dataType: string | ICrudDataType | GetDataType, options?: ICrudRouteOptions): IRoute[] {
     options = options || {};
     const params = Object.entries(options.defaultParams || {});
     const mode = options.mode || 'routes';
@@ -148,6 +153,9 @@ export function createCrudRoutes(id: string, endpoint: string, requestType: stri
     const formOutlet = isInline ? options.outlet || 'after' : options.outlet;
     const path = endpoint.includes(':') ? endpoint : id;
     const subPath = mode !== 'routes' ? `` : `${path}/`;
+    const getDataType = ObjectUtils.isFunction(dataType)
+        ? dataType as GetDataType
+        : (ctx => getDataTransferType(dataType, ctx.primaryRequest)) as GetDataType
     const listRoutes: Route[] = mode === 'dialog'
         ? [
             {
@@ -177,7 +185,7 @@ export function createCrudRoutes(id: string, endpoint: string, requestType: stri
             `add-${id}`,
             `${subPath}add`,
             options.addComponent || formWrapper,
-            createCrudSettings(id, endpoint, requestType, options.addRequest || "add", options),
+            createCrudSettings(id, endpoint, options.addRequest || "add", getDataType, options),
             {},
             options.formChildren,
             formOutlet
@@ -186,7 +194,7 @@ export function createCrudRoutes(id: string, endpoint: string, requestType: stri
             `edit-${id}`,
             `${subPath}edit/:id`,
             options.editComponent || formWrapper,
-            createCrudSettings(id, endpoint, requestType, options.editRequest || "edit", options),
+            createCrudSettings(id, endpoint, options.editRequest || "edit", getDataType, options),
             {},
             options.formChildren,
             formOutlet
@@ -201,7 +209,7 @@ export function createCrudRoutes(id: string, endpoint: string, requestType: stri
             id,
             path,
             options.listComponent || listWrapper,
-            createCrudSettings(id, endpoint, requestType, "list", options),
+            createCrudSettings(id, endpoint, "list", getDataType, options),
             {
                 name: options.menu !== false && !defaultPath.includes(":") ? `menu.${id}` : null,
                 icon: options.icon,

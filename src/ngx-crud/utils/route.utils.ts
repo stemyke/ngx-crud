@@ -5,7 +5,7 @@ import {ObjectUtils, StringUtils} from "@stemy/ngx-utils";
 import {
     CrudRouteMethod,
     CrudRouteRequest,
-    ICrudRequestType,
+    ICrudDataType, ICrudRouteActionContext,
     ICrudRouteContext,
     ICrudRouteSettings
 } from "../common-types";
@@ -36,23 +36,24 @@ export function defaultRouteMatcher(segments: UrlSegment[], group: UrlSegmentGro
     return !firstSegment || (firstSegment.path == "admin" && segments[0] == firstSegment) ? null : {consumed: segments};
 }
 
-export async function getRequestPath(endpoint: string, item: Record<string, any>, reqType: CrudRouteRequest, method: CrudRouteMethod, injector: Injector, importExport?: string): Promise<string> {
-    const id = (!item ? null : item._id || item.id) || `new/default`;
+export function getRequestPath(ctx: ICrudRouteActionContext, reqType: CrudRouteRequest, method: CrudRouteMethod, ie?: string): string {
+    const entity = ctx.entity;
+    const id = (!entity ? null : entity.id || entity._id) || `new/default`;
     switch (method) {
         case "delete":
-            return `${endpoint}/${id}`;
+            return `${ctx.endpoint}/${id}`;
         case "import":
         case "export":
-            return `/${id}/${method}-${importExport}`;
+            return `/${id}/${method}-${ie}`;
     }
     if (reqType === "edit") {
-        return `${endpoint}/${id}`;
+        return `${ctx.endpoint}/${id}`;
     }
-    return (reqType === "list") !== (method === "request") ? `${endpoint}/${id}` : endpoint;
+    return (reqType === "list") !== (method === "request") ? `${ctx.endpoint}/${id}` : ctx.endpoint;
 }
 
-export function getRequestType(requestType: string | ICrudRequestType, primary: string): string {
-    const requestTypes: ICrudRequestType = (typeof requestType == "string") ? {list: requestType}: requestType;
+export function getDataTransferType(dataType: string | ICrudDataType, primary: string): string {
+    const requestTypes: ICrudDataType = (typeof dataType == "string") ? {list: dataType}: dataType;
     if (ObjectUtils.isString(requestTypes.prefixed) && requestTypes.prefixed) {
         return requestTypes[primary] || StringUtils.ucFirst(primary) + requestTypes.prefixed;
     }
@@ -63,7 +64,7 @@ export function getRequestType(requestType: string | ICrudRequestType, primary: 
     return reqType;
 }
 
-export async function getNavigateBackPath(context: ICrudRouteContext, endpoint: string): Promise<string> {
+export function getNavigateBackPath(context: ICrudRouteContext, endpoint: string): string {
     const settings = context.routeData.settings as ICrudRouteSettings;
     switch (settings.mode) {
         case 'dialog':

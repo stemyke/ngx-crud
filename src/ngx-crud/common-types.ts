@@ -32,7 +32,7 @@ export interface ICrudTreeItem {
     component: any;
 }
 
-export interface ICrudRequestType {
+export interface ICrudDataType {
     list?: string;
     add?: string;
     edit?: string;
@@ -56,6 +56,7 @@ export interface ICrudRouteContextBase {
 }
 
 export interface ICrudRouteContext extends ICrudRouteContextBase {
+    primaryRequest: CrudRouteRequest;
     [key: string]: any;
 }
 
@@ -116,12 +117,12 @@ export type CrudRouteRequest = "list" | "add" | "edit";
 export type CrudRouteMethod = "request" | "save" | "delete" | "import" | "export";
 
 export type GetRequestPath = (
-    endpoint: string, item: Record<string, any>, reqType: CrudRouteRequest, method: CrudRouteMethod, injector: Injector, importExport?: string
-) => Promise<string>;
+    context: ICrudRouteActionContext, reqType: CrudRouteRequest, method: CrudRouteMethod, importExport?: string
+) => string;
 
-export type GetBackPath = (
-    context: ICrudRouteContext, endpoint: string
-) => Promise<string>;
+export type GetBackPath = (context: ICrudRouteContext, endpoint: string) => string;
+
+export type GetDataType = (context: ICrudRouteContext, injector: Injector) => string;
 
 export type CrudDragHandler<R = boolean> = (ev: ITableDragEvent, context: ICrudRouteActionContext, injector: Injector) => R;
 
@@ -218,7 +219,7 @@ export interface ICrudRouteOptions extends ICrudRouteOptionsBase {
 }
 
 export interface ICrudRouteSettings extends Required<ICrudRouteOptionsBase> {
-    requestType: string | ICrudRequestType;
+    getDataType: GetDataType;
     primaryRequest: CrudRouteRequest;
     endpoint: string;
     id: string;
