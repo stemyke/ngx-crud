@@ -1,5 +1,5 @@
 import {Inject, Injectable, Injector, Optional, Type} from "@angular/core";
-import {ActivatedRouteSnapshot, CanDeactivate, ChildrenOutletContexts} from "@angular/router";
+import {ActivatedRouteSnapshot, CanDeactivate, ChildrenOutletContexts, OutletContext} from "@angular/router";
 import {
     ACTION_ICONS,
     COMPONENT_TYPES,
@@ -12,9 +12,9 @@ import {
 @Injectable()
 export class CrudService implements CanDeactivate<any> {
 
-    constructor(@Inject(COMPONENT_TYPES) readonly componentTypes: ICrudComponentTypes,
+    constructor(readonly injector: Injector,
+                @Inject(COMPONENT_TYPES) readonly componentTypes: ICrudComponentTypes,
                 @Inject(ACTION_ICONS) readonly actionIcons: CrudActionIcons,
-                readonly injector: Injector,
                 @Optional() readonly contexts: ChildrenOutletContexts = null) {
     }
 
@@ -28,9 +28,11 @@ export class CrudService implements CanDeactivate<any> {
 
     getTree(snapshot: ActivatedRouteSnapshot): ICrudTreeItem[] {
         let contexts = this.contexts;
-        return snapshot.pathFromRoot.map(snapshot => {
+        return snapshot.pathFromRoot.map((snapshot, ix) => {
             let component: any = null;
-            if (snapshot.component && contexts) {
+            // We skip the first ix because it's the root snapshot,
+            // and even if we have a component Type for it, we cant retrieve the instance from the ChildrenOutletContexts
+            if (snapshot.component && contexts && ix > 0) {
                 const context = contexts.getContext(snapshot.outlet);
                 contexts = context?.children;
                 component = context?.outlet.component as any;
