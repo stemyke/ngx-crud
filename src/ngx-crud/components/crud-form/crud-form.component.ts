@@ -27,16 +27,22 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     formGroup: FormGroup;
     formChanged: boolean;
 
+    protected formSubscription: Subscription;
+
     ngOnInit() {
         super.ngOnInit();
         this.data = {};
         this.files = {};
-        this.forms.getFormGroupModelForSchema(this.requestType, {
-            labelPrefix: this.settings.id,
-            customizer: this.settings.customizeFormModel
-        })
-            .then(m => this.initForm(m))
-            .catch(console.warn);
+        this.subscription = ObservableUtils.multiSubscription(
+            this.subscription,
+            this.events.languageChanged.subscribe(() => this.initForm())
+        )
+        this.initForm().then(() => this.subToState());
+    }
+
+    ngOnDestroy() {
+        super.ngOnDestroy();
+        this.formSubscription?.unsubscribe();
     }
 
     importFile = async (ie: string): Promise<IAsyncMessage> => {
@@ -175,62 +181,65 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         await this.router.navigateByUrl(path);
     }
 
-    protected initForm(model: DynamicFormGroupModel): void {
-        const value = this.formGroup?.value || {};
-        this.formGroupModel = model;
-        this.formModel = model.group;
+    protected async initForm() {
+        const value = Object.assign({}, this.data, this.formGroup?.value || {});
+        this.formGroupModel = await this.forms.getFormGroupModelForSchema(this.requestType, {
+            labelPrefix: this.settings.id,
+            customizer: this.settings.customizeFormModel
+        });
+        this.formModel = this.formGroupModel.group;
         this.formGroup = this.forms.createFormGroup(this.formModel, {updateOn: "blur"});
         this.forms.patchGroup(value, this.formModel, this.formGroup);
-        this.subscription = ObservableUtils.multiSubscription(
-            this.subscription,
-            this.formGroup.valueChanges.subscribe(() => {
-                this.formChanged = this.formGroup.touched;
-            }),
-            this.subToState()
-        );
+        this.formSubscription?.unsubscribe();
+        this.formSubscription = this.formGroup.valueChanges.subscribe(() => {
+            this.formChanged = this.formGroup.touched;
+        });
     }
 
-    protected subToState(): Subscription {
-        return ObservableUtils.subscribe({
-            subjects: [this.route.data, this.route.params],
-            cb: async () => {
-                this.id = this.snapshot.params.id;
-                this.saveButton = selectBtnProp(this.settings.saveButton, this.getActionContext(), "save", "save");
-                try {
-                    const path = await this.settings.getRequestPath(
-                        this.endpoint, {...this.data, id: this.id}, this.settings.primaryRequest, "request", this.injector
-                    );
-                    // Get basic data
-                    const data = await this.api.get(path);
-                    delete data._id;
-                    // Customize data
-                    this.data = await this.settings.customizeFormData(data, this.injector, this.formModel, this.context) ?? data;
-                    this.context = Object.assign(
-                        {},
-                        this.snapshot.data.context,
-                        {entity: this.data}
-                    );
-                    this.generateButtons();
-                } catch (res) {
-                    if (res instanceof HttpErrorResponse) {
-                        const errorObj = res.message || res.error;
-                        const error = ObjectUtils.isObject(errorObj) ? `${errorObj.message}` : `${res.error}`;
-                        const action = `load-${this.id}`;
-                        this.toaster.error(error
-                                ? (error.indexOf("Error") > -1 ? `message.${action}.error` : error)
-                                : `message.${action}.error`,
-                            {reason: res.error}
+    protected subToState() {
+        this.subscription = ObservableUtils.multiSubscription(
+            this.subscription,
+            ObservableUtils.subscribe({
+                subjects: [this.route.data, this.route.params],
+                cb: async () => {
+                    this.id = this.snapshot.params.id;
+                    this.saveButton = selectBtnProp(this.settings.saveButton, this.getActionContext(), "save", "save");
+                    try {
+                        const path = await this.settings.getRequestPath(
+                            this.endpoint, {...this.data, id: this.id}, this.settings.primaryRequest, "request", this.injector
                         );
-                    } else {
-                        console.log(`Error happened in form, should navigate back`, res);
+                        // Get basic data
+                        const data = await this.api.get(path);
+                        delete data._id;
+                        // Customize data
+                        this.data = await this.settings.customizeFormData(data, this.injector, this.formModel, this.context) ?? data;
+                        this.context = Object.assign(
+                            {},
+                            this.snapshot.data.context,
+                            {entity: this.data}
+                        );
+                        this.generateButtons();
+                    } catch (res) {
+                        if (res instanceof HttpErrorResponse) {
+                            const errorObj = res.message || res.error;
+                            const error = ObjectUtils.isObject(errorObj) ? `${errorObj.message}` : `${res.error}`;
+                            const action = `load-${this.id}`;
+                            this.toaster.error(error
+                                    ? (error.indexOf("Error") > -1 ? `message.${action}.error` : error)
+                                    : `message.${action}.error`,
+                                {reason: res.error}
+                            );
+                        } else {
+                            console.log(`Error happened in form, should navigate back`, res);
+                        }
+                        await this.navigateBack();
+                        return;
                     }
-                    await this.navigateBack();
-                    return;
+                    this.forms.patchGroup(this.data, this.formModel, this.formGroup);
+                    this.formChanged = false;
+                    this.cdr.detectChanges();
                 }
-                this.forms.patchGroup(this.data, this.formModel, this.formGroup);
-                this.formChanged = false;
-                this.cdr.detectChanges();
-            }
-        });
+            })
+        );
     }
 }
