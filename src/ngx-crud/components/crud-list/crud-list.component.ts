@@ -137,8 +137,6 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             }
             this.tableColumns = columns;
             this.columnNames = Object.keys(columns);
-            // --- Separate actions column
-
             // --- Create data loader ---
             this.dataLoader = async (page, rowsPerPage, orderBy, orderDescending, filter, query) => {
                 const endpoint = settings.getRequestPath(
@@ -171,8 +169,10 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
 
                 const data = await this.api.list(endpoint, params);
                 let {total, items, meta} = Object.assign({total: 0, items: [], meta: {}}, data);
+                let hasActions = true;
+                // --- Process items actions ---
                 items?.forEach(item => {
-                    item[actionsKey] = actions.map(action => {
+                    const itemActions = actions.map(action => {
                         const icon = selectBtnProp(action.button, actionCtx, action.id, action.icon, item);
                         const status = selectBtnProp(action.status, actionCtx, action.id, null, item);
                         return !icon ? null : {
@@ -182,7 +182,15 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                             action: () => this.callAction(action.id, item)
                         };
                     }).filter(Boolean);
+                    hasActions = hasActions && itemActions.length > 0;
+                    item[actionsKey] = itemActions;
                 });
+                //  --- Add/remove actions column ---
+                this.tableColumns = Object.assign({}, columns);
+                if (!hasActions) {
+                    delete this.tableColumns[actionsKey];
+                }
+                // --- Set new data ---
                 this.data = data;
                 this.updateSelected();
                 this.context = Object.assign(
