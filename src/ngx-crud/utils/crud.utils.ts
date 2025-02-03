@@ -106,7 +106,7 @@ export function createCrudSettings(
         updateAdditionalResources: options?.updateAdditionalResources || noopCb,
         listDependencies: options?.listDependencies || [],
         itemsListed: options?.itemsListed || noopCb,
-        itemsPerPage: options?.itemsPerPage || 12,
+        itemsPerPage: options?.itemsPerPage || 25,
         queryForm: options?.queryForm || false,
         displayMeta: options?.displayMeta || false,
         onDragStart: options?.onDragStart || dragCb,
