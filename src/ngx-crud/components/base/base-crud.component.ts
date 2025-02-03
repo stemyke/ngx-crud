@@ -60,7 +60,9 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
     }
 
     get endpoint(): string {
-        const params = this.snapshot.params || {};
+        const params = this.snapshot.pathFromRoot.reduce((res, s) => {
+            return Object.assign(res, s.params || {});
+        }, {}) as Record<string, any>;
         return Object.entries(params).reduce((ep, [key, value]) => {
             return ep.replace(`/:${key}`, `/${value}`);
         }, this.settings.endpoint);
