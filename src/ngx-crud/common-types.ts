@@ -146,6 +146,8 @@ export interface ICrudRouteOptionsBase {
     deleteButton?: CrudButtonPropSetting;
     deleteAction?: CrudButtonFunc;
     saveButton?: CrudButtonPropSetting;
+    // Title of the action buttons list column
+    actionsTitle?: string;
     // Custom actions to display for each item in list component
     customActions?: ICrudRouteCustomAction[];
     // Custom buttons to display under the table in list component
@@ -273,19 +275,23 @@ export interface ICrudComponentTypes {
 
 export type CrudActionIcons = Record<string, string>;
 
-export const COMPONENT_TYPES = new InjectionToken<ICrudComponentTypes>("crud-component-types");
-
-export const ACTION_ICONS = new InjectionToken<ICrudComponentTypes>("crud-action-icons");
-
 // --- Module Configuration ---
 
 export const FILTER_PARAM_NAME = new InjectionToken<string>("filter-param-name");
 
 export const QUERY_PARAM_NAME = new InjectionToken<string>("query-param-name");
 
+export const COMPONENT_TYPES = new InjectionToken<ICrudComponentTypes>("crud-component-types");
+
+export const ACTION_ICONS = new InjectionToken<ICrudComponentTypes>("crud-action-icons");
+
+export const ACTIONS_COLUMN_TITLE = new InjectionToken<string>("actions-column-title");
+
 export interface ICrudModuleConfig {
     filterParamName?: string;
     queryParamName?: string;
     componentTypes?: ICrudComponentTypes;
     actionIcons?: CrudActionIcons;
+    // Default title of the actions column in list component
+    actionsTitle?: string;
 }

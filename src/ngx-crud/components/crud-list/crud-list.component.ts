@@ -81,7 +81,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             let canAdd = settings.addButton;
             if (canAdd || this.queryGroup) {
                 try {
-                    const path = await settings.getRequestPath(
+                    const path = settings.getRequestPath(
                         this.getActionContext(), settings.primaryRequest, "save"
                     );
                     const data = await this.api.get(path);
@@ -111,7 +111,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                 };
                 if (property.column === false) continue;
                 const title = name === actionsKey
-                    ? ` `
+                    ? settings.actionsTitle || this.actionsTitle
                     : await this.language.getTranslation(`${labelPrefix}.${name}`);
                 const column = await settings.customizeListColumn(
                     {
@@ -137,9 +137,11 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             }
             this.tableColumns = columns;
             this.columnNames = Object.keys(columns);
+            // --- Separate actions column
+
             // --- Create data loader ---
             this.dataLoader = async (page, rowsPerPage, orderBy, orderDescending, filter, query) => {
-                const endpoint = await settings.getRequestPath(
+                const endpoint = settings.getRequestPath(
                     this.getActionContext(), settings.primaryRequest, "request"
                 );
                 const actions = [
@@ -235,6 +237,10 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
 
     addItem(): void {
         this.toaster.handleAsyncMethod(() => this.callAction("add"));
+    }
+
+    refresh(): void {
+        this.table?.refresh();
     }
 
     updateFilters(ev: IDynamicFormEvent): void {

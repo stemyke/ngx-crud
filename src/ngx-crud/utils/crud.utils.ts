@@ -81,6 +81,7 @@ export function createCrudSettings(
         deleteButton: options?.deleteButton,
         deleteAction: options?.deleteAction,
         saveButton: options?.saveButton,
+        actionsTitle: options?.actionsTitle || "",
         customActions: options?.customActions || [],
         customButtons: options?.customButtons || [],
         labelPrefix: options?.labelPrefix || "",

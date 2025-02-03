@@ -18,6 +18,7 @@ import {
 import {DynamicFormService} from "@stemy/ngx-dynamic-form";
 
 import {
+    ACTIONS_COLUMN_TITLE,
     FILTER_PARAM_NAME,
     ICrudRouteActionContext,
     ICrudRouteButton,
@@ -81,6 +82,7 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
                 @Inject(TOASTER_SERVICE) readonly toaster: IToasterService,
                 @Inject(FILTER_PARAM_NAME) protected filterParamName: string,
                 @Inject(QUERY_PARAM_NAME) protected queryParamName: string,
+                @Inject(ACTIONS_COLUMN_TITLE) protected actionsTitle: string,
                 @Optional() protected wrapper: CrudWrapperComponent) {
     }
 

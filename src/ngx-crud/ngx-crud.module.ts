@@ -5,7 +5,7 @@ import {RouterModule} from "@angular/router";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
 
 import {
-    ACTION_ICONS,
+    ACTION_ICONS, ACTIONS_COLUMN_TITLE,
     COMPONENT_TYPES,
     CrudActionIcons,
     FILTER_PARAM_NAME,
@@ -73,6 +73,10 @@ export class NgxCrudModule {
                     edit: "edit",
                     delete: "delete"
                 } as CrudActionIcons, config?.actionIcons || {})
+            },
+            {
+                provide: ACTIONS_COLUMN_TITLE,
+                useValue: config?.actionsTitle || " "
             }
         ];
     }

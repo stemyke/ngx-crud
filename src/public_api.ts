@@ -11,6 +11,7 @@ export {
     CrudButtonFunc,
     CrudButtonCheckFunc,
     CrudButtonPropSetting,
+    CrudButtonActionSetting,
     CrudDataCustomizerFunc,
     CrudColumnCustomizerFunc,
     CrudUpdateResourcesFunc,
@@ -34,10 +35,11 @@ export {
     IUpdateResources,
     ICrudComponentTypes,
     CrudActionIcons,
-    COMPONENT_TYPES,
-    ACTION_ICONS,
     FILTER_PARAM_NAME,
     QUERY_PARAM_NAME,
+    COMPONENT_TYPES,
+    ACTION_ICONS,
+    ACTIONS_COLUMN_TITLE,
     ICrudModuleConfig
 } from "./ngx-crud/common-types";
 
