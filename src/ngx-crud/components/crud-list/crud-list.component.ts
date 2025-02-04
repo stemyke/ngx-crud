@@ -11,6 +11,7 @@ import {
     ObjectUtils,
     ObservableUtils,
     TableDataLoader,
+    TableFilterType,
     TimerUtils
 } from "@stemy/ngx-utils";
 import {DynamicFormModel, IDynamicFormEvent} from "@stemy/ngx-dynamic-form";
@@ -113,13 +114,28 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                 const title = name === actionsKey
                     ? settings.actionsTitle || this.actionsTitle
                     : await this.language.getTranslation(`${labelPrefix}.${name}`);
+                let filterType: TableFilterType = null;
+                switch (property.type) {
+                    case "string":
+                        if (property.enum) {
+                            filterType = "enum";
+                        } else if (property.format !== "date") {
+                            filterType = "text";
+                        }
+                        break;
+                    case "boolean":
+                        filterType = "checkbox";
+                        break;
+                }
                 const column = await settings.customizeListColumn(
                     {
                         name,
                         title,
                         sort: property.disableSort ? null : name,
-                        filter: settings.query && property.type === "string" && property.format !== "date" && !property.disableFilter,
-                        filterType: property.filterType,
+                        filter: settings.query && filterType && !property.disableFilter,
+                        filterType,
+                        enum: property.enum,
+                        enumPrefix: property.enumPrefix,
                         property,
                     },
                     this.injector, property, this.snapshot.params, this.context

@@ -43,8 +43,8 @@ export interface ICrudDataSource {
     loadData: (page: number, itemsPerPage: number) => Promise<IPaginationData>;
     refresh(time?: number): void;
     setFilter(filter: string): void;
-    setOrder(column: string): void;
-    updateQuery(col: string, value: string): void;
+    setSorting(column: string): void;
+    setQueryValue(col: string, value: string): void;
 }
 
 export interface ICrudRouteContextBase {
