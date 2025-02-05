@@ -105,9 +105,9 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
     }
 
     close(outlet: RouterOutlet, event: MouseEvent): boolean {
-        if (this.settings?.mode !== 'dialog' || event.target !== this.closeTarget) return false;
+        if (this.settings?.mode !== 'dialog' || event.target !== this.closeTarget) return true;
         const closeElem = this.findCloseElement(event.target);
-        if (!closeElem) return false;
+        if (!closeElem) return true;
         event.preventDefault();
         const url = getSnapshotPath(outlet.activatedRoute.snapshot, 'list', true);
         this.router.navigateByUrl(url);
