@@ -45,6 +45,11 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         this.formSubscription?.unsubscribe();
     }
 
+    reset() {
+        this.forms.patchGroup(this.data, this.formModel, this.formGroup);
+        this.formChanged = false;
+    }
+
     importFile = async (ie: string): Promise<IAsyncMessage> => {
         try {
             const path = this.settings.getRequestPath(

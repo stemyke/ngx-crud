@@ -2,10 +2,10 @@
     <div class="child-wrapper before"
          [ngClass]="{hidden: !beforeState.value.isActive, dialog: beforeState.value.dialog}"
          (mousedown)="beforeClose($event)"
-         (click)="close($event, before)">
+         (click)="close(before, $event)">
         <div class="child-content">
             <router-outlet name="before" #before="outlet"></router-outlet>
-            <a class="child-close-btn" (click)="close($event, before)" *ngIf="beforeState.value.dialog"></a>
+            <a class="child-close-btn" (click)="close(before, $event)" *ngIf="beforeState.value.dialog"></a>
         </div>
     </div>
     <div class="main-wrapper">
@@ -14,10 +14,10 @@
     <div class="child-wrapper after"
          [ngClass]="{hidden: !afterState.value.isActive, dialog: afterState.value.dialog}"
          (mousedown)="beforeClose($event)"
-         (click)="close($event, after)">
+         (click)="close(after, $event)">
         <div class="child-content">
             <router-outlet name="after" #after="outlet"></router-outlet>
-            <a class="child-close-btn" (click)="close($event, after)" *ngIf="afterState.value.dialog"></a>
+            <a class="child-close-btn" (click)="close(after, $event)" *ngIf="afterState.value.dialog"></a>
         </div>
     </div>
 </div>

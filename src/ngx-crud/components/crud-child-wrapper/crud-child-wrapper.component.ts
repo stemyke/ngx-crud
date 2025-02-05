@@ -104,13 +104,26 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
         this.closeTarget = event.target;
     }
 
-    close(event: MouseEvent, outlet: RouterOutlet): void {
-        if (this.settings?.mode !== 'dialog' || this.closeTarget !== event.target) return;
-        const classList = event.target instanceof HTMLElement
-            ? Array.from(event.target.classList) : [];
-        if (!classList.includes('child-wrapper') && !classList.includes('child-close-btn')) return;
+    close(outlet: RouterOutlet, event: MouseEvent): boolean {
+        if (this.settings?.mode !== 'dialog' || event.target !== this.closeTarget) return false;
+        const closeElem = this.findCloseElement(event.target);
+        if (!closeElem) return false;
         event.preventDefault();
         const url = getSnapshotPath(outlet.activatedRoute.snapshot, 'list', true);
         this.router.navigateByUrl(url);
+        return true;
+    }
+
+    protected findCloseElement(target: EventTarget): HTMLElement {
+        if (target instanceof HTMLElement) {
+            if (target.classList.contains('child-content')) {
+                return null;
+            }
+            if (target.classList.contains('child-wrapper') || target.classList.contains('child-close-btn')) {
+                return target;
+            }
+            return this.findCloseElement(target.parentElement);
+        }
+        return null;
     }
 }
