@@ -187,7 +187,9 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
             `${subPath}add`,
             options.addComponent || formWrapper,
             createCrudSettings(id, endpoint, options.addRequest || "add", getDataType, options),
-            {},
+            {
+                mode: 'none'
+            },
             options.formChildren,
             formOutlet
         ),
@@ -196,7 +198,9 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
             `${subPath}edit/:id`,
             options.editComponent || formWrapper,
             createCrudSettings(id, endpoint, options.editRequest || "edit", getDataType, options),
-            {},
+            {
+                mode: 'none'
+            },
             options.formChildren,
             formOutlet
         )

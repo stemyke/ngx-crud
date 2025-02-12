@@ -1,6 +1,6 @@
-<div class="crud-wrapper" [ngClass]="['mode-' + (data.mode || 'none'), settings.id + '-wrapper']">
+<div class="crud-wrapper" [ngClass]="['mode-' + data.mode, settings.id + '-wrapper']">
     <div class="child-wrapper before"
-         [ngClass]="{hidden: !beforeState.value.isActive, dialog: beforeState.value.dialog}"
+         [ngClass]="[beforeState.value.isActive ? '' : 'hidden', beforeState.value.dialog ? 'dialog' : '', 'mode-' + data.mode]"
          (mousedown)="beforeClose($event)"
          (click)="close(before, $event)">
         <div class="child-content">
@@ -8,11 +8,11 @@
             <a class="child-close-btn" (click)="close(before, $event)" *ngIf="beforeState.value.dialog"></a>
         </div>
     </div>
-    <div class="main-wrapper">
+    <div class="main-wrapper" [ngClass]="['mode-' + data.mode]">
         <ng-container [ngComponentOutlet]="componentType"></ng-container>
     </div>
     <div class="child-wrapper after"
-         [ngClass]="{hidden: !afterState.value.isActive, dialog: afterState.value.dialog}"
+         [ngClass]="[afterState.value.isActive ? '' : 'hidden', afterState.value.dialog ? 'dialog' : '', 'mode-' + data.mode]"
          (mousedown)="beforeClose($event)"
          (click)="close(after, $event)">
         <div class="child-content">
