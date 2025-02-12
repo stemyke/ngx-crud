@@ -117,14 +117,14 @@ export function createCrudSettings(
 
 export function createCrudRoute(id: string,
                                 path: string,
-                                component: Type<any>,
                                 settings: ICrudRouteSettings,
                                 data?: ICrudRouteData,
                                 children?: IRoute[],
+                                component?: Type<any>,
                                 outlet?: string): IRoute {
     return {
         path,
-        component,
+        component: component ?? CrudWrapperComponent,
         canActivate: [AuthGuard],
         canDeactivate: [CrudService],
         data: {
@@ -185,23 +185,23 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
         createCrudRoute(
             `add-${id}`,
             `${subPath}add`,
-            options.addComponent || formWrapper,
             createCrudSettings(id, endpoint, options.addRequest || "add", getDataType, options),
             {
                 mode: 'none'
             },
             options.formChildren,
+            options.addComponent || formWrapper,
             formOutlet
         ),
         createCrudRoute(
             `edit-${id}`,
             `${subPath}edit/:id`,
-            options.editComponent || formWrapper,
             createCrudSettings(id, endpoint, options.editRequest || "edit", getDataType, options),
             {
                 mode: 'none'
             },
             options.formChildren,
+            options.editComponent || formWrapper,
             formOutlet
         )
     ];
@@ -213,7 +213,6 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
         createCrudRoute(
             id,
             path,
-            options.listComponent || listWrapper,
             createCrudSettings(id, endpoint, "list", getDataType, options),
             {
                 name: options.menu !== false && !defaultPath.includes(":") ? `menu.${id}` : null,
@@ -227,6 +226,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
                 ...formRoutes,
                 ...(options.listChildren || [])
             ] : options.listChildren,
+            options.listComponent || listWrapper,
             listOutlet
         ),
         ...(isInline ? [] : formRoutes)

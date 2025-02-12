@@ -16,7 +16,10 @@ export const defaultOutletState = {
 @Component({
     standalone: false,
     template: `
-        <ng-container [ngComponentOutlet]="componentType"></ng-container>`,
+        <div class="crud-wrapper">
+            <ng-container [ngComponentOutlet]="componentType"></ng-container>
+        </div>
+    `,
     selector: "crud-wrapper"
 })
 export class CrudWrapperComponent implements OnInit, OnDestroy {
