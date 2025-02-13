@@ -4,7 +4,7 @@ import {ObservableUtils} from "@stemy/ngx-utils";
 import {Subscription} from "rxjs";
 
 import {ICrudOutletState} from "../../common-types";
-import {getSnapshotPath} from "../../utils/route.utils";
+import {checkIsDialog, getSnapshotPath} from "../../utils/route.utils";
 import {CrudWrapperComponent, defaultOutletState} from "../base/crud-wrapper.component";
 
 @Component({
@@ -36,7 +36,7 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
             this.subscription,
             ObservableUtils.subscribe(
                 {
-                    subjects: [this.before.activateEvents],
+                    subjects: [this.before.activateEvents, this.before.deactivateEvents],
                     cb: () => {
                         const state = this.getState(this.before);
                         this.beforeSub?.unsubscribe();
@@ -56,7 +56,7 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
                     }
                 },
                 {
-                    subjects: [this.after.activateEvents],
+                    subjects: [this.after.activateEvents, this.after.deactivateEvents],
                     cb: () => {
                         const state = this.getState(this.after);
                         this.afterSub?.unsubscribe();
@@ -91,8 +91,7 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
         }
         const {data, params} = outlet.activatedRoute.snapshot;
         return {
-            dialog: this.settings?.mode === 'dialog'
-                && outlet.component && !outlet.activatedRouteData.empty,
+            dialog: checkIsDialog(this.route.snapshot) && outlet.component && !outlet.activatedRouteData.empty,
             isActive: true,
             data: data || {},
             params: params || {},
@@ -105,11 +104,11 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
     }
 
     close(outlet: RouterOutlet, event: MouseEvent): boolean {
-        if (this.settings?.mode !== 'dialog' || event.target !== this.closeTarget) return true;
+        if (!outlet.isActivated || !checkIsDialog(this.route.snapshot) || event.target !== this.closeTarget) return true;
         const closeElem = this.findCloseElement(event.target);
         if (!closeElem) return true;
         event.preventDefault();
-        const url = getSnapshotPath(outlet.activatedRoute.snapshot, 'list', true);
+        const url = getSnapshotPath(outlet.activatedRoute.snapshot, "", true);
         this.router.navigateByUrl(url);
         return true;
     }

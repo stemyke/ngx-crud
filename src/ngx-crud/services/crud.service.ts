@@ -35,7 +35,7 @@ export class CrudService implements CanDeactivate<any> {
             if (snapshot.component && contexts && ix > 0) {
                 const context = contexts.getContext(snapshot.outlet);
                 contexts = context?.children;
-                component = context?.outlet.component as any;
+                component = context?.outlet?.component as any;
             }
             return {
                 snapshot,

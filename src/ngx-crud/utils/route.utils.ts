@@ -1,32 +1,45 @@
-import {Injector} from "@angular/core";
 import {ActivatedRouteSnapshot, Route, UrlMatchResult, UrlSegment, UrlSegmentGroup} from "@angular/router";
 import {ObjectUtils, StringUtils} from "@stemy/ngx-utils";
 
 import {
     CrudRouteMethod,
     CrudRouteRequest,
-    ICrudDataType, ICrudRouteActionContext,
+    ICrudDataType,
+    ICrudRouteActionContext,
     ICrudRouteContext,
     ICrudRouteSettings
 } from "../common-types";
 
+export function checkIsDialog(snapshot: ActivatedRouteSnapshot): boolean {
+    return snapshot.data.mode === 'dialog'
+        || (snapshot.data.settings as ICrudRouteSettings)?.mode === 'dialog';
+}
+
 export function getSnapshotPath(snapshot: ActivatedRouteSnapshot, additional: string = "", replace: boolean = false): string {
     let path = "";
     while (snapshot) {
-        const segments = snapshot.url.map(s => s.path);
-        if (additional) {
-            if (replace) {
-                segments.length = 0;
+        const children = snapshot.parent ? snapshot.parent.children : [snapshot];
+        const subPath = children.reduce((res, child) => {
+            const segments = child.url.map(s => s.path);
+            if (child !== snapshot) return segments.join("/");
+            if (child === snapshot && (additional || replace)) {
+                if (replace) {
+                    segments.length = 0;
+                }
+                segments.push(additional);
             }
-            segments.push(additional);
-        }
-        let subPath = segments.join('/');
-        path = !path ? subPath : `${subPath}/${path}`;
-        if (snapshot.outlet && snapshot.outlet !== "primary") {
-            path = `(${snapshot.outlet}:${path})`;
+            const childPath = segments.join("/");
+            if (childPath && child.outlet && child.outlet !== "primary") {
+                return `${res}(${snapshot.outlet}:${childPath})`;
+            }
+            return `${res}${childPath}`;
+        }, "");
+        if (subPath) {
+            path = !path ? subPath : `${subPath}/${path}`;
         }
         snapshot = snapshot.parent;
         additional = "";
+        replace = false;
     }
     return path;
 }
@@ -68,10 +81,10 @@ export function getNavigateBackPath(context: ICrudRouteContext, endpoint: string
     const settings = context.routeData.settings as ICrudRouteSettings;
     switch (settings.mode) {
         case 'dialog':
-            return getSnapshotPath(context.snapshot, 'list', true);
+            return getSnapshotPath(context.snapshot, "", true);
         case 'inline':
             const id = context.entity?.id || context.entity?._id;
-            return getSnapshotPath(context.snapshot, !id ? 'list' : `edit/${id}`, true);
+            return getSnapshotPath(context.snapshot, !id ? "list" : `edit/${id}`, true);
     }
     return getSnapshotPath(context.snapshot, endpoint, true);
 }

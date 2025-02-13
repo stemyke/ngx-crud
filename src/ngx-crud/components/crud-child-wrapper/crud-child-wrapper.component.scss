@@ -22,7 +22,7 @@
     --close-top-distance: var(--close-distance);
     --close-right-distance: var(--close-distance);
 
-    .child-wrapper, .child-wrapper.dialog:before {
+    .child-wrapper.mode-dialog, .child-wrapper.dialog:before {
         position: fixed;
         top: 0;
         left: 0;
@@ -30,7 +30,7 @@
         bottom: 0;
     }
 
-    .child-wrapper {
+    .child-wrapper.mode-dialog {
         z-index: 50;
         display: grid;
         place-items: center;
@@ -47,7 +47,7 @@
         }
     }
 
-    .child-content {
+    .child-wrapper.mode-dialog .child-content {
         position: relative;
         pointer-events: auto;
         z-index: 1;
