@@ -116,6 +116,11 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                     : await this.language.getTranslation(`${labelPrefix}.${name}`);
                 let filterType: TableFilterType = null;
                 switch (property.type) {
+                    case "array":
+                        if (property.items?.enum) {
+                            filterType = "enum";
+                        }
+                        break;
                     case "string":
                         if (property.enum) {
                             filterType = "enum";
@@ -134,7 +139,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                         sort: property.disableSort ? null : name,
                         filter: settings.query && filterType && !property.disableFilter,
                         filterType,
-                        enum: property.enum,
+                        enum: property.enum || property.items?.enum || [],
                         enumPrefix: property.enumPrefix,
                         property,
                     },
