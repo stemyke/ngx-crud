@@ -368,7 +368,6 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
     }
 
     protected updateSelected(): void {
-        console.log(`Update selected`, this.endpoint);
         if (!this.wrapper || !this.settings) {
             this.selectedItem = null;
             return;
@@ -380,7 +379,6 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             return settings && settings.getDataType === dataType;
         });
         const id = !state ? null : state.params.id || null;
-        console.log(id, this.data?.items);
         this.selectedItem = !state || !this.data
             ? null
             : this.data.items.find(t => t.id === id || t._id === id);

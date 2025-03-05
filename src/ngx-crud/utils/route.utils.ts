@@ -29,7 +29,6 @@ export function getSnapshotPath(snapshot: ActivatedRouteSnapshot, serializer: Ur
         commands.unshift(snapshot.url.map(() => "..").join("/"));
     }
     const tree = createUrlTreeFromSnapshot(snapshot, commands);
-    console.log(commands, serializer.serialize(tree));
     return serializer.serialize(tree);
 }
 
