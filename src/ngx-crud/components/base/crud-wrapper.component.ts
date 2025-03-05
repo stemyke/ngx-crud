@@ -1,5 +1,5 @@
 import {ChangeDetectorRef, Component, OnDestroy, OnInit, Type} from "@angular/core";
-import {ActivatedRoute, Data, Router} from "@angular/router";
+import {ActivatedRoute, Data, Router, UrlSerializer} from "@angular/router";
 import {BehaviorSubject, Subscription} from "rxjs";
 
 import {ICrudOutletState, ICrudRouteSettings} from "../../common-types";
@@ -36,7 +36,8 @@ export class CrudWrapperComponent implements OnInit, OnDestroy {
     constructor(protected route: ActivatedRoute,
                 protected router: Router,
                 protected crud: CrudService,
-                protected cdr: ChangeDetectorRef) {
+                protected cdr: ChangeDetectorRef,
+                protected urlSerializer: UrlSerializer) {
         this.data = {};
         this.settings = {} as any;
         this.beforeState = new BehaviorSubject(defaultOutletState);

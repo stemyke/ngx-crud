@@ -14,7 +14,7 @@ import {
     ICrudRouteSettings,
     ICrudTreeItem
 } from "../common-types";
-import {getDataTransferType, getNavigateBackPath, getRequestPath, getSnapshotPath} from "./route.utils";
+import {getDataTransferType, getNavigateBackPath, getRequestPath, getRoutePath, getSnapshotPath} from "./route.utils";
 import {ContextResolverService} from "../services/context-resolver.service";
 
 import {CrudWrapperComponent} from "../components/base/crud-wrapper.component";
@@ -26,8 +26,8 @@ export async function defaultCrudAction(ctx: ICrudRouteActionContext, item: any,
     const router = ctx.injector.get(Router);
     const snapshot = ctx.context.snapshot;
     const route = !item ? button : `${button}/${item._id || item.id}`;
-    const outlet = snapshot.data.actionOutlet;
-    const path = getSnapshotPath(snapshot, !outlet ? route : `(${outlet}:${route})`);
+    const outlet = snapshot.data.actionOutlet || "primary";
+    const path = getRoutePath(ctx, [{outlets: {[outlet]: route}}]);
     await router.navigateByUrl(path);
 }
 

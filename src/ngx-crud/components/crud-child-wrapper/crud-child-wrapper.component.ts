@@ -49,7 +49,6 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
                                     this.cdr.detectChanges();
                                 }
                             });
-                            return;
                         }
                         this.beforeState.next(state);
                         this.cdr.detectChanges();
@@ -69,7 +68,6 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
                                     this.cdr.detectChanges();
                                 }
                             });
-                            return;
                         }
                         this.afterState.next(state);
                         this.cdr.detectChanges();
@@ -108,7 +106,7 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
         const closeElem = this.findCloseElement(event.target);
         if (!closeElem) return true;
         event.preventDefault();
-        const url = getSnapshotPath(outlet.activatedRoute.snapshot, "", true);
+        const url = getSnapshotPath(outlet.activatedRoute.snapshot, this.urlSerializer, "", true);
         this.router.navigateByUrl(url);
         return true;
     }

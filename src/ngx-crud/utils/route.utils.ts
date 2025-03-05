@@ -1,4 +1,12 @@
-import {ActivatedRouteSnapshot, Route, UrlMatchResult, UrlSegment, UrlSegmentGroup} from "@angular/router";
+import {
+    ActivatedRouteSnapshot,
+    createUrlTreeFromSnapshot,
+    Route,
+    UrlMatchResult,
+    UrlSegment,
+    UrlSegmentGroup,
+    UrlSerializer
+} from "@angular/router";
 import {ObjectUtils, StringUtils} from "@stemy/ngx-utils";
 
 import {
@@ -6,7 +14,6 @@ import {
     CrudRouteRequest,
     ICrudDataType,
     ICrudRouteActionContext,
-    ICrudRouteContext,
     ICrudRouteSettings
 } from "../common-types";
 
@@ -15,33 +22,19 @@ export function checkIsDialog(snapshot: ActivatedRouteSnapshot): boolean {
         || (snapshot.data.settings as ICrudRouteSettings)?.mode === 'dialog';
 }
 
-export function getSnapshotPath(snapshot: ActivatedRouteSnapshot, additional: string = "", replace: boolean = false): string {
-    let path = "";
-    while (snapshot) {
-        const children = snapshot.parent ? snapshot.parent.children : [snapshot];
-        const subPath = children.reduce((res, child) => {
-            const segments = child.url.map(s => s.path);
-            if (child !== snapshot) return segments.join("/");
-            if (child === snapshot && (additional || replace)) {
-                if (replace) {
-                    segments.length = 0;
-                }
-                segments.push(additional);
-            }
-            const childPath = segments.join("/");
-            if (childPath && child.outlet && child.outlet !== "primary") {
-                return `${res}(${snapshot.outlet}:${childPath})`;
-            }
-            return `${res}${childPath}`;
-        }, "");
-        if (subPath) {
-            path = !path ? subPath : `${subPath}/${path}`;
-        }
-        snapshot = snapshot.parent;
-        additional = "";
-        replace = false;
+export function getSnapshotPath(snapshot: ActivatedRouteSnapshot, serializer: UrlSerializer,
+                                path: string | string[], replace: boolean = false): string {
+    const commands = (Array.isArray(path) ? path : path.split("/")).filter(s => !!s);
+    if (replace && snapshot.url.length > 0) {
+        commands.unshift(snapshot.url.map(() => "..").join("/"));
     }
-    return path;
+    const tree = createUrlTreeFromSnapshot(snapshot, commands);
+    console.log(commands, serializer.serialize(tree));
+    return serializer.serialize(tree);
+}
+
+export function getRoutePath(ctx: ICrudRouteActionContext, path: string | any[], replace: boolean = false): string {
+    return getSnapshotPath(ctx.snapshot, ctx.injector.get(UrlSerializer), path, replace);
 }
 
 export function defaultRouteMatcher(segments: UrlSegment[], group: UrlSegmentGroup, route: Route): UrlMatchResult {
@@ -77,14 +70,14 @@ export function getDataTransferType(dataType: string | ICrudDataType, primary: s
     return reqType;
 }
 
-export function getNavigateBackPath(context: ICrudRouteContext, endpoint: string): string {
+export function getNavigateBackPath(context: ICrudRouteActionContext): string {
     const settings = context.routeData.settings as ICrudRouteSettings;
     switch (settings.mode) {
         case 'dialog':
-            return getSnapshotPath(context.snapshot, "", true);
+            return getRoutePath(context, "", true);
         case 'inline':
             const id = context.entity?.id || context.entity?._id;
-            return getSnapshotPath(context.snapshot, !id ? "list" : `edit/${id}`, true);
+            return getRoutePath(context, !id ? "list" : `edit/${id}`, true);
     }
-    return getSnapshotPath(context.snapshot, endpoint, true);
+    return getRoutePath(context, context.endpoint, true);
 }

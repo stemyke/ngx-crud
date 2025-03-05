@@ -200,7 +200,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                             title: action.title,
                             icon,
                             status,
-                            action: () => this.callAction(action.id, item)
+                            action: (_, ev: MouseEvent) => this.callAction(action.id, item, ev)
                         };
                     }).filter(Boolean);
                     hasActions = hasActions && itemActions.length > 0;
@@ -224,7 +224,8 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                 );
                 await settings.itemsListed(this.context, this.injector);
                 this.generateButtons();
-                return data;
+
+                return {...data};
             };
         }, 10);
         this.updateSettings?.run();
@@ -240,7 +241,9 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             ObservableUtils.subscribe(
                 {
                     subjects: [this.route.data, this.route.params, ...(subjects ?? [])],
-                    cb: () => this.table?.refresh()
+                    cb: () => {
+                        this.table?.refresh();
+                    }
                 },
                 {
                     subjects: [this.events.languageChanged, this.auth.userChanged],
@@ -278,7 +281,8 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
         });
     }
 
-    async callAction(setting: CrudButtonActionSetting, item?: any): Promise<IAsyncMessage> {
+    async callAction(setting: CrudButtonActionSetting, item?: any, ev?: MouseEvent): Promise<IAsyncMessage> {
+        ev?.stopPropagation();
         const action = !setting
             ? null
             : (ObjectUtils.isFunction(setting) ? setting(this.getActionContext(), this.injector, item) : setting);
@@ -326,15 +330,19 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
         }
     }
 
-    deleteItem(item: any): void {
+    deleteItem(entity: any): void {
         const id = this.settings.id;
         this.dialog.confirm({
             message: `message.delete-${id}.confirm`,
-            messageContext: item,
+            messageContext: entity,
             method: async () => {
                 try {
                     const path = this.settings.getRequestPath(
-                        this.getActionContext(), this.settings.primaryRequest, "delete"
+                        {
+                            ...this.getActionContext(),
+                            entity
+                        },
+                        this.settings.primaryRequest, "delete"
                     );
                     await this.api.delete(path);
                     this.table?.refresh();
@@ -360,6 +368,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
     }
 
     protected updateSelected(): void {
+        console.log(`Update selected`, this.endpoint);
         if (!this.wrapper || !this.settings) {
             this.selectedItem = null;
             return;
@@ -371,6 +380,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             return settings && settings.getDataType === dataType;
         });
         const id = !state ? null : state.params.id || null;
+        console.log(id, this.data?.items);
         this.selectedItem = !state || !this.data
             ? null
             : this.data.items.find(t => t.id === id || t._id === id);

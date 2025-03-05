@@ -120,7 +120,7 @@ export type GetRequestPath = (
     context: ICrudRouteActionContext, reqType: CrudRouteRequest, method: CrudRouteMethod, importExport?: string
 ) => string;
 
-export type GetBackPath = (context: ICrudRouteContext, endpoint: string) => string;
+export type GetBackPath = (context: ICrudRouteActionContext) => string;
 
 export type GetDataType = (context: ICrudRouteContext, injector: Injector) => string;
 

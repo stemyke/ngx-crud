@@ -21,11 +21,13 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     saveButton: string;
     data: Record<string, any>;
     files: any;
+    loading: boolean;
 
     formGroupModel: DynamicFormGroupModel;
     formModel: DynamicFormModel;
     formGroup: FormGroup;
     formChanged: boolean;
+    formUpdated: boolean;
 
     protected formSubscription: Subscription;
 
@@ -33,6 +35,9 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         super.ngOnInit();
         this.data = {};
         this.files = {};
+        this.loading = false;
+        this.formChanged = false;
+        this.formUpdated = false;
         this.subscription = ObservableUtils.multiSubscription(
             this.subscription,
             this.events.languageChanged.subscribe(() => this.initForm())
@@ -111,7 +116,8 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                 ? await this.api.patch(path, data)
                 : await this.api.post(path, data);
             await this.settings.updateAdditionalResources(additionalResources, this.injector, response, this.context);
-            // Form not changed anymore
+            // Form not changed anymore but updated
+            this.formUpdated = this.formChanged;
             this.formChanged = false;
             // Update context
             this.data = response;
@@ -148,7 +154,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
             const ctx = await this.forms.serialize(this.formModel, this.formGroup);
             const result = await new Promise<boolean>(resolve => {
                 this.dialog.confirm({
-                    message: 'message.leave-without-changes.confirm',
+                    message: `message.leave-without-changes.confirm`,
                     messageContext: ctx,
                     method: async () => {
                         resolve(true);
@@ -167,6 +173,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     }
 
     protected refreshList(tree: ICrudTreeItem[]): void {
+        if (!this.formUpdated) return;
         for (let item of tree) {
             const comp = item.component as ICrudComponent;
             if (!comp?.getActionContext) continue;
@@ -174,6 +181,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
             if (!context.dataSource) continue;
             context.dataSource.refresh();
         }
+        this.formUpdated = false;
     }
 
     protected async navigateBack(): Promise<void> {
@@ -182,7 +190,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
             this.refreshList(tree);
             return;
         }
-        const path = this.settings.getBackPath(this.context, this.endpoint);
+        const path = this.settings.getBackPath(this.getActionContext());
         await this.router.navigateByUrl(path);
     }
 
@@ -210,6 +218,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
             ObservableUtils.subscribe({
                 subjects: [this.route.data, this.route.params],
                 cb: async () => {
+                    this.loading = true;
                     this.id = this.snapshot.params.id;
                     this.saveButton = selectBtnProp(this.settings.saveButton, this.getActionContext(), "save", "save");
                     try {
@@ -245,6 +254,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                     }
                     this.forms.patchGroup(this.data, this.formModel, this.formGroup);
                     this.formChanged = false;
+                    this.loading = false;
                     this.cdr.detectChanges();
                 }
             })
