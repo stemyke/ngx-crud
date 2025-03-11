@@ -225,10 +225,8 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                         const path = this.settings.getRequestPath(
                             this.getActionContext(), this.settings.primaryRequest, "request"
                         );
-                        // Get basic data
-                        const data = await this.api.get(path);
-                        delete data._id;
                         // Customize data
+                        const data = await this.api.get(path);
                         this.data = await this.settings.customizeFormData(data, this.injector, this.formModel, this.context) ?? data;
                         this.context = Object.assign(
                             {},
