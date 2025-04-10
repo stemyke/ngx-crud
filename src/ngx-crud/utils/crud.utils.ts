@@ -144,29 +144,29 @@ export function createCrudRoute(id: string,
 export function createCrudRoutes(id: string, endpoint: string, dataType: string | ICrudDataType | GetDataType, options?: ICrudRouteOptions): IRoute[] {
     options = options || {};
     const params = Object.entries(options.defaultParams || {});
-    const mode = options.mode || 'routes';
-    const isInline = mode !== 'routes';
+    const mode = options.mode || "routes";
+    const isInline = mode !== "routes";
     const listWrapper = isInline || options.listChildren
         ? CrudChildWrapperComponent : CrudWrapperComponent;
     const formWrapper = options.formChildren
         ? CrudChildWrapperComponent : CrudWrapperComponent;
-    const listOutlet = isInline ? 'primary' : options.outlet;
-    const formOutlet = isInline ? options.outlet || 'after' : options.outlet;
-    const path = endpoint.includes(':') ? endpoint : id;
-    const subPath = mode !== 'routes' ? `` : `${path}/`;
+    const listOutlet = isInline ? "primary" : options.outlet;
+    const formOutlet = isInline ? options.outlet || "after" : options.outlet;
+    const path = endpoint.includes(":") ? endpoint : id;
+    const subPath = mode !== "routes" ? `` : `${path}/`;
     const getDataType = ObjectUtils.isFunction(dataType)
         ? dataType as GetDataType
         : (ctx => getDataTransferType(dataType, ctx.primaryRequest)) as GetDataType
-    const listRoutes: Route[] = mode === 'dialog'
+    const listRoutes: Route[] = mode === "dialog"
         ? [
             {
-                path: '',
-                pathMatch: 'full',
-                redirectTo: 'list',
+                path: "",
+                pathMatch: "full",
+                redirectTo: "list",
                 outlet: formOutlet
             },
             {
-                path: 'list',
+                path: "list",
                 outlet: formOutlet,
                 component: EmptyComponent,
                 data: {
@@ -175,9 +175,9 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
             }
         ] : [
             {
-                path: '',
-                pathMatch: 'full',
-                redirectTo: 'add',
+                path: "",
+                pathMatch: "full",
+                redirectTo: "add",
                 outlet: formOutlet
             }
         ];
@@ -187,7 +187,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
             `${subPath}add`,
             createCrudSettings(id, endpoint, options.addRequest || "add", getDataType, options),
             {
-                mode: 'none'
+                mode: "none"
             },
             options.formChildren,
             options.addComponent || formWrapper,
@@ -198,7 +198,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
             `${subPath}edit/:id`,
             createCrudSettings(id, endpoint, options.editRequest || "edit", getDataType, options),
             {
-                mode: 'none'
+                mode: "none"
             },
             options.formChildren,
             options.editComponent || formWrapper,
@@ -217,7 +217,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
             {
                 name: options.menu !== false && !defaultPath.includes(":") ? `menu.${id}` : null,
                 icon: options.icon,
-                actionOutlet: formOutlet,
+                actionOutlet: isInline ? formOutlet : "primary",
                 mode,
                 defaultPath
             },
