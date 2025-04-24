@@ -199,10 +199,12 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         if (!settings) return;
         const value = Object.assign({}, this.data, this.formGroup?.value || {});
         const dataType = this.settings.getDataType(this.context, this.injector);
+        console.log(dataType, this.context, settings);
         this.formGroupModel = await this.forms.getFormGroupModelForSchema(dataType, {
             labelPrefix: settings.id,
             customizer: settings.customizeFormModel
         });
+        console.log(this.formGroupModel);
         this.formModel = this.formGroupModel.group;
         this.formGroup = this.forms.createFormGroup(this.formModel, {updateOn: "blur"});
         this.forms.patchGroup(value, this.formModel, this.formGroup);
@@ -225,6 +227,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                         const path = this.settings.getRequestPath(
                             this.getActionContext(), this.settings.primaryRequest, "request"
                         );
+                        console.log(path);
                         // Customize data
                         const data = await this.api.get(path);
                         this.data = await this.settings.customizeFormData(data, this.injector, this.formModel, this.context) ?? data;

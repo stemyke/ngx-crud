@@ -1,5 +1,5 @@
 import {InjectionToken, Injector, Type} from "@angular/core";
-import {ActivatedRouteSnapshot, Data, Params} from "@angular/router";
+import {ActivatedRouteSnapshot, Data, Params, UrlTree} from "@angular/router";
 import {Subject} from "rxjs";
 import {
     IAsyncMessage,
@@ -19,12 +19,21 @@ import {
 } from "@stemy/ngx-dynamic-form";
 
 // --- CRUD ---
+export interface ICrudRouteLink {
+    title: string;
+    active: boolean;
+    path: UrlTree;
+    data: Data;
+}
+
 export interface ICrudOutletState {
     dialog?: boolean;
     isActive?: boolean;
     data?: Data;
     params?: Params;
     snapshot?: ActivatedRouteSnapshot;
+    page?: string;
+    links?: ICrudRouteLink[];
 }
 
 export interface ICrudTreeItem {
@@ -36,6 +45,7 @@ export interface ICrudDataType {
     list?: string;
     add?: string;
     edit?: string;
+    view?: string;
     prefixed?: string;
 }
 
@@ -136,6 +146,10 @@ export interface ICrudRouteData {
 export interface ICrudRouteOptionsBase {
     // Setting of crud display mode
     mode?: CrudDisplayMode;
+    // Whether to display tab buttons for child route components
+    useTabs?: boolean;
+    // Whether to hide the main component when a child route is activated
+    hideMain?: boolean;
     // Add button
     addButton?: CrudButtonPropSetting;
     addAction?: CrudButtonFunc;
@@ -212,19 +226,25 @@ export interface ICrudRouteOptions extends ICrudRouteOptionsBase {
     addRequest?: CrudRouteRequest;
     editComponent?: Type<any>;
     editRequest?: CrudRouteRequest;
+    viewComponent?: Type<any>;
+    viewRequest?: CrudRouteRequest;
     menu?: boolean;
     icon?: string;
     defaultParams?: Record<string, any>;
     outlet?: string;
     listChildren?: IRoute[];
+    addChildren?: IRoute[];
+    editChildren?: IRoute[];
+    viewChildren?: IRoute[];
     formChildren?: IRoute[];
 }
 
 export interface ICrudRouteSettings extends Required<ICrudRouteOptionsBase> {
-    getDataType: GetDataType;
-    primaryRequest: CrudRouteRequest;
-    endpoint: string;
     id: string;
+    endpoint: string;
+    primaryRequest: CrudRouteRequest;
+    getDataType: GetDataType;
+    component: Type<any>;
 }
 
 export interface ICrudComponent {
@@ -270,6 +290,7 @@ export interface ICrudComponentTypes {
     list?: Type<any>;
     add?: Type<any>;
     edit?: Type<any>;
+    view?: Type<any>;
     cell?: Type<any>;
 }
 

@@ -63,6 +63,7 @@ export class NgxCrudModule {
                     list: CrudListComponent,
                     add: CrudFormComponent,
                     edit: CrudFormComponent,
+                    view: CrudFormComponent,
                     cell: CrudCellComponent,
                 } as ICrudComponentTypes, config?.componentTypes || {})
             },

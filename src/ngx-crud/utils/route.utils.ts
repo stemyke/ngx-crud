@@ -5,7 +5,7 @@ import {
     UrlMatchResult,
     UrlSegment,
     UrlSegmentGroup,
-    UrlSerializer
+    UrlSerializer, UrlTree
 } from "@angular/router";
 import {ObjectUtils, StringUtils} from "@stemy/ngx-utils";
 
@@ -22,14 +22,17 @@ export function checkIsDialog(snapshot: ActivatedRouteSnapshot): boolean {
         || (snapshot.data.settings as ICrudRouteSettings)?.mode === 'dialog';
 }
 
-export function getSnapshotPath(snapshot: ActivatedRouteSnapshot, serializer: UrlSerializer,
-                                path: string | string[], replace: boolean = false): string {
+export function getSnapshotTree(snapshot: ActivatedRouteSnapshot, path: string | any[], replace: boolean = false): UrlTree {
     const commands = (Array.isArray(path) ? path : path.split("/")).filter(s => !!s);
     if (replace && snapshot.url.length > 0) {
         commands.unshift(snapshot.url.map(() => "..").join("/"));
     }
-    const tree = createUrlTreeFromSnapshot(snapshot, commands);
-    return serializer.serialize(tree);
+    return createUrlTreeFromSnapshot(snapshot, commands);
+}
+
+export function getSnapshotPath(snapshot: ActivatedRouteSnapshot, serializer: UrlSerializer,
+                                path: string | any[], replace: boolean = false): string {
+    return serializer.serialize(getSnapshotTree(snapshot, path, replace));
 }
 
 export function getRoutePath(ctx: ICrudRouteActionContext, path: string | any[], replace: boolean = false): string {

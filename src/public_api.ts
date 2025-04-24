@@ -1,4 +1,5 @@
 export {
+    ICrudRouteLink,
     ICrudOutletState,
     ICrudTreeItem,
     ICrudDataType,
@@ -56,6 +57,6 @@ export {CrudService} from "./ngx-crud/services/crud.service";
 
 export {defaultCrudAction, selectBtnProp, createCrudSettings, createCrudRoute, createCrudRoutes} from "./ngx-crud/utils/crud.utils";
 export {customizeFormData, customizeSerializedData, updateAdditionalResources} from "./ngx-crud/utils/crud-factory.utils";
-export {getSnapshotPath, getRoutePath, defaultRouteMatcher, getRequestPath, getDataTransferType, getNavigateBackPath} from "./ngx-crud/utils/route.utils";
+export {getSnapshotTree, getSnapshotPath, getRoutePath, defaultRouteMatcher, getRequestPath, getDataTransferType, getNavigateBackPath} from "./ngx-crud/utils/route.utils";
 
 export {NgxCrudModule} from "./ngx-crud/ngx-crud.module";

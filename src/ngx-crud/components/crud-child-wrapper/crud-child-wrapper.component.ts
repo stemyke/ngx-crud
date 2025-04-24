@@ -1,10 +1,10 @@
 import {AfterViewInit, Component, ViewChild, ViewEncapsulation} from "@angular/core";
 import {RouterOutlet} from "@angular/router";
-import {ObservableUtils} from "@stemy/ngx-utils";
+import {IRoute, ObservableUtils} from "@stemy/ngx-utils";
 import {Subscription} from "rxjs";
 
-import {ICrudOutletState} from "../../common-types";
-import {checkIsDialog, getSnapshotPath} from "../../utils/route.utils";
+import {ICrudOutletState, ICrudRouteLink} from "../../common-types";
+import {checkIsDialog, getSnapshotPath, getSnapshotTree} from "../../utils/route.utils";
 import {CrudWrapperComponent, defaultOutletState} from "../base/crud-wrapper.component";
 
 @Component({
@@ -30,6 +30,10 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
     protected afterSub: Subscription;
 
     protected closeTarget: EventTarget;
+
+    get showMain(): boolean {
+        return !this.settings || !this.settings.hideMain || (!this.beforeState.value.isActive && !this.afterState.value.isActive);
+    }
 
     ngAfterViewInit() {
         this.subscription = ObservableUtils.multiSubscription(
@@ -84,16 +88,59 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
     }
 
     getState(outlet: RouterOutlet): ICrudOutletState {
-        if (!outlet?.isActivated) {
-            return defaultOutletState;
+
+        if (!outlet) return defaultOutletState;
+
+        const settings = this.settings;
+        const snapshot = this.route.snapshot;
+        const children = (this.data?.children || []) as IRoute[];
+        const links = settings?.useTabs ? children.filter(r => r.outlet === outlet.name && r.data?.name).map(r => {
+            return {
+                title: r.data.name,
+                active: false,
+                path: getSnapshotTree(snapshot, [{outlets: {[outlet.name]: r.path}}]),
+                data: r.data
+            } as ICrudRouteLink;
+        }) : [];
+
+        if (!outlet.isActivated) {
+            if (links.length && settings.hideMain) {
+                links.unshift({
+                    title: 'menu.' + this.data?.id,
+                    active: true,
+                    path: getSnapshotTree(snapshot, []),
+                    data: this.data
+                });
+            }
+            return {
+                ...defaultOutletState,
+                links
+            }
         }
-        const {data, params} = outlet.activatedRoute.snapshot;
+
+        const activatedSnapshot = outlet.activatedRoute.snapshot;
+        const {data, params} = activatedSnapshot;
+
+        if (links.length && settings.hideMain) {
+            links.forEach(link => {
+                link.active = data.page === link.data.page;
+            });
+            links.unshift({
+                title: 'menu.' + this.data?.id,
+                active: false,
+                path: getSnapshotTree(activatedSnapshot, "", true),
+                data: this.data
+            });
+        }
+
         return {
             dialog: checkIsDialog(this.route.snapshot) && outlet.component && !outlet.activatedRouteData.empty,
             isActive: true,
             data: data || {},
             params: params || {},
-            snapshot: outlet.activatedRoute.snapshot
+            snapshot: outlet.activatedRoute.snapshot,
+            page: data?.page || "",
+            links
         };
     }
 

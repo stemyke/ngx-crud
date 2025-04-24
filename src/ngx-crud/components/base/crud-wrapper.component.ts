@@ -10,7 +10,9 @@ export const defaultOutletState = {
     isActive: false,
     data: {},
     params: {},
-    snapshot: null
+    snapshot: null,
+    page: "",
+    links: []
 } as ICrudOutletState;
 
 @Component({
@@ -49,7 +51,7 @@ export class CrudWrapperComponent implements OnInit, OnDestroy {
             this.data = data;
             this.settings = data.settings as ICrudRouteSettings;
             if (!this.settings) return;
-            this.componentType = this.crud.getComponentType(this.settings.primaryRequest);
+            this.componentType = this.settings.component || this.crud.getComponentType(this.settings.primaryRequest);
             if (!this.componentType) {
                 console.log(`Component not defined for: ${this.settings.primaryRequest}`);
             }

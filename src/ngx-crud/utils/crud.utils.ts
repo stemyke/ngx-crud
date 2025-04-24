@@ -14,11 +14,11 @@ import {
     ICrudRouteSettings,
     ICrudTreeItem
 } from "../common-types";
-import {getDataTransferType, getNavigateBackPath, getRequestPath, getRoutePath, getSnapshotPath} from "./route.utils";
+import {getDataTransferType, getNavigateBackPath, getRequestPath, getRoutePath} from "./route.utils";
 import {ContextResolverService} from "../services/context-resolver.service";
 
-import {CrudWrapperComponent} from "../components/base/crud-wrapper.component";
 import {EmptyComponent} from "../components/base/empty.component";
+import {CrudWrapperComponent} from "../components/base/crud-wrapper.component";
 import {CrudChildWrapperComponent} from "../components/crud-child-wrapper/crud-child-wrapper.component";
 import {CrudService} from "../services/crud.service";
 
@@ -64,14 +64,17 @@ export function selectBtnProp<T extends string>(prop: CrudButtonPropSetting<T>, 
 
 export function createCrudSettings(
     id: string, endpoint: string, primaryRequest: CrudRouteRequest,
-    getDataType: GetDataType, options?: ICrudRouteOptions
+    getDataType: GetDataType, options?: ICrudRouteOptions, component?: Type<any>
 ): ICrudRouteSettings {
     return {
         id,
         endpoint,
-        getDataType,
         primaryRequest,
+        getDataType,
+        component,
         mode: options?.mode || "routes",
+        useTabs: options?.useTabs || false,
+        hideMain: options?.hideMain || false,
         addButton: options?.addButton,
         addAction: options?.addAction || defaultCrudAction,
         viewButton: options?.viewButton || false,
@@ -119,17 +122,18 @@ export function createCrudRoute(id: string,
                                 path: string,
                                 settings: ICrudRouteSettings,
                                 data?: ICrudRouteData,
-                                children?: IRoute[],
-                                component?: Type<any>,
-                                outlet?: string): IRoute {
+                                children: IRoute[] = [],
+                                outlet: string = "primary"): IRoute {
     return {
         path,
-        component: component ?? CrudWrapperComponent,
+        component: children?.length > 0 ? CrudChildWrapperComponent : CrudWrapperComponent,
         canActivate: [AuthGuard],
         canDeactivate: [CrudService],
         data: {
             id,
+            page: id,
             guards: settings.guards || [],
+            children,
             settings,
             ...(data || {})
         },
@@ -146,10 +150,6 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
     const params = Object.entries(options.defaultParams || {});
     const mode = options.mode || "routes";
     const isInline = mode !== "routes";
-    const listWrapper = isInline || options.listChildren
-        ? CrudChildWrapperComponent : CrudWrapperComponent;
-    const formWrapper = options.formChildren
-        ? CrudChildWrapperComponent : CrudWrapperComponent;
     const listOutlet = isInline ? "primary" : options.outlet;
     const formOutlet = isInline ? options.outlet || "after" : options.outlet;
     const path = endpoint.includes(":") ? endpoint : id;
@@ -185,23 +185,40 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
         createCrudRoute(
             `add-${id}`,
             `${subPath}add`,
-            createCrudSettings(id, endpoint, options.addRequest || "add", getDataType, options),
+            createCrudSettings(id, endpoint, options.addRequest || "add", getDataType, options, options.addComponent),
             {
-                mode: "none"
+                mode: "none",
+                page: id,
             },
-            options.formChildren,
-            options.addComponent || formWrapper,
+            [
+                ...(options.addChildren || []),
+                ...(options.formChildren || []),
+            ],
             formOutlet
         ),
         createCrudRoute(
             `edit-${id}`,
             `${subPath}edit/:id`,
-            createCrudSettings(id, endpoint, options.editRequest || "edit", getDataType, options),
+            createCrudSettings(id, endpoint, options.editRequest || "edit", getDataType, options, options.editComponent),
             {
-                mode: "none"
+                mode: "none",
+                page: id,
             },
-            options.formChildren,
-            options.editComponent || formWrapper,
+            [
+                ...(options.editChildren || []),
+                ...(options.formChildren || []),
+            ],
+            formOutlet
+        ),
+        createCrudRoute(
+            `view-${id}`,
+            `${subPath}view/:id`,
+            createCrudSettings(id, endpoint, options.viewRequest || "edit", getDataType, options, options.viewComponent),
+            {
+                mode: "none",
+                page: id,
+            },
+            options.viewChildren || [],
             formOutlet
         )
     ];
@@ -213,7 +230,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
         createCrudRoute(
             id,
             path,
-            createCrudSettings(id, endpoint, "list", getDataType, options),
+            createCrudSettings(id, endpoint, "list", getDataType, options, options.listComponent),
             {
                 name: options.menu !== false && !defaultPath.includes(":") ? `menu.${id}` : null,
                 icon: options.icon,
@@ -225,8 +242,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
                 ...listRoutes,
                 ...formRoutes,
                 ...(options.listChildren || [])
-            ] : options.listChildren,
-            options.listComponent || listWrapper,
+            ] : (options.listChildren || []),
             listOutlet
         ),
         ...(isInline ? [] : formRoutes)

@@ -1,4 +1,12 @@
+<ng-template let-state="state" #childLinks>
+    <ul *ngIf="state?.links?.length" class="crud-child-links">
+        <li *ngFor="let link of state.links" [ngClass]="{active: link.active}">
+            <a [routerLink]="link.path">{{ link.title | translate }}</a>
+        </li>
+    </ul>
+</ng-template>
 <div class="crud-wrapper" [ngClass]="['mode-' + data.mode, (settings?.id || 'simple') + '-wrapper']">
+    <ng-container [ngTemplateOutlet]="childLinks" [ngTemplateOutletContext]="{state: beforeState.value}"></ng-container>
     <div class="child-wrapper before"
          [ngClass]="[beforeState.value.isActive ? '' : 'hidden', beforeState.value.dialog ? 'dialog' : '', 'mode-' + data.mode]"
          (mousedown)="beforeClose($event)"
@@ -14,8 +22,9 @@
         </div>
     </ng-template>
     <div class="main-wrapper" [ngClass]="['mode-' + data.mode]" *ngIf="settings; else simpleWrapper">
-        <ng-container [ngComponentOutlet]="componentType"></ng-container>
+        <ng-container [ngComponentOutlet]="componentType" *ngIf="showMain"></ng-container>
     </div>
+    <ng-container [ngTemplateOutlet]="childLinks" [ngTemplateOutletContext]="{state: afterState.value}"></ng-container>
     <div class="child-wrapper after"
          [ngClass]="[afterState.value.isActive ? '' : 'hidden', afterState.value.dialog ? 'dialog' : '', 'mode-' + data.mode]"
          (mousedown)="beforeClose($event)"
