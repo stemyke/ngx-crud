@@ -11,6 +11,7 @@ import {
     ICrudRouteActionContext,
     ICrudRouteData,
     ICrudRouteOptions,
+    ICrudRouteParams,
     ICrudRouteSettings,
     ICrudTreeItem
 } from "../common-types";
@@ -42,14 +43,7 @@ async function returnCb(data?: any): Promise<any> {
     return data;
 }
 
-function noopCb(): any {}
-
-function dragCb(): boolean {
-    return false;
-}
-
-function leaveCb(): boolean {
-    return false;
+function noopCb(): any {
 }
 
 function getNullFormComponent(): Type<DynamicFormControlComponent> {
@@ -64,7 +58,7 @@ export function selectBtnProp<T extends string>(prop: CrudButtonPropSetting<T>, 
 
 export function createCrudSettings(
     id: string, endpoint: string, primaryRequest: CrudRouteRequest,
-    getDataType: GetDataType, options?: ICrudRouteOptions, component?: Type<any>
+    getDataType: GetDataType, params?: ICrudRouteParams, component?: Type<any>
 ): ICrudRouteSettings {
     return {
         id,
@@ -72,49 +66,50 @@ export function createCrudSettings(
         primaryRequest,
         getDataType,
         component,
-        mode: options?.mode || "routes",
-        useTabs: options?.useTabs || false,
-        hideMain: options?.hideMain || false,
-        addButton: options?.addButton,
-        addAction: options?.addAction || defaultCrudAction,
-        viewButton: options?.viewButton || false,
-        viewAction: options?.viewAction || defaultCrudAction,
-        editButton: options?.editButton,
-        editAction: options?.editAction || defaultCrudAction,
-        deleteButton: options?.deleteButton,
-        deleteAction: options?.deleteAction,
-        saveButton: options?.saveButton,
-        actionsTitle: options?.actionsTitle || "",
-        customActions: options?.customActions || [],
-        customButtons: options?.customButtons || [],
-        labelPrefix: options?.labelPrefix || "",
-        filter: options?.filter || false,
+        mode: params?.mode || "routes",
+        useTabs: params?.useTabs || false,
+        hideMain: params?.hideMain || false,
+        addButton: params?.addButton,
+        addAction: params?.addAction || defaultCrudAction,
+        viewButton: params?.viewButton || false,
+        viewAction: params?.viewAction || defaultCrudAction,
+        editButton: params?.editButton,
+        editAction: params?.editAction || defaultCrudAction,
+        deleteButton: params?.deleteButton,
+        deleteAction: params?.deleteAction,
+        saveButton: params?.saveButton,
+        actionsTitle: params?.actionsTitle || "",
+        customActions: params?.customActions || [],
+        customButtons: params?.customButtons || [],
+        labelPrefix: params?.labelPrefix || "",
+        filter: params?.filter || false,
         // In case if filter is enabled it should also be enabled explicitly to display both,
         // if not then it should be explicitly disabled to make it disappear
-        query: options?.filter ? options.query || false : options?.query !== false,
-        guards: options?.guards || [],
-        onLeave: options?.onLeave || defaultLeaveFunction,
-        importExports: primaryRequest == "edit" ? (options?.importExports || []) : [],
-        loadContext: options?.loadContext || returnCb,
-        formValueChange: options?.formValueChange || noopCb,
-        getFormComponent: options?.getFormComponent || getNullFormComponent,
-        rowAction: options?.rowAction || null,
-        formContext: options?.formContext || null,
-        getRequestPath: options?.getRequestPath || getRequestPath,
-        getBackPath: options?.getBackPath || getNavigateBackPath,
-        customizeListColumn: options?.customizeListColumn || returnCb,
-        customizeFormModel: options?.customizeFormModel,
-        customizeFormData: options?.customizeFormData || returnCb,
-        customizeSerializedData: options?.customizeSerializedData || returnCb,
-        updateAdditionalResources: options?.updateAdditionalResources || noopCb,
-        listDependencies: options?.listDependencies || [],
-        itemsListed: options?.itemsListed || noopCb,
-        itemsPerPage: options?.itemsPerPage || 25,
-        queryForm: options?.queryForm || false,
-        displayMeta: options?.displayMeta || false,
-        onDragStart: options?.onDragStart || dragCb,
-        onDragEnter: options?.onDragEnter || dragCb,
-        onDrop: options?.onDrop || dragCb,
+        query: params?.filter ? params.query || false : params?.query !== false,
+        guards: params?.guards || [],
+        onLeave: params?.onLeave || defaultLeaveFunction,
+        importExports: primaryRequest == "edit" ? (params?.importExports || []) : [],
+        loadContext: params?.loadContext || returnCb,
+        getFormComponent: params?.getFormComponent || getNullFormComponent,
+        rowAction: params?.rowAction || null,
+        formContext: params?.formContext || null,
+        getRequestPath: params?.getRequestPath || getRequestPath,
+        getBackPath: params?.getBackPath || getNavigateBackPath,
+        customizeListColumn: params?.customizeListColumn || returnCb,
+        customizeFormModel: params?.customizeFormModel,
+        customizeFormData: params?.customizeFormData || returnCb,
+        customizeSerializedData: params?.customizeSerializedData || returnCb,
+        updateAdditionalResources: params?.updateAdditionalResources || noopCb,
+        listDependencies: params?.listDependencies || [],
+        itemsListed: params?.itemsListed || noopCb,
+        itemsPerPage: params?.itemsPerPage || 25,
+        orderBy: params?.orderBy || "",
+        orderDescending: params?.orderDescending || false,
+        queryForm: params?.queryForm || false,
+        displayMeta: params?.displayMeta || false,
+        onDragStart: params?.onDragStart,
+        onDragEnter: params?.onDragEnter,
+        onDrop: params?.onDrop,
     };
 }
 

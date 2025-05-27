@@ -143,7 +143,7 @@ export interface ICrudRouteData {
     [key: string]: any;
 }
 
-export interface ICrudRouteOptionsBase {
+export interface ICrudRouteParams {
     // Setting of crud display mode
     mode?: CrudDisplayMode;
     // Whether to display tab buttons for child route components
@@ -180,8 +180,6 @@ export interface ICrudRouteOptionsBase {
     importExports?: string[];
     // Loads an additional context for the route
     loadContext?: (context: ICrudRouteContext, injector: Injector) => Promise<ICrudRouteContext>;
-    // Called when form value changes
-    formValueChange?: (ev: IDynamicFormEvent, injector: Injector) => void;
     // This can be used to define custom components for each model
     getFormComponent?: GetFormControlComponentType;
     // Run this action when the whole row is clicked
@@ -208,6 +206,10 @@ export interface ICrudRouteOptionsBase {
     itemsListed?: (context: ICrudRouteContext, injector: Injector) => Promise<void>;
     // How many items should be listed
     itemsPerPage?: number;
+    // Default order column
+    orderBy?: string;
+    // Default order direction
+    orderDescending?: boolean;
     // Displays an extra form based on the specified JSON schema in list component that helps in complex query
     queryForm?: boolean;
     // Sets if list metadata should be displayed
@@ -220,7 +222,7 @@ export interface ICrudRouteOptionsBase {
     onDrop?: CrudDragHandler<void>;
 }
 
-export interface ICrudRouteOptions extends ICrudRouteOptionsBase {
+export interface ICrudRouteOptions extends ICrudRouteParams {
     listComponent?: Type<any>;
     addComponent?: Type<any>;
     addRequest?: CrudRouteRequest;
@@ -239,7 +241,7 @@ export interface ICrudRouteOptions extends ICrudRouteOptionsBase {
     formChildren?: IRoute[];
 }
 
-export interface ICrudRouteSettings extends Required<ICrudRouteOptionsBase> {
+export interface ICrudRouteSettings extends Required<ICrudRouteParams> {
     id: string;
     endpoint: string;
     primaryRequest: CrudRouteRequest;

@@ -27,7 +27,7 @@ export {
     GetBackPath,
     GetDataType,
     ICrudRouteData,
-    ICrudRouteOptionsBase,
+    ICrudRouteParams,
     ICrudRouteOptions,
     ICrudRouteSettings,
     ICrudList,

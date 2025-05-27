@@ -24,7 +24,7 @@ import {BaseCrudComponent} from "../base/base-crud.component";
     selector: "crud-list",
     templateUrl: "./crud-list.component.html"
 })
-export class CrudListComponent extends BaseCrudComponent implements OnInit, AfterViewInit, OnChanges, ICrudList {
+export class CrudListComponent extends BaseCrudComponent implements OnChanges, ICrudList {
 
     dataLoader: TableDataLoader;
     queryModel: DynamicFormModel;
@@ -57,25 +57,30 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
             items: [],
             meta: {}
         };
-        this.dragStartFn = (ev) => {
+        this.dragStartFn = !this.settings.onDragStart ? null : (ev) => {
             return this.settings.onDragStart(ev, this.getActionContext(), this.injector);
         };
-        this.dragEnterFn = (ev) => {
+        this.dragEnterFn = !this.settings.onDragEnter ? null : (ev) => {
             return this.settings.onDragEnter(ev, this.getActionContext(), this.injector);
         };
-        this.dropFn = (ev) => {
+        this.dropFn = !this.settings.onDrop ? null : (ev) => {
             this.settings.onDrop(ev, this.getActionContext(), this.injector);
         };
+        const dependencies = this.settings.listDependencies;
+        const subjects = ObjectUtils.isArray(dependencies)
+            ? dependencies
+            : (ObjectUtils.isFunction(dependencies) ? dependencies(this.injector) : []);
         this.updateSettings = TimerUtils.createTimeout(async () => {
             const settings = this.settings;
             if (!settings) return;
+
             // --- Update query models ---
             const requestType = settings.getDataType(this.context, this.injector);
             this.queryModel = settings.queryForm ? await this.forms.getFormModelForSchema(requestType) : null;
             this.queryGroup = this.queryModel ? this.forms.createFormGroup(this.queryModel, {updateOn: "blur"}) : null;
             this.schema = await this.openApi.getSchema(requestType);
             if (!this.schema) {
-                console.log(`Schema by name '${requestType}' not found`);
+                console.log(`Schema by name "${requestType}" not found`);
                 return;
             }
             // --- Check if we can add a new entity ---
@@ -227,15 +232,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
 
                 return {...data};
             };
-        }, 10);
-        this.updateSettings?.run();
-    }
-
-    ngAfterViewInit(): void {
-        const dependencies = this.settings.listDependencies;
-        const subjects = ObjectUtils.isArray(dependencies)
-            ? dependencies
-            : (ObjectUtils.isFunction(dependencies) ? dependencies(this.injector) : []);
+        }, 50);
         this.subscription = ObservableUtils.multiSubscription(
             this.subscription,
             ObservableUtils.subscribe(
@@ -261,6 +258,11 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                 }
             )
         );
+    }
+
+    ngOnDestroy() {
+        super.ngOnDestroy();
+        this.updateSettings?.clear();
     }
 
     ngOnChanges(): void {
@@ -310,7 +312,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnInit, Afte
                 default:
                     const custom = this.settings.customActions.find(t => t.id == action);
                     if (!custom || !ObjectUtils.isFunction(custom.action)) {
-                        console.error(`Custom action '${custom.id} ${action}' is not a function`);
+                        console.error(`Custom action "${custom.id} ${action}" is not a function`);
                         return null;
                     }
                     message = await custom.action(actionCtx, item, custom.id);
