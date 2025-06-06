@@ -1,4 +1,14 @@
-import {ChangeDetectorRef, Component, Inject, Input, OnChanges, OnDestroy, OnInit, TemplateRef} from "@angular/core";
+import {
+    ChangeDetectorRef,
+    Component,
+    Inject,
+    Input,
+    OnChanges,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    ViewEncapsulation
+} from "@angular/core";
 import {Subscription} from "rxjs";
 import {
     GlobalTemplateService,
@@ -15,7 +25,8 @@ import {ICrudList} from "../../common-types";
     standalone: false,
     selector: "base-crud-cell",
     styleUrls: ["./crud-cell.component.scss"],
-    templateUrl: "./crud-cell.component.html"
+    templateUrl: "./crud-cell.component.html",
+    encapsulation: ViewEncapsulation.None
 })
 export class CrudCellComponent implements OnInit, OnChanges, OnDestroy {
 

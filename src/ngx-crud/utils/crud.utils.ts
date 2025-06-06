@@ -1,7 +1,7 @@
 import {Type} from "@angular/core";
 import {Route, Router} from "@angular/router";
 import {AuthGuard, IRoute, ObjectUtils} from "@stemy/ngx-utils";
-import {DynamicFormControlComponent} from "@stemy/ngx-dynamic-form";
+import {} from "@stemy/ngx-dynamic-form";
 
 import {
     CrudButtonPropSetting,
@@ -46,10 +46,6 @@ async function returnCb(data?: any): Promise<any> {
 function noopCb(): any {
 }
 
-function getNullFormComponent(): Type<DynamicFormControlComponent> {
-    return null;
-}
-
 export function selectBtnProp<T extends string>(prop: CrudButtonPropSetting<T>, ctx: ICrudRouteActionContext, action: string, value: T, item?: any): T {
     prop = ObjectUtils.isFunction(prop) ? prop(ctx, item, action) : prop;
     return ObjectUtils.isString(prop) && prop
@@ -90,13 +86,12 @@ export function createCrudSettings(
         onLeave: params?.onLeave || defaultLeaveFunction,
         importExports: primaryRequest == "edit" ? (params?.importExports || []) : [],
         loadContext: params?.loadContext || returnCb,
-        getFormComponent: params?.getFormComponent || getNullFormComponent,
         rowAction: params?.rowAction || null,
         formContext: params?.formContext || null,
         getRequestPath: params?.getRequestPath || getRequestPath,
         getBackPath: params?.getBackPath || getNavigateBackPath,
         customizeListColumn: params?.customizeListColumn || returnCb,
-        customizeFormModel: params?.customizeFormModel,
+        customizeFormField: params?.customizeFormField,
         customizeFormData: params?.customizeFormData || returnCb,
         customizeSerializedData: params?.customizeSerializedData || returnCb,
         updateAdditionalResources: params?.updateAdditionalResources || noopCb,

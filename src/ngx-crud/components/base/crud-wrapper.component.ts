@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit, Type} from "@angular/core";
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, Type, ViewEncapsulation} from "@angular/core";
 import {ActivatedRoute, Data, Router, UrlSerializer} from "@angular/router";
 import {BehaviorSubject, Subscription} from "rxjs";
 
@@ -22,6 +22,7 @@ export const defaultOutletState = {
             <ng-container [ngComponentOutlet]="componentType"></ng-container>
         </div>
     `,
+    encapsulation: ViewEncapsulation.None,
     selector: "crud-wrapper"
 })
 export class CrudWrapperComponent implements OnInit, OnDestroy {

@@ -12,10 +12,8 @@ import {
     RouteValidator
 } from "@stemy/ngx-utils";
 import {
-    DynamicFormModel,
-    FormModelCustomizer,
-    GetFormControlComponentType,
-    IDynamicFormEvent
+    FormFieldConfig,
+    FormFieldCustomizer
 } from "@stemy/ngx-dynamic-form";
 
 // --- CRUD ---
@@ -93,7 +91,7 @@ export type CrudButtonPropSetting<T = string> = boolean | T | CrudButtonCheckFun
 
 export type CrudButtonActionSetting = string | ((context: ICrudRouteActionContext, injector: Injector, item?: any) => string);
 
-export type CrudDataCustomizerFunc = (data: any, injector: Injector, model: DynamicFormModel, context: ICrudRouteContext) => Promise<any>;
+export type CrudDataCustomizerFunc = (data: any, injector: Injector, field: FormFieldConfig, context: ICrudRouteContext) => Promise<any>;
 
 export type CrudColumnCustomizerFunc = (column: ICrudListColumn, injector: Injector, property: IOpenApiSchemaProperty, params: Params, context: ICrudRouteContext)
     => Promise<ICrudListColumn | ICrudListColumn[]>;
@@ -180,8 +178,6 @@ export interface ICrudRouteParams {
     importExports?: string[];
     // Loads an additional context for the route
     loadContext?: (context: ICrudRouteContext, injector: Injector) => Promise<ICrudRouteContext>;
-    // This can be used to define custom components for each model
-    getFormComponent?: GetFormControlComponentType;
     // Run this action when the whole row is clicked
     rowAction?: CrudButtonActionSetting;
     // Additional context to be sent for admin user when saving an entity
@@ -192,8 +188,8 @@ export interface ICrudRouteParams {
     getBackPath?: GetBackPath;
     // Customize list columns, if it returns null/undefined it will be removed
     customizeListColumn?: CrudColumnCustomizerFunc;
-    // Customize the form model generated based on swagger schema
-    customizeFormModel?: FormModelCustomizer;
+    // Customize the form fields generated based on swagger schema
+    customizeFormField?: FormFieldCustomizer;
     // Customize the DTO response to fit the customized form model
     customizeFormData?: CrudDataCustomizerFunc;
     // Customize the form"s serialized data to fit the DTO
@@ -264,7 +260,7 @@ export interface ICrudList extends ICrudComponent {
 export interface IFormDataCustomizer {
     customizeFormData(
         data: any,
-        model: DynamicFormModel,
+        field: FormFieldConfig,
         context: ICrudRouteContext
     ): Promise<void>;
 }
@@ -273,7 +269,7 @@ export interface ISerializedDataCustomizer {
     customizeSerializedData(
         target: any,
         data: any,
-        model: DynamicFormModel,
+        field: FormFieldConfig,
         context: ICrudRouteContext
     ): Promise<void>;
 }

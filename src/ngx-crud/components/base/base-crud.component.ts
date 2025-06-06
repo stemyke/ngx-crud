@@ -1,4 +1,13 @@
-import {ChangeDetectorRef, Component, Inject, Injector, OnDestroy, OnInit, Optional} from "@angular/core";
+import {
+    ChangeDetectorRef,
+    Component,
+    Inject,
+    Injector,
+    OnDestroy,
+    OnInit,
+    Optional,
+    ViewEncapsulation
+} from "@angular/core";
 import {Subscription} from "rxjs";
 import {
     API_SERVICE,
@@ -35,7 +44,8 @@ import {CrudWrapperComponent} from "./crud-wrapper.component";
 @Component({
     standalone: false,
     template: "",
-    selector: "crud-base-component"
+    selector: "crud-base-component",
+    encapsulation: ViewEncapsulation.None
 })
 export class BaseCrudComponent implements OnInit, OnDestroy {
 

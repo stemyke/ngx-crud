@@ -1,9 +1,12 @@
-<div [ngClass]="[snapshot.data.id + '-editor', 'editor-card', 'crud-card']" *ngIf="formGroup">
+<div [ngClass]="[snapshot.data.id + '-editor', 'editor-card', 'crud-card']">
     <div class="crud-card-header">
         <span class="title">{{ 'title.' + snapshot.data.id | translate:context }}</span>
     </div>
     <div class="crud-card-body">
-        This can't be implemented without a proper component library...
+        <dynamic-form #form
+                      [data]="data"
+                      [fields]="formFields">
+        </dynamic-form>
     </div>
     <div class="crud-card-footer">
 

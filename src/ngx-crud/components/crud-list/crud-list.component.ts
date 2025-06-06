@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnChanges, OnInit, Type, ViewChild} from "@angular/core";
+import {AfterViewInit, Component, OnChanges, OnInit, Type, ViewChild, ViewEncapsulation} from "@angular/core";
 import {FormGroup} from "@angular/forms";
 import {
     DynamicTableComponent,
@@ -14,7 +14,7 @@ import {
     TableFilterType,
     TimerUtils
 } from "@stemy/ngx-utils";
-import {DynamicFormModel, IDynamicFormEvent} from "@stemy/ngx-dynamic-form";
+import {FormFieldConfig} from "@stemy/ngx-dynamic-form";
 import {CrudButtonActionSetting, ICrudList, ICrudRouteActionContext, ICrudRouteSettings} from "../../common-types"
 import {selectBtnProp} from "../../utils/crud.utils";
 import {BaseCrudComponent} from "../base/base-crud.component";
@@ -22,13 +22,14 @@ import {BaseCrudComponent} from "../base/base-crud.component";
 @Component({
     standalone: false,
     selector: "crud-list",
-    templateUrl: "./crud-list.component.html"
+    templateUrl: "./crud-list.component.html",
+    encapsulation: ViewEncapsulation.None
 })
 export class CrudListComponent extends BaseCrudComponent implements OnChanges, ICrudList {
 
     dataLoader: TableDataLoader;
-    queryModel: DynamicFormModel;
-    queryGroup: FormGroup;
+    queryFieldGroup: FormFieldConfig;
+    queryData: Record<string, any>;
 
     tableColumns: ITableColumns;
     cellComponent: Type<any>;
@@ -76,8 +77,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
 
             // --- Update query models ---
             const requestType = settings.getDataType(this.context, this.injector);
-            this.queryModel = settings.queryForm ? await this.forms.getFormModelForSchema(requestType) : null;
-            this.queryGroup = this.queryModel ? this.forms.createFormGroup(this.queryModel, {updateOn: "blur"}) : null;
+            this.queryFieldGroup = settings.queryForm ? await this.forms.getFormFieldGroupForSchema(requestType) : null;
             this.schema = await this.openApi.getSchema(requestType);
             if (!this.schema) {
                 console.log(`Schema by name "${requestType}" not found`);
@@ -85,15 +85,12 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
             }
             // --- Check if we can add a new entity ---
             let canAdd = settings.addButton;
-            if (canAdd || this.queryGroup) {
+            if (canAdd || this.queryFieldGroup) {
                 try {
                     const path = settings.getRequestPath(
                         this.getActionContext(), settings.primaryRequest, "save"
                     );
-                    const data = await this.api.get(path);
-                    if (this.queryGroup) {
-                        this.forms.patchGroup(data, this.queryModel, this.queryGroup);
-                    }
+                    this.queryData = await this.api.get(path);
                 } catch (e) {
                     canAdd = false;
                 }
@@ -276,12 +273,12 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
     refresh(): void {
         this.table?.refresh();
     }
-
-    updateFilters(ev: IDynamicFormEvent): void {
-        this.forms.serializeForm(ev.form).then(filter => {
-            this.filterParams = filter;
-        });
-    }
+    //
+    // updateFilters(ev: IDynamicFormEvent): void {
+    //     this.forms.serializeForm(ev.form).then(filter => {
+    //         this.filterParams = filter;
+    //     });
+    // }
 
     async callAction(setting: CrudButtonActionSetting, item?: any, ev?: MouseEvent): Promise<IAsyncMessage> {
         ev?.stopPropagation();

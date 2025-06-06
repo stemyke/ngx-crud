@@ -3,9 +3,11 @@ import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {RouterModule} from "@angular/router";
 import {NgxUtilsModule} from "@stemy/ngx-utils";
+import {NgxDynamicFormModule} from "@stemy/ngx-dynamic-form";
 
 import {
-    ACTION_ICONS, ACTIONS_COLUMN_TITLE,
+    ACTION_ICONS,
+    ACTIONS_COLUMN_TITLE,
     COMPONENT_TYPES,
     CrudActionIcons,
     FILTER_PARAM_NAME,
@@ -30,6 +32,7 @@ import {CrudFormComponent} from "./components/crud-form/crud-form.component";
         CommonModule,
         FormsModule,
         NgxUtilsModule,
+        NgxDynamicFormModule,
         RouterModule
     ],
     exports: [
@@ -37,7 +40,8 @@ import {CrudFormComponent} from "./components/crud-form/crud-form.component";
         ...directives,
         ...pipes,
         FormsModule,
-        NgxUtilsModule
+        NgxUtilsModule,
+        NgxDynamicFormModule
     ],
     providers: [
         ...pipes

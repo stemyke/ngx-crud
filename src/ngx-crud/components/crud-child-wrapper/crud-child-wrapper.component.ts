@@ -9,10 +9,10 @@ import {CrudWrapperComponent, defaultOutletState} from "../base/crud-wrapper.com
 
 @Component({
     standalone: false,
-    encapsulation: ViewEncapsulation.None,
     templateUrl: "./crud-child-wrapper.component.html",
     styleUrls: ["./crud-child-wrapper.component.scss"],
     selector: "crud-child-wrapper",
+    encapsulation: ViewEncapsulation.None,
     providers: [
         {provide: CrudWrapperComponent, useExisting: CrudChildWrapperComponent}
     ]

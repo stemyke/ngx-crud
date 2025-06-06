@@ -1,19 +1,19 @@
-import {Component, OnInit} from "@angular/core";
-import {FormGroup} from "@angular/forms";
+import {Component, computed, linkedSignal, OnInit, viewChild, ViewEncapsulation} from "@angular/core";
 import {HttpErrorResponse} from "@angular/common/http";
-import {Subscription} from "rxjs";
-import {DynamicFormGroupModel, DynamicFormModel, IDynamicForm} from "@stemy/ngx-dynamic-form";
+import {FormFieldConfig, IDynamicForm} from "@stemy/ngx-dynamic-form";
 import {FileUtils, IAsyncMessage, ObjectUtils, ObservableUtils} from "@stemy/ngx-utils";
 
 import {ICrudComponent, ICrudRouteActionContext, ICrudTreeItem} from "../../common-types";
 import {selectBtnProp} from "../../utils/crud.utils";
 import {BaseCrudComponent} from "../base/base-crud.component";
+import {rxResource} from "@angular/core/rxjs-interop";
 
 @Component({
     standalone: false,
     selector: "crud-form",
     styleUrls: ["./crud-form.component.scss"],
     templateUrl: "./crud-form.component.html",
+    encapsulation: ViewEncapsulation.None
 })
 export class CrudFormComponent extends BaseCrudComponent implements OnInit {
 
@@ -23,36 +23,37 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     files: any;
     loading: boolean;
 
-    formGroupModel: DynamicFormGroupModel;
-    formModel: DynamicFormModel;
-    formGroup: FormGroup;
-    formChanged: boolean;
+    formFieldGroup: FormFieldConfig;
+    formFields: FormFieldConfig[];
     formUpdated: boolean;
 
-    protected formSubscription: Subscription;
+    protected readonly form = viewChild<IDynamicForm>("form");
+
+    protected readonly formGroup = computed(() => this.form()?.group());
+
+    protected readonly formValue = rxResource({
+        request: () => this.formGroup(),
+        loader: p => p.request.valueChanges
+    });
+
+    protected readonly formChanged = linkedSignal(() => {
+        return this.formValue.hasValue();
+    });
 
     ngOnInit() {
         super.ngOnInit();
         this.data = {};
         this.files = {};
         this.loading = false;
-        this.formChanged = false;
+        this.formChanged.set(false);
         this.formUpdated = false;
-        this.subscription = ObservableUtils.multiSubscription(
-            this.subscription,
-            this.events.languageChanged.subscribe(() => this.initForm())
-        )
         this.initForm().then(() => this.subToState());
     }
 
-    ngOnDestroy() {
-        super.ngOnDestroy();
-        this.formSubscription?.unsubscribe();
-    }
-
     reset() {
-        this.forms.patchGroup(this.data, this.formModel, this.formGroup);
-        this.formChanged = false;
+        // this.forms.patchGroup(this.data, this.formModel, this.formGroup);
+        this.form().reset();
+        this.formChanged.set(false);
     }
 
     importFile = async (ie: string): Promise<IAsyncMessage> => {
@@ -61,7 +62,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                 this.getActionContext(), this.settings.primaryRequest, "import", ie
             );
             const response = await this.api.post(path, {file: this.files[ie]});
-            this.forms.patchGroup(response, this.formModel, this.formGroup);
+            this.data = ObjectUtils.assign(this.data, response);
             return {
                 message: `message.import-${ie}.success`
             };
@@ -100,7 +101,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         }
         let additionalResources = {};
         try {
-            additionalResources = await this.settings.customizeSerializedData(data, this.injector, this.formModel, this.context);
+            additionalResources = await this.settings.customizeSerializedData(data, this.injector, this.formFieldGroup, this.context);
         } catch (error) {
             throw {
                 message: `${error}`
@@ -117,8 +118,8 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                 : await this.api.post(path, data);
             await this.settings.updateAdditionalResources(additionalResources, this.injector, response, this.context);
             // Form not changed anymore but updated
-            this.formUpdated = this.formChanged;
-            this.formChanged = false;
+            this.formUpdated = this.formChanged();
+            this.formChanged.set(false);
             // Update context
             this.data = response;
             this.context = Object.assign(
@@ -151,7 +152,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
 
     protected async onLeave(tree: ICrudTreeItem[]): Promise<boolean> {
         if (this.formChanged) {
-            const ctx = await this.forms.serialize(this.formModel, this.formGroup);
+            const ctx = await this.forms.serialize(this.formFields);
             const result = await new Promise<boolean>(resolve => {
                 this.dialog.confirm({
                     message: `message.leave-without-changes.confirm`,
@@ -196,22 +197,12 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
 
     protected async initForm() {
         const settings = this.settings;
-        if (!settings) return;
-        const value = Object.assign({}, this.data, this.formGroup?.value || {});
         const dataType = this.settings.getDataType(this.context, this.injector);
-        console.log(dataType, this.context, settings);
-        this.formGroupModel = await this.forms.getFormGroupModelForSchema(dataType, {
+        this.formFieldGroup = await this.forms.getFormFieldGroupForSchema(dataType, {
             labelPrefix: settings.id,
-            customizer: settings.customizeFormModel
+            customizer: settings.customizeFormField
         });
-        console.log(this.formGroupModel);
-        this.formModel = this.formGroupModel.group;
-        this.formGroup = this.forms.createFormGroup(this.formModel, {updateOn: "blur"});
-        this.forms.patchGroup(value, this.formModel, this.formGroup);
-        this.formSubscription?.unsubscribe();
-        this.formSubscription = this.formGroup.valueChanges.subscribe(() => {
-            this.formChanged = this.formGroup.touched;
-        });
+        this.formFields = this.formFieldGroup.fieldGroup;
     }
 
     protected subToState() {
@@ -227,10 +218,9 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                         const path = this.settings.getRequestPath(
                             this.getActionContext(), this.settings.primaryRequest, "request"
                         );
-                        console.log(path);
                         // Customize data
                         const data = await this.api.get(path);
-                        this.data = await this.settings.customizeFormData(data, this.injector, this.formModel, this.context) ?? data;
+                        this.data = await this.settings.customizeFormData(data, this.injector, this.formFieldGroup, this.context) ?? data;
                         this.context = Object.assign(
                             {},
                             this.snapshot.data.context,
@@ -253,8 +243,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                         await this.navigateBack();
                         return;
                     }
-                    this.forms.patchGroup(this.data, this.formModel, this.formGroup);
-                    this.formChanged = false;
+                    this.formChanged.set(false);
                     this.loading = false;
                     this.cdr.detectChanges();
                 }
