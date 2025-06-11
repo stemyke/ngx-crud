@@ -1,12 +1,14 @@
-import {Component, computed, linkedSignal, OnInit, viewChild, ViewEncapsulation} from "@angular/core";
+import {Component, linkedSignal, OnInit, viewChild, ViewEncapsulation} from "@angular/core";
 import {HttpErrorResponse} from "@angular/common/http";
+import {rxResource} from "@angular/core/rxjs-interop";
+import {FormControl} from "@angular/forms";
+import {filter} from "rxjs";
 import {FormFieldConfig, IDynamicForm} from "@stemy/ngx-dynamic-form";
 import {FileUtils, IAsyncMessage, ObjectUtils, ObservableUtils} from "@stemy/ngx-utils";
 
 import {ICrudComponent, ICrudRouteActionContext, ICrudTreeItem} from "../../common-types";
 import {selectBtnProp} from "../../utils/crud.utils";
 import {BaseCrudComponent} from "../base/base-crud.component";
-import {rxResource} from "@angular/core/rxjs-interop";
 
 @Component({
     standalone: false,
@@ -29,15 +31,19 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
 
     protected readonly form = viewChild<IDynamicForm>("form");
 
-    protected readonly formGroup = computed(() => this.form()?.group());
-
-    protected readonly formValue = rxResource({
-        request: () => this.formGroup(),
-        loader: p => p.request.valueChanges
+    protected readonly formChanged$ = rxResource({
+        request: () => this.form(),
+        loader: p => p.request?.fieldChanges?.pipe(
+            filter(c => {
+                const control = c.field?.formControl as FormControl;
+                return c.type === "valueChanges" && control.value !== control.defaultValue;
+            })
+        ),
+        defaultValue: null
     });
 
     protected readonly formChanged = linkedSignal(() => {
-        return this.formValue.hasValue();
+        return this.formChanged$.value();
     });
 
     ngOnInit() {
@@ -45,7 +51,6 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         this.data = {};
         this.files = {};
         this.loading = false;
-        this.formChanged.set(false);
         this.formUpdated = false;
         this.initForm().then(() => this.subToState());
     }
@@ -53,7 +58,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     reset() {
         // this.forms.patchGroup(this.data, this.formModel, this.formGroup);
         this.form().reset();
-        this.formChanged.set(false);
+        this.formChanged.set(null);
     }
 
     importFile = async (ie: string): Promise<IAsyncMessage> => {
@@ -118,8 +123,8 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                 : await this.api.post(path, data);
             await this.settings.updateAdditionalResources(additionalResources, this.injector, response, this.context);
             // Form not changed anymore but updated
-            this.formUpdated = this.formChanged();
-            this.formChanged.set(false);
+            this.formUpdated = this.formChanged() !== null;
+            this.formChanged.set(null);
             // Update context
             this.data = response;
             this.context = Object.assign(
@@ -151,7 +156,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     }
 
     protected async onLeave(tree: ICrudTreeItem[]): Promise<boolean> {
-        if (this.formChanged) {
+        if (this.formChanged()) {
             const ctx = await this.forms.serialize(this.formFields);
             const result = await new Promise<boolean>(resolve => {
                 this.dialog.confirm({
@@ -226,6 +231,8 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                             this.snapshot.data.context,
                             {entity: this.data}
                         );
+                        this.formChanged.set(null);
+                        console.log("DATA LOADED");
                         this.generateButtons();
                     } catch (res) {
                         if (res instanceof HttpErrorResponse) {
@@ -243,7 +250,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                         await this.navigateBack();
                         return;
                     }
-                    this.formChanged.set(false);
+                    this.formChanged.set(null);
                     this.loading = false;
                     this.cdr.detectChanges();
                 }
