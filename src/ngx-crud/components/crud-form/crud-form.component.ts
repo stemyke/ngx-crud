@@ -126,7 +126,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
             this.formUpdated = this.formChanged() !== null;
             this.formChanged.set(null);
             // Update context
-            this.data = response;
+            this.data = ObjectUtils.assign(this.data, response);
             this.context = Object.assign(
                 {},
                 this.snapshot.data.context,
@@ -232,7 +232,6 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                             {entity: this.data}
                         );
                         this.formChanged.set(null);
-                        console.log("DATA LOADED");
                         this.generateButtons();
                     } catch (res) {
                         if (res instanceof HttpErrorResponse) {
