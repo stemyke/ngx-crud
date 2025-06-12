@@ -219,6 +219,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                     this.loading = true;
                     this.id = this.snapshot.params.id;
                     this.saveButton = selectBtnProp(this.settings.saveButton, this.getActionContext(), "save", "save");
+
                     try {
                         const path = this.settings.getRequestPath(
                             this.getActionContext(), this.settings.primaryRequest, "request"
@@ -252,7 +253,8 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                     this.formChanged.set(null);
                     this.loading = false;
                     this.cdr.detectChanges();
-                }
+                },
+                timeout: 25
             })
         );
     }
