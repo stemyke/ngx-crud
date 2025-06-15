@@ -101,7 +101,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
             const actionsKey = `${settings.id}-actions`;
             const props = this.schema.properties;
             const propNames = Object.keys(props).concat(actionsKey);
-            const labelPrefix = settings.labelPrefix ? settings.labelPrefix : settings.id;
+            const labelPrefix = settings.labelPrefix || settings.id;
             for (const name of propNames) {
                 const property = props[name] || {
                     id: actionsKey,
@@ -114,7 +114,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                 if (property.column === false) continue;
                 const title = name === actionsKey
                     ? settings.actionsTitle || this.actionsTitle
-                    : await this.language.getTranslation(`${labelPrefix}.${name}`);
+                    : `${labelPrefix}.${name}`;
                 let filterType: TableFilterType = null;
                 switch (property.type) {
                     case "array":

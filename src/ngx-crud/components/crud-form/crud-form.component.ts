@@ -204,7 +204,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         const settings = this.settings;
         const dataType = this.settings.getDataType(this.context, this.injector);
         this.formFieldGroup = await this.forms.getFormFieldGroupForSchema(dataType, {
-            labelPrefix: settings.id,
+            labelPrefix: settings.labelPrefix || settings.id,
             labelCustomizer: settings.customizeFormLabel,
             testId: settings.id,
             fieldCustomizer: settings.customizeFormField
