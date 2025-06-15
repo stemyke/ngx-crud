@@ -3,6 +3,7 @@ import {CrudWrapperComponent} from "./components/base/crud-wrapper.component";
 import {EmptyComponent} from "./components/base/empty.component";
 
 import {CrudChildWrapperComponent} from "./components/crud-child-wrapper/crud-child-wrapper.component";
+import {CrudContainerComponent} from "./components/crud-container/crud-container.component";
 import {CrudCellComponent} from "./components/crud-cell/crud-cell.component";
 import {CrudFormComponent} from "./components/crud-form/crud-form.component";
 import {CrudListComponent} from "./components/crud-list/crud-list.component";
@@ -13,6 +14,7 @@ export const components = [
     CrudWrapperComponent,
     EmptyComponent,
     CrudChildWrapperComponent,
+    CrudContainerComponent,
     CrudCellComponent,
     CrudFormComponent,
     CrudListComponent

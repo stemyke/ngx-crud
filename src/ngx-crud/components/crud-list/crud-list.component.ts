@@ -1,5 +1,4 @@
-import {AfterViewInit, Component, OnChanges, OnInit, Type, ViewChild, ViewEncapsulation} from "@angular/core";
-import {FormGroup} from "@angular/forms";
+import {Component, OnChanges, Type, ViewChild, ViewEncapsulation} from "@angular/core";
 import {
     DynamicTableComponent,
     DynamicTableDragHandler,

@@ -11,10 +11,7 @@ import {
     ITableDragEvent,
     RouteValidator
 } from "@stemy/ngx-utils";
-import {
-    FormFieldConfig,
-    FormFieldCustomizer
-} from "@stemy/ngx-dynamic-form";
+import {FormFieldConfig, FormFieldCustomizer, FormFieldLabelCustomizer,} from "@stemy/ngx-dynamic-form";
 
 // --- CRUD ---
 export interface ICrudRouteLink {
@@ -49,9 +46,13 @@ export interface ICrudDataType {
 
 export interface ICrudDataSource {
     loadData: (page: number, itemsPerPage: number) => Promise<IPaginationData>;
+
     refresh(time?: number): void;
+
     setFilter(filter: string): void;
+
     setSorting(column: string): void;
+
     setQueryValue(col: string, value: string): void;
 }
 
@@ -65,6 +66,7 @@ export interface ICrudRouteContextBase {
 
 export interface ICrudRouteContext extends ICrudRouteContextBase {
     primaryRequest: CrudRouteRequest;
+
     [key: string]: any;
 }
 
@@ -89,7 +91,9 @@ export type CrudButtonCheckFunc<T = string> =
 
 export type CrudButtonPropSetting<T = string> = boolean | T | CrudButtonCheckFunc<T>;
 
-export type CrudButtonActionSetting = string | ((context: ICrudRouteActionContext, injector: Injector, item?: any) => string);
+export type CrudButtonActionSetting =
+    string
+    | ((context: ICrudRouteActionContext, injector: Injector, item?: any) => string);
 
 export type CrudDataCustomizerFunc = (data: any, injector: Injector, field: FormFieldConfig, context: ICrudRouteContext) => Promise<any>;
 
@@ -138,17 +142,26 @@ export interface ICrudRouteData {
     name?: string;
     icon?: string;
     defaultPath?: string;
+
     [key: string]: any;
 }
 
 export interface ICrudRouteParams {
-    // Setting of crud display mode
+    /**
+     * Setting of crud display mode
+     */
     mode?: CrudDisplayMode;
-    // Whether to display tab buttons for child route components
+    /**
+     * Whether to display tab buttons for child route components
+     */
     useTabs?: boolean;
-    // Whether to hide the main component when a child route is activated
+    /**
+     * Whether to hide the main component when a child route is activated
+     */
     hideMain?: boolean;
-    // Add button
+    /**
+     * Add button
+     */
     addButton?: CrudButtonPropSetting;
     addAction?: CrudButtonFunc;
     viewButton?: CrudButtonPropSetting;
@@ -158,63 +171,125 @@ export interface ICrudRouteParams {
     deleteButton?: CrudButtonPropSetting;
     deleteAction?: CrudButtonFunc;
     saveButton?: CrudButtonPropSetting;
-    // Title of the action buttons list column
+    /**
+     * Title of the action buttons list column
+     */
     actionsTitle?: string;
-    // Custom actions to display for each item in list component
+    /**
+     * Custom actions to display for each item in list component
+     */
     customActions?: ICrudRouteCustomAction[];
-    // Custom buttons to display under the table in list component
+    /**
+     * Custom buttons to display under the table in list component
+     */
     customButtons?: ICrudRouteButton[];
-    // Defines prefix for label translations
+    /**
+     * Defines prefix for label translations
+     */
     labelPrefix?: string;
-    // Defines if filtering with basic keywords in the list if enabled
+    /**
+     * Defines if filtering with basic keywords in the list if enabled
+     */
     filter?: boolean;
-    // Defines if querying for list fields are enabled in general
+    /**
+     * Defines if querying for list fields are enabled in general
+     */
     query?: boolean;
-    // Defines custom auth guards for the child routes
+    /**
+     * Defines custom auth guards for the child routes
+     */
     guards?: Array<IResolveFactory | RouteValidator>;
-    // A leave handler for any child rute
+    /**
+     * A leave handler for any child rute
+     */
     onLeave?: CrudRouteLeaveFunc;
-    // Defines small forms for import/export partial data with the specified identifiers
+    /**
+     * Defines small forms for import/export partial data with the specified identifiers
+     */
     importExports?: string[];
-    // Loads an additional context for the route
+    /**
+     * Loads an additional context for the route
+     */
     loadContext?: (context: ICrudRouteContext, injector: Injector) => Promise<ICrudRouteContext>;
-    // Run this action when the whole row is clicked
+    /**
+     * Run this action when the whole row is clicked
+     */
     rowAction?: CrudButtonActionSetting;
-    // Additional context to be sent for admin user when saving an entity
+    /**
+     * Additional context to be sent for admin user when saving an entity
+     */
     formContext?: any;
-    // Get the request path for the specified request type
+    /**
+     * Get the request path for the specified request type
+     */
     getRequestPath?: GetRequestPath;
-    // Get the route back path after editing/adding an entity
+    /**
+     * Get the route back path after editing/adding an entity
+     */
     getBackPath?: GetBackPath;
-    // Customize list columns, if it returns null/undefined it will be removed
+    /**
+     * Customize list columns, if it returns null/undefined it will be removed
+     */
     customizeListColumn?: CrudColumnCustomizerFunc;
-    // Customize the form fields generated based on swagger schema
+    /**
+     * Customize the form fields labels generated based on swagger schema
+     */
+    customizeFormLabel?: FormFieldLabelCustomizer;
+    /**
+     * Customize the form fields generated based on swagger schema
+     */
     customizeFormField?: FormFieldCustomizer;
-    // Customize the DTO response to fit the customized form model
+    /**
+     * Customize the DTO response to fit the customized form model
+     */
     customizeFormData?: CrudDataCustomizerFunc;
-    // Customize the form"s serialized data to fit the DTO
+    /**
+     * Customize the forms serialized data to fit the DTO
+     */
     customizeSerializedData?: CrudDataCustomizerFunc;
-    // Here with an already created entity you can update additional resources attached to it
+    /**
+     * Here with an already created entity you can update additional resources attached to it
+     */
     updateAdditionalResources?: CrudUpdateResourcesFunc;
-    // Dependency subjects to be checked if we should refresh the list
+    /**
+     * Dependency subjects to be checked if we should refresh the list
+     */
     listDependencies?: Subject<any>[] | ((injector: Injector) => Subject<any>[]);
-    // Listener when list data is arrived
+    /**
+     * Listener when list data is arrived
+     */
     itemsListed?: (context: ICrudRouteContext, injector: Injector) => Promise<void>;
-    // How many items should be listed
+    /**
+     * How many items should be listed
+     */
     itemsPerPage?: number;
-    // Default order column
+    /**
+     * Default order column
+     */
     orderBy?: string;
-    // Default order direction
+    /**
+     * Default order direction
+     */
     orderDescending?: boolean;
-    // Displays an extra form based on the specified JSON schema in list component that helps in complex query
+    /**
+     * Displays an extra form based on the specified JSON schema in list component that helps in complex query
+     */
     queryForm?: boolean;
-    // Sets if list metadata should be displayed
+    /**
+     * Sets if list metadata should be displayed
+     */
     displayMeta?: boolean;
-    // Drag start handler in list component
+    /**
+     * Drag start handler in list component
+     */
     onDragStart?: CrudDragHandler;
-    // Drag enter handler in list component
+    /**
+     * Drag enter handler in list component
+     */
     onDragEnter?: CrudDragHandler;
-    // Drop handler in list component
+    /**
+     * Drop handler in list component
+     */
     onDrop?: CrudDragHandler<void>;
 }
 
@@ -248,6 +323,7 @@ export interface ICrudRouteSettings extends Required<ICrudRouteParams> {
 export interface ICrudComponent {
     readonly context: ICrudRouteContext;
     readonly settings: ICrudRouteSettings;
+
     getActionContext(): ICrudRouteActionContext;
 }
 
@@ -290,6 +366,7 @@ export interface ICrudComponentTypes {
     edit?: Type<any>;
     view?: Type<any>;
     cell?: Type<any>;
+    container?: Type<any>;
 }
 
 export type CrudActionIcons = Record<string, string>;
@@ -311,6 +388,8 @@ export interface ICrudModuleConfig {
     queryParamName?: string;
     componentTypes?: ICrudComponentTypes;
     actionIcons?: CrudActionIcons;
-    // Default title of the actions column in list component
+    /**
+     * Default title of the actions column in list component
+     */
     actionsTitle?: string;
 }

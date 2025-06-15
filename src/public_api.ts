@@ -49,6 +49,7 @@ export {CrudWrapperComponent} from "./ngx-crud/components/base/crud-wrapper.comp
 export {EmptyComponent} from "./ngx-crud/components/base/empty.component";
 
 export {CrudChildWrapperComponent} from "./ngx-crud/components/crud-child-wrapper/crud-child-wrapper.component";
+export {CrudContainerComponent} from "./ngx-crud/components/crud-container/crud-container.component";
 export {CrudCellComponent} from "./ngx-crud/components/crud-cell/crud-cell.component";
 export {CrudFormComponent} from "./ngx-crud/components/crud-form/crud-form.component";
 export {CrudListComponent} from "./ngx-crud/components/crud-list/crud-list.component";

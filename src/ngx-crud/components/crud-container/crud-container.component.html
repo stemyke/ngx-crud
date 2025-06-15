@@ -1,0 +1,12 @@
+<div [ngClass]="[data.id + '-editor', 'editor-card', 'crud-card']">
+    <div class="crud-card-header">
+        <span class="title">{{ 'title.' + data.id | translate: context }}</span>
+        Header
+    </div>
+    <div class="crud-card-body">
+        Body
+    </div>
+    <div class="crud-card-footer">
+        Footer
+    </div>
+</div>

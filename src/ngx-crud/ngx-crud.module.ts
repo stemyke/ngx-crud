@@ -18,9 +18,10 @@ import {
 import {ContextResolverService} from "./services/context-resolver.service";
 import {CrudService} from "./services/crud.service";
 import {components, directives, pipes} from "./ngx-crud.imports";
-import {CrudListComponent} from "./components/crud-list/crud-list.component";
 import {CrudCellComponent} from "./components/crud-cell/crud-cell.component";
+import {CrudListComponent} from "./components/crud-list/crud-list.component";
 import {CrudFormComponent} from "./components/crud-form/crud-form.component";
+import {CrudContainerComponent} from "./components/crud-container/crud-container.component";
 
 @NgModule({
     declarations: [
@@ -69,6 +70,7 @@ export class NgxCrudModule {
                     edit: CrudFormComponent,
                     view: CrudFormComponent,
                     cell: CrudCellComponent,
+                    container: CrudContainerComponent,
                 } as ICrudComponentTypes, config?.componentTypes || {})
             },
             {

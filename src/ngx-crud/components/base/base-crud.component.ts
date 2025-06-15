@@ -62,10 +62,6 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
         return this.api.language;
     }
 
-    get openApi(): OpenApiService {
-        return this.forms.openApi;
-    }
-
     get settings(): ICrudRouteSettings {
         return this.snapshot.data.settings;
     }
@@ -83,6 +79,7 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
                 readonly route: ActivatedRoute,
                 readonly router: Router,
                 readonly injector: Injector,
+                readonly openApi: OpenApiService,
                 readonly forms: DynamicFormService,
                 readonly events: EventsService,
                 readonly crud: CrudService,

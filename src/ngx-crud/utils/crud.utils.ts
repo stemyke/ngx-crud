@@ -91,6 +91,7 @@ export function createCrudSettings(
         getRequestPath: params?.getRequestPath || getRequestPath,
         getBackPath: params?.getBackPath || getNavigateBackPath,
         customizeListColumn: params?.customizeListColumn || returnCb,
+        customizeFormLabel: params?.customizeFormLabel,
         customizeFormField: params?.customizeFormField,
         customizeFormData: params?.customizeFormData || returnCb,
         customizeSerializedData: params?.customizeSerializedData || returnCb,
