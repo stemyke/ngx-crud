@@ -5,7 +5,7 @@ import {Subscription} from "rxjs";
 
 import {ICrudOutletState, ICrudRouteLink} from "../../common-types";
 import {checkIsDialog, getSnapshotPath, getSnapshotTree} from "../../utils/route.utils";
-import {CrudWrapperComponent, defaultOutletState} from "../base/crud-wrapper.component";
+import {CrudWrapperComponent, defaultOutletState} from "../crud-wrapper/crud-wrapper.component";
 
 @Component({
     standalone: false,

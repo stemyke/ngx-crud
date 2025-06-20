@@ -1,8 +1,19 @@
-import {ChangeDetectorRef, Component, ComponentRef, OnDestroy, OnInit, Type, ViewEncapsulation} from "@angular/core";
+import {
+    ApplicationRef,
+    Component,
+    ComponentRef,
+    createComponent,
+    EnvironmentInjector, Injector,
+    OnDestroy,
+    OnInit,
+    ViewChild,
+    ViewContainerRef,
+    ViewEncapsulation
+} from "@angular/core";
 import {ActivatedRoute, Data, Router, UrlSerializer} from "@angular/router";
 import {Subscription} from "rxjs";
 
-import {ICrudRouteSettings} from "../../common-types";
+import {ICrudComponent, ICrudRouteSettings} from "../../common-types";
 import {CrudService} from "../../services/crud.service";
 
 @Component({
@@ -12,6 +23,10 @@ import {CrudService} from "../../services/crud.service";
     encapsulation: ViewEncapsulation.None
 })
 export class CrudContainerComponent implements OnInit, OnDestroy {
+
+    @ViewChild('header', { read: ViewContainerRef, static: true }) header: ViewContainerRef;
+    @ViewChild('content', { read: ViewContainerRef, static: true }) content: ViewContainerRef;
+    @ViewChild('footer', { read: ViewContainerRef, static: true }) footer: ViewContainerRef;
 
     data: Data;
     settings: ICrudRouteSettings;
@@ -23,29 +38,63 @@ export class CrudContainerComponent implements OnInit, OnDestroy {
 
     protected subscription: Subscription;
 
-    constructor(protected route: ActivatedRoute,
-                protected router: Router,
-                protected crud: CrudService,
-                protected cdr: ChangeDetectorRef,
-                protected urlSerializer: UrlSerializer) {
+    constructor(protected readonly route: ActivatedRoute,
+                protected readonly router: Router,
+                protected readonly crud: CrudService,
+                protected readonly injector: Injector,
+                protected readonly appRef: ApplicationRef) {
         this.data = {};
         this.settings = {} as any;
     }
 
     ngOnInit() {
         this.subscription = this.route.data.subscribe(data => {
+            this.detach();
             this.data = data;
             this.settings = data.settings as ICrudRouteSettings;
-            this.componentRef?.destroy();
             if (!this.settings) return;
-            // this.componentType = this.settings.component || this.crud.getComponentType(this.settings.primaryRequest);
-            // if (!this.componentType) {
-            //     console.log(`Component not defined for: ${this.settings.primaryRequest}`);
-            // }
+            const type = this.settings.component || this.crud.getComponentType(this.settings.primaryRequest);
+            if (!type) {
+                console.log(`Component not defined for: ${this.settings.primaryRequest}`);
+                return;
+            }
+            this.componentRef = createComponent(type, {
+                environmentInjector: this.appRef.injector,
+                elementInjector: this.injector
+            });
+            this.appRef.attachView(this.componentRef.hostView);
+            this.attach(this.componentRef.instance);
         });
+    }
+
+    attach(component: ICrudComponent) {
+        console.log("CRUD COMP ATTACH",
+            this.header, this.content, this.footer,
+            component.header, component.content, component.footer,
+        );
+        if (component.header) {
+            this.header?.createEmbeddedView(component.header);
+        }
+        if (component.content) {
+            this.content?.createEmbeddedView(component.content);
+        }
+        if (component.footer) {
+            this.footer?.createEmbeddedView(component.footer);
+        }
+    }
+
+    detach(): void {
+        this.header?.clear();
+        this.content?.clear();
+        this.footer?.clear();
+        if (!this.componentRef) return;
+        this.appRef.detachView(this.componentRef.hostView);
+        this.componentRef.destroy();
+        this.componentRef = null;
     }
 
     ngOnDestroy() {
         this.subscription?.unsubscribe();
+        this.detach();
     }
 }

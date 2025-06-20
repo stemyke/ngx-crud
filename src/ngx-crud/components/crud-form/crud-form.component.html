@@ -1,14 +1,36 @@
-<div [ngClass]="[snapshot.data.id + '-editor', 'editor-card', 'crud-card']">
-    <div class="crud-card-header">
-        <span class="title">{{ 'title.' + snapshot.data.id | translate:context }}</span>
+<ng-template #content>
+    <dynamic-form #crudForm
+                  [data]="data"
+                  [fields]="formFields">
+    </dynamic-form>
+    <ul class="import-export">
+        <li *ngFor="let ie of settings.importExports">
+            <label>{{ 'label.import-export.' + snapshot.data.id + '.' + ie | translate }}</label>
+            <upload [(ngModel)]="files[ie]" accept=".zip"></upload>
+            <button type="button" class="btn btn-primary" [async-method]="importFile" [context]="ie"
+                    *ngIf="files[ie]">
+                {{ 'button.import-zip' | translate }}
+            </button>
+            <button type="button" class="btn btn-primary" [async-method]="exportFile" [context]="ie">
+                {{ 'button.export-zip' | translate }}
+            </button>
+        </li>
+    </ul>
+</ng-template>
+<ng-template #footer>
+    <div class="crud-card-buttons">
+        <ng-container *ngIf="saveButton">
+            <btn [label]="'button.' + saveButton"
+                 [async-submit]="sendForm"
+                 [form]="form()">
+            </btn>
+        </ng-container>
+        <ng-container *ngFor="let button of buttons">
+            <btn [label]="settings.id + '.' + button.button"
+                 [type]="button.type"
+                 [async-method]="callButton"
+                 [context]="button">
+            </btn>
+        </ng-container>
     </div>
-    <div class="crud-card-body">
-        <dynamic-form #form
-                      [data]="data"
-                      [fields]="formFields">
-        </dynamic-form>
-    </div>
-    <div class="crud-card-footer">
-
-    </div>
-</div>
+</ng-template>

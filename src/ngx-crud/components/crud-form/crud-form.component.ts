@@ -29,7 +29,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     formFields: FormFieldConfig[];
     formUpdated: boolean;
 
-    protected readonly form = viewChild<IDynamicForm>("form");
+    readonly form = viewChild<IDynamicForm>("crudForm");
 
     protected readonly formChanged$ = rxResource({
         request: () => this.form(),

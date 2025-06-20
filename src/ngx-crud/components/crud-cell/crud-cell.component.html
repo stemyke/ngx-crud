@@ -10,7 +10,7 @@
         </div>
         <div *ngSwitchCase="'boolean'" class="checkbox">
             <div style="text-align: center">
-                <i [icon]="value ? 'checkmark' : 'close'"></i>
+                <icon [name]="value ? 'check' : 'xmark'"></icon>
             </div>
         </div>
         <ng-container *ngSwitchCase="'date'">
@@ -26,13 +26,12 @@
         </ng-container>
         <ng-container *ngSwitchCase="'actions'">
             <div class="crud-actions">
-                <a class="btn btn-transparent crud-action"
-                   [ngClass]="[!action.status ? '' : 'status status-' + action.status]"
-                   [async-method]="action.action"
-                   [context]="item"
-                   *ngFor="let action of value">
-                    {{ action.title | translate }}
-                </a>
+                @for (action of value; track action) {
+                    <btn type="transparent"
+                         [icon]="action.icon"
+                         [tooltip]="action.title"
+                         [async-method]="action.action"></btn>
+                }
             </div>
         </ng-container>
         <ng-container *ngSwitchDefault>

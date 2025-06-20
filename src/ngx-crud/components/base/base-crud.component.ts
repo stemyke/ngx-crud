@@ -6,6 +6,8 @@ import {
     OnDestroy,
     OnInit,
     Optional,
+    TemplateRef,
+    ViewChild,
     ViewEncapsulation
 } from "@angular/core";
 import {Subscription} from "rxjs";
@@ -29,6 +31,7 @@ import {DynamicFormService} from "@stemy/ngx-dynamic-form";
 import {
     ACTIONS_COLUMN_TITLE,
     FILTER_PARAM_NAME,
+    ICrudComponent,
     ICrudRouteActionContext,
     ICrudRouteButton,
     ICrudRouteContext,
@@ -39,7 +42,7 @@ import {
 import {CrudService} from "../../services/crud.service";
 import {selectBtnProp} from "../../utils/crud.utils";
 import {ActivatedRoute, ActivatedRouteSnapshot, Router} from "@angular/router";
-import {CrudWrapperComponent} from "./crud-wrapper.component";
+import {CrudWrapperComponent} from "../crud-wrapper/crud-wrapper.component";
 
 @Component({
     standalone: false,
@@ -47,10 +50,14 @@ import {CrudWrapperComponent} from "./crud-wrapper.component";
     selector: "crud-base-component",
     encapsulation: ViewEncapsulation.None
 })
-export class BaseCrudComponent implements OnInit, OnDestroy {
+export class BaseCrudComponent implements ICrudComponent, OnInit, OnDestroy {
 
     context: ICrudRouteContext;
     buttons: ICrudRouteButton<string>[];
+
+    @ViewChild("header", {read: TemplateRef, static: true}) header: TemplateRef<any>;
+    @ViewChild("content", {read: TemplateRef, static: true}) content: TemplateRef<any>;
+    @ViewChild("footer", {read: TemplateRef, static: true}) footer: TemplateRef<any>;
 
     protected subscription: Subscription;
 
@@ -97,6 +104,10 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
         this.context = this.snapshot.data.context;
         this.subscription = this.auth.userChanged
             .subscribe(() => this.generateButtons());
+        console.log("CRUD COMP INIT",
+            this.snapshot, this.settings,
+            this.header, this.content, this.footer
+        );
         if (!this.wrapper) return;
         this.wrapper.component = this;
     }
@@ -110,7 +121,7 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
             const message = await context.function(this.getActionContext(), null, context.button) as IAsyncMessage;
             this.generateButtons();
             return ObjectUtils.isObject(message) && message?.message
-                ? message: null;
+                ? message : null;
         } catch (e) {
             const msg = `message.${this.settings.id}-${context.button}.error`;
             throw {
@@ -150,6 +161,7 @@ export class BaseCrudComponent implements OnInit, OnDestroy {
         }).map(btn => {
             const res = {...btn} as ICrudRouteButton<string>;
             res.icon = selectBtnProp(btn.icon, actionCtx, btn.button, "");
+            res.type = res.type || "secondary";
             return res;
         }) || [];
     }

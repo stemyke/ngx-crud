@@ -6,10 +6,8 @@ import {NgxUtilsModule} from "@stemy/ngx-utils";
 import {NgxDynamicFormModule} from "@stemy/ngx-dynamic-form";
 
 import {
-    ACTION_ICONS,
     ACTIONS_COLUMN_TITLE,
     COMPONENT_TYPES,
-    CrudActionIcons,
     FILTER_PARAM_NAME,
     ICrudComponentTypes,
     ICrudModuleConfig,
@@ -72,14 +70,6 @@ export class NgxCrudModule {
                     cell: CrudCellComponent,
                     container: CrudContainerComponent,
                 } as ICrudComponentTypes, config?.componentTypes || {})
-            },
-            {
-                provide: ACTION_ICONS,
-                useValue: Object.assign({
-                    view: "visibility",
-                    edit: "edit",
-                    delete: "delete"
-                } as CrudActionIcons, config?.actionIcons || {})
             },
             {
                 provide: ACTIONS_COLUMN_TITLE,

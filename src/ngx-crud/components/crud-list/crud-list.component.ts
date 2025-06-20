@@ -22,6 +22,7 @@ import {BaseCrudComponent} from "../base/base-crud.component";
     standalone: false,
     selector: "crud-list",
     templateUrl: "./crud-list.component.html",
+    styleUrls: ["./crud-list.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
 export class CrudListComponent extends BaseCrudComponent implements OnChanges, ICrudList {
@@ -95,7 +96,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                 }
             }
             const actionCtx = this.getActionContext();
-            this.addButton = selectBtnProp(canAdd, actionCtx, "add", "plus-outline", null);
+            this.addButton = selectBtnProp(canAdd, actionCtx, "add", "plus", null);
             // --- Start creating table settings ---
             const columns = {} as ITableColumns;
             const actionsKey = `${settings.id}-actions`;
@@ -168,19 +169,19 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                     {
                         id: "view",
                         button: settings.viewButton,
-                        icon: this.crud.getIcon("view"),
+                        icon: "eye",
                         title: `action.${labelPrefix}.view`
                     },
                     {
                         id: "edit",
                         button: settings.editButton,
-                        icon: this.crud.getIcon("edit"),
+                        icon: "pencil",
                         title: `action.${labelPrefix}.edit`
                     },
                     {
                         id: "delete",
                         button: settings.deleteButton,
-                        icon: this.crud.getIcon("delete"),
+                        icon: "trash",
                         title: `action.${labelPrefix}.delete`
                     },
                     ...settings.customActions,

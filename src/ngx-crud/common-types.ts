@@ -1,7 +1,8 @@
-import {InjectionToken, Injector, Type} from "@angular/core";
+import {InjectionToken, Injector, TemplateRef, Type} from "@angular/core";
 import {ActivatedRouteSnapshot, Data, Params, UrlTree} from "@angular/router";
 import {Subject} from "rxjs";
 import {
+    ButtonType,
     IAsyncMessage,
     IOpenApiSchemaProperty,
     IPaginationData,
@@ -111,6 +112,7 @@ export interface ICrudRouteButton<IT = CrudButtonPropSetting> {
     function: CrudButtonFunc;
     hidden?: boolean | CrudButtonCheckFunc<boolean>;
     icon?: IT;
+    type?: ButtonType;
 }
 
 export interface ICrudRouteCustomAction {
@@ -323,6 +325,9 @@ export interface ICrudRouteSettings extends Required<ICrudRouteParams> {
 export interface ICrudComponent {
     readonly context: ICrudRouteContext;
     readonly settings: ICrudRouteSettings;
+    readonly header: TemplateRef<any>;
+    readonly content: TemplateRef<any>;
+    readonly footer: TemplateRef<any>;
 
     getActionContext(): ICrudRouteActionContext;
 }
@@ -369,8 +374,6 @@ export interface ICrudComponentTypes {
     container?: Type<any>;
 }
 
-export type CrudActionIcons = Record<string, string>;
-
 // --- Module Configuration ---
 
 export const FILTER_PARAM_NAME = new InjectionToken<string>("filter-param-name");
@@ -379,15 +382,12 @@ export const QUERY_PARAM_NAME = new InjectionToken<string>("query-param-name");
 
 export const COMPONENT_TYPES = new InjectionToken<ICrudComponentTypes>("crud-component-types");
 
-export const ACTION_ICONS = new InjectionToken<ICrudComponentTypes>("crud-action-icons");
-
 export const ACTIONS_COLUMN_TITLE = new InjectionToken<string>("actions-column-title");
 
 export interface ICrudModuleConfig {
     filterParamName?: string;
     queryParamName?: string;
     componentTypes?: ICrudComponentTypes;
-    actionIcons?: CrudActionIcons;
     /**
      * Default title of the actions column in list component
      */

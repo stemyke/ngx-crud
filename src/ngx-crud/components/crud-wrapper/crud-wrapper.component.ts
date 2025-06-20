@@ -17,21 +17,18 @@ export const defaultOutletState = {
 
 @Component({
     standalone: false,
-    template: `
-        <div class="crud-wrapper">
-            <ng-container [ngComponentOutlet]="componentType"></ng-container>
-        </div>
-    `,
     encapsulation: ViewEncapsulation.None,
+    templateUrl: "./crud-wrapper.component.html",
+    styleUrls: ["./crud-wrapper.component.scss"],
     selector: "crud-wrapper"
 })
 export class CrudWrapperComponent implements OnInit, OnDestroy {
 
     data: Data;
     settings: ICrudRouteSettings;
+    componentType: Type<any>;
     beforeState: BehaviorSubject<ICrudOutletState>;
     afterState: BehaviorSubject<ICrudOutletState>;
-    componentType: Type<any>;
     component: any;
 
     protected subscription: Subscription;
@@ -43,6 +40,7 @@ export class CrudWrapperComponent implements OnInit, OnDestroy {
                 protected urlSerializer: UrlSerializer) {
         this.data = {};
         this.settings = {} as any;
+        this.componentType = this.crud.getComponentType("container");
         this.beforeState = new BehaviorSubject(defaultOutletState);
         this.afterState = new BehaviorSubject(defaultOutletState);
     }
@@ -51,11 +49,6 @@ export class CrudWrapperComponent implements OnInit, OnDestroy {
         this.subscription = this.route.data.subscribe(data => {
             this.data = data;
             this.settings = data.settings as ICrudRouteSettings;
-            if (!this.settings) return;
-            this.componentType = this.settings.component || this.crud.getComponentType(this.settings.primaryRequest);
-            if (!this.componentType) {
-                console.log(`Component not defined for: ${this.settings.primaryRequest}`);
-            }
         });
     }
 

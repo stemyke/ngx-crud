@@ -1,50 +1,42 @@
-<div [ngClass]="[snapshot.data.id + '-editor', 'editor-card', 'crud-card']" *ngIf="settings">
-    <div class="crud-card-header">
-        <span class="title">{{ 'title.' + snapshot.data.id | translate:context }}</span>
-    </div>
-    <div class="crud-card-body">
-        <ng-container *ngIf="dataLoader">
-            <dynamic-table class="table mb-lg"
-                           [columns]="tableColumns"
-                           [showFilter]="settings.filter"
-                           [dataLoader]="dataLoader"
-                           [itemsPerPage]="settings.itemsPerPage"
-                           [orderBy]="settings.orderBy"
-                           [orderDescending]="settings.orderDescending"
-                           [dragStartFn]="dragStartFn"
-                           [dragEnterFn]="dragEnterFn"
-                           [dropFn]="dropFn"
-                           #table>
-                <ng-template [pure]="true" [column]="columnNames" let-col="column" let-item="item">
-                    <td [ngClass]="'column-' + col" (click)="callAction(settings.rowAction, item)">
-                        <ng-container [ngComponentOutlet]="cellComponent"
-                                      [ngComponentOutletInputs]="{
+<ng-template #content>
+    <ng-container *ngIf="dataLoader">
+        <dynamic-table class="table mb-lg"
+                       [columns]="tableColumns"
+                       [showFilter]="settings.filter"
+                       [dataLoader]="dataLoader"
+                       [itemsPerPage]="settings.itemsPerPage"
+                       [orderBy]="settings.orderBy"
+                       [orderDescending]="settings.orderDescending"
+                       [dragStartFn]="dragStartFn"
+                       [dragEnterFn]="dragEnterFn"
+                       [dropFn]="dropFn"
+                       #table>
+            <ng-template [pure]="true" [column]="columnNames" let-col="column" let-item="item">
+                <td [ngClass]="'column-' + col" (click)="callAction(settings.rowAction, item)">
+                    <ng-container [ngComponentOutlet]="cellComponent"
+                                  [ngComponentOutletInputs]="{
                                         value: item | getValue: col,
                                         item: item,
                                         list: this,
                                         id: col,
                                         property: tableColumns[col].property
                                       }"></ng-container>
-                    </td>
-                </ng-template>
-            </dynamic-table>
+                </td>
+            </ng-template>
+        </dynamic-table>
+    </ng-container>
+</ng-template>
+<ng-template #footer>
+    <div class="crud-card-buttons">
+        <ng-container *ngIf="addButton">
+            <btn (click)="addItem()" [icon]="addButton"></btn>
         </ng-container>
-        <div class="text-center mt-lg">
-            <ng-container *ngIf="addButton">
-                <button class="btn btn-primary" (click)="addItem()">
-                    <i [icon]="addButton"></i>
-                </button>
-                &nbsp;
-            </ng-container>
-            <ng-container *ngFor="let button of buttons">
-                <button class="btn btn-primary" [async-method]="callButton" [context]="button">
-                    {{ settings.id + '.' + button.button | translate }}
-                </button>
-                &nbsp;
-            </ng-container>
-        </div>
+        <ng-container *ngFor="let button of buttons">
+            <btn [label]="settings.id + '.' + button.button"
+                 [type]="button.type"
+                 [async-method]="callButton"
+                 [context]="button">
+            </btn>
+        </ng-container>
     </div>
-    <div class="crud-card-footer">
-
-    </div>
-</div>
+</ng-template>

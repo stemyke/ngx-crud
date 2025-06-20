@@ -19,7 +19,7 @@ import {getDataTransferType, getNavigateBackPath, getRequestPath, getRoutePath} 
 import {ContextResolverService} from "../services/context-resolver.service";
 
 import {EmptyComponent} from "../components/base/empty.component";
-import {CrudWrapperComponent} from "../components/base/crud-wrapper.component";
+import {CrudWrapperComponent} from "../components/crud-wrapper/crud-wrapper.component";
 import {CrudChildWrapperComponent} from "../components/crud-child-wrapper/crud-child-wrapper.component";
 import {CrudService} from "../services/crud.service";
 
