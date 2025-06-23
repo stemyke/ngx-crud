@@ -104,10 +104,6 @@ export class BaseCrudComponent implements ICrudComponent, OnInit, OnDestroy {
         this.context = this.snapshot.data.context;
         this.subscription = this.auth.userChanged
             .subscribe(() => this.generateButtons());
-        console.log("CRUD COMP INIT",
-            this.snapshot, this.settings,
-            this.header, this.content, this.footer
-        );
         if (!this.wrapper) return;
         this.wrapper.component = this;
     }

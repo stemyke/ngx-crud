@@ -68,10 +68,6 @@ export class CrudContainerComponent implements OnInit, OnDestroy {
     }
 
     attach(component: ICrudComponent) {
-        console.log("CRUD COMP ATTACH",
-            this.header, this.content, this.footer,
-            component.header, component.content, component.footer,
-        );
         if (component.header) {
             this.header?.createEmbeddedView(component.header);
         }
