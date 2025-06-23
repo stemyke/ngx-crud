@@ -2,7 +2,7 @@ import {Component, OnChanges, Type, ViewChild, ViewEncapsulation} from "@angular
 import {
     DynamicTableComponent,
     DynamicTableDragHandler,
-    IAsyncMessage,
+    IAsyncMessage, IconMap,
     IOpenApiSchema,
     IPaginationData,
     ITableColumns,
@@ -18,11 +18,16 @@ import {CrudButtonActionSetting, ICrudList, ICrudRouteActionContext, ICrudRouteS
 import {selectBtnProp} from "../../utils/crud.utils";
 import {BaseCrudComponent} from "../base/base-crud.component";
 
+const defaultIcons: IconMap = {
+    view: "eye",
+    edit: "pencil",
+    delete: "trash"
+};
+
 @Component({
     standalone: false,
     selector: "crud-list",
     templateUrl: "./crud-list.component.html",
-    styleUrls: ["./crud-list.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
 export class CrudListComponent extends BaseCrudComponent implements OnChanges, ICrudList {
@@ -169,19 +174,16 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                     {
                         id: "view",
                         button: settings.viewButton,
-                        icon: "eye",
                         title: `action.${labelPrefix}.view`
                     },
                     {
                         id: "edit",
                         button: settings.editButton,
-                        icon: "pencil",
                         title: `action.${labelPrefix}.edit`
                     },
                     {
                         id: "delete",
                         button: settings.deleteButton,
-                        icon: "trash",
                         title: `action.${labelPrefix}.delete`
                     },
                     ...settings.customActions,
@@ -196,7 +198,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                 // --- Process items actions ---
                 items?.forEach(item => {
                     const itemActions = actions.map(action => {
-                        const icon = selectBtnProp(action.button, actionCtx, action.id, action.icon, item);
+                        const icon = selectBtnProp(action.button, actionCtx, action.id, defaultIcons[action.id], item);
                         const status = selectBtnProp(action.status, actionCtx, action.id, null, item);
                         return !icon ? null : {
                             title: action.title,

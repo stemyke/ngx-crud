@@ -9,9 +9,7 @@
             </ul>
         </div>
         <div *ngSwitchCase="'boolean'" class="checkbox">
-            <div style="text-align: center">
-                <icon [name]="value ? 'check' : 'xmark'"></icon>
-            </div>
+            <icon [name]="value ? 'check' : 'xmark'"></icon>
         </div>
         <ng-container *ngSwitchCase="'date'">
             {{ value | date: dateFormat }}
@@ -25,14 +23,15 @@
             </ng-container>
         </ng-container>
         <ng-container *ngSwitchCase="'actions'">
-            <div class="crud-actions">
-                @for (action of value; track action) {
+            @for (action of value; track action) {
+                <div class="crud-action">
                     <btn type="transparent"
                          [icon]="action.icon"
                          [tooltip]="action.title"
                          [async-method]="action.action"></btn>
-                }
-            </div>
+                    <div class="crud-action-status" [ngClass]="action.status || 'empty'"></div>
+                </div>
+            }
         </ng-container>
         <ng-container *ngSwitchDefault>
             <ng-container [ngSwitch]="property?.format">
@@ -46,7 +45,7 @@
         </ng-container>
     </ng-container>
 </ng-template>
-<div class="custom-template" *ngIf="template; else defaultTemplate">
-    <ng-container [ngTemplateOutlet]="template"
+<div [ngClass]="['crud-cell', 'crud-cell-' + property?.type]">
+    <ng-container [ngTemplateOutlet]="template || defaultTemplate"
                   [ngTemplateOutletContext]="{property, value, item, list, defaultTemplate}"></ng-container>
 </div>

@@ -115,13 +115,12 @@ export interface ICrudRouteButton<IT = CrudButtonPropSetting> {
     type?: ButtonType;
 }
 
-export interface ICrudRouteCustomAction {
+export interface ICrudRouteAction {
     id: string;
     button: CrudButtonPropSetting;
     action?: CrudButtonFunc;
     status?: CrudButtonStatus | CrudButtonCheckFunc<CrudButtonStatus>;
     title?: string;
-    icon?: string;
 }
 
 export type CrudDisplayMode = "routes" | "inline" | "dialog";
@@ -180,7 +179,7 @@ export interface ICrudRouteParams {
     /**
      * Custom actions to display for each item in list component
      */
-    customActions?: ICrudRouteCustomAction[];
+    customActions?: ICrudRouteAction[];
     /**
      * Custom buttons to display under the table in list component
      */

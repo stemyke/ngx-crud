@@ -19,7 +19,7 @@ export {
     CrudRouteLeaveFunc,
     CrudButtonStatus,
     ICrudRouteButton,
-    ICrudRouteCustomAction,
+    ICrudRouteAction,
     CrudDisplayMode,
     CrudRouteRequest,
     CrudRouteMethod,

@@ -1,6 +1,49 @@
-.custom-template {
+.crud-cell {
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 10px;
+}
+
+.crud-cell * {
+    box-sizing: border-box;
+}
+
+.crud-cell.crud-cell-actions {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.crud-action {
+    position: relative;
+}
+
+.crud-action-status {
+    position: absolute;
+    background: transparent;
+    border-radius: 999px;
+    width: 10px;
+    height: 10px;
+    top: -1px;
+    right: -1px;
+
+    &:not(.empty) {
+        border: 1px solid rgba(0, 0, 0, .2);
+    }
+
+    &.info {
+        background: #2F96B4;
+    }
+
+    &.success {
+        background: #51A351;
+    }
+
+    &.warning {
+        background: #F89406;
+    }
+
+    &.error {
+        background: #BD362F;
+    }
 }
