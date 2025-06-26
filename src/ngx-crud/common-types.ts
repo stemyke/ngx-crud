@@ -67,7 +67,6 @@ export interface ICrudRouteContextBase {
 
 export interface ICrudRouteContext extends ICrudRouteContextBase {
     primaryRequest: CrudRouteRequest;
-
     [key: string]: any;
 }
 

@@ -207,6 +207,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
             labelPrefix: settings.labelPrefix || settings.id,
             labelCustomizer: settings.customizeFormLabel,
             testId: settings.id,
+            context: this.context,
             fieldCustomizer: settings.customizeFormField
         });
         this.formFields = this.formFieldGroup.fieldGroup;
