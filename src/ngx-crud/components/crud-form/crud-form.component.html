@@ -1,8 +1,11 @@
 <ng-template #content>
-    <dynamic-form #crudForm
-                  [data]="data"
-                  [fields]="formFields">
-    </dynamic-form>
+    @if (formFieldGroup) {
+        <dynamic-form #crudForm
+                      [data]="data"
+                      [useTabs]="formFieldGroup.props.useTabs"
+                      [fields]="formFields">
+        </dynamic-form>
+    }
     <ul class="import-export">
         <li *ngFor="let ie of settings.importExports">
             <label>{{ 'label.import-export.' + snapshot.data.id + '.' + ie | translate }}</label>

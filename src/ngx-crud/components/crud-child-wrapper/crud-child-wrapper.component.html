@@ -1,9 +1,7 @@
 <ng-template let-state="state" #childLinks>
-    <ul *ngIf="state?.links?.length" class="crud-child-links">
-        <li *ngFor="let link of state.links" [ngClass]="{active: link.active}">
-            <a [routerLink]="link.path">{{ link.title | translate }}</a>
-        </li>
-    </ul>
+    <tabs class="crud-child-links"
+          [value]="state.page"
+          [options]="state.links" (selectedChange)="navigate($event)"></tabs>
 </ng-template>
 <div class="crud-wrapper" [ngClass]="['mode-' + data.mode, (settings?.id || 'simple') + '-wrapper']">
     <ng-container [ngTemplateOutlet]="childLinks" [ngTemplateOutletContext]="{state: beforeState.value}"></ng-container>

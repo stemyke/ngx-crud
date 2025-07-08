@@ -2,7 +2,7 @@ import {ChangeDetectorRef, Component, OnDestroy, OnInit, Type, ViewEncapsulation
 import {ActivatedRoute, Data, Router, UrlSerializer} from "@angular/router";
 import {BehaviorSubject, Subscription} from "rxjs";
 
-import {ICrudOutletState, ICrudRouteSettings} from "../../common-types";
+import {CrudOutletState, ICrudRouteSettings} from "../../common-types";
 import {CrudService} from "../../services/crud.service";
 
 export const defaultOutletState = {
@@ -13,7 +13,7 @@ export const defaultOutletState = {
     snapshot: null,
     page: "",
     links: []
-} as ICrudOutletState;
+} as CrudOutletState;
 
 @Component({
     standalone: false,
@@ -27,8 +27,8 @@ export class CrudWrapperComponent implements OnInit, OnDestroy {
     data: Data;
     settings: ICrudRouteSettings;
     componentType: Type<any>;
-    beforeState: BehaviorSubject<ICrudOutletState>;
-    afterState: BehaviorSubject<ICrudOutletState>;
+    beforeState: BehaviorSubject<CrudOutletState>;
+    afterState: BehaviorSubject<CrudOutletState>;
     component: any;
 
     protected subscription: Subscription;

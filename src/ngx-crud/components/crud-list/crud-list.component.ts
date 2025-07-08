@@ -92,10 +92,10 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
             let canAdd = settings.addButton;
             if (canAdd || this.queryFieldGroup) {
                 try {
-                    const path = settings.getRequestPath(
+                    const [path, options] = this.getRequestPath(
                         this.getActionContext(), settings.primaryRequest, "save"
                     );
-                    this.queryData = await this.api.get(path);
+                    this.queryData = await this.api.get(path, options);
                 } catch (e) {
                     canAdd = false;
                 }
@@ -167,7 +167,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
             this.columnNames = Object.keys(columns);
             // --- Create data loader ---
             this.dataLoader = async (page, rowsPerPage, orderBy, orderDescending, filter, query) => {
-                const endpoint = settings.getRequestPath(
+                const [path, options] = this.getRequestPath(
                     this.getActionContext(), settings.primaryRequest, "request"
                 );
                 const actions = [
@@ -192,7 +192,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                 params[this.filterParamName] = filter;
                 params[this.queryParamName] = query;
 
-                const data = await this.api.list(endpoint, params);
+                const data = await this.api.list(path, params, options);
                 let {total, items, meta} = Object.assign({total: 0, items: [], meta: {}}, data);
                 let hasActions = true;
                 // --- Process items actions ---
@@ -338,14 +338,14 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
             messageContext: entity,
             method: async () => {
                 try {
-                    const path = this.settings.getRequestPath(
+                    const [path, options] = this.getRequestPath(
                         {
                             ...this.getActionContext(),
                             entity
                         },
                         this.settings.primaryRequest, "delete"
                     );
-                    await this.api.delete(path);
+                    await this.api.delete(path, options);
                     this.table?.refresh();
                     return {
                         message: `message.delete-${id}.success`

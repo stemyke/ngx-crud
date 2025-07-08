@@ -3,41 +3,41 @@ import {ActivatedRouteSnapshot, Data, Params, UrlTree} from "@angular/router";
 import {Subject} from "rxjs";
 import {
     ButtonType,
-    IAsyncMessage,
+    IAsyncMessage, IHttpParams,
     IOpenApiSchemaProperty,
     IPaginationData,
     IResolveFactory,
     IRoute,
     ITableColumn,
     ITableDragEvent,
-    RouteValidator
+    RouteValidator,
+    IRequestOptions,
+    TabOption
 } from "@stemy/ngx-utils";
 import {FormFieldConfig, FormFieldCustomizer, FormFieldLabelCustomizer,} from "@stemy/ngx-dynamic-form";
 
 // --- CRUD ---
-export interface ICrudRouteLink {
-    title: string;
-    active: boolean;
-    path: UrlTree;
-    data: Data;
+export interface CrudRouteLink extends TabOption {
+    path?: UrlTree;
+    data?: Data;
 }
 
-export interface ICrudOutletState {
+export interface CrudOutletState {
     dialog?: boolean;
     isActive?: boolean;
     data?: Data;
     params?: Params;
     snapshot?: ActivatedRouteSnapshot;
     page?: string;
-    links?: ICrudRouteLink[];
+    links?: CrudRouteLink[];
 }
 
-export interface ICrudTreeItem {
+export interface CrudTreeItem {
     snapshot: ActivatedRouteSnapshot;
     component: any;
 }
 
-export interface ICrudDataType {
+export interface CrudDataType {
     list?: string;
     add?: string;
     edit?: string;
@@ -45,19 +45,15 @@ export interface ICrudDataType {
     prefixed?: string;
 }
 
-export interface ICrudDataSource {
+export interface CrudDataSource {
     loadData: (page: number, itemsPerPage: number) => Promise<IPaginationData>;
-
     refresh(time?: number): void;
-
     setFilter(filter: string): void;
-
     setSorting(column: string): void;
-
     setQueryValue(col: string, value: string): void;
 }
 
-export interface ICrudRouteContextBase {
+export interface CrudRouteContextBase {
     snapshot: ActivatedRouteSnapshot;
     params: Params;
     routeData: Data;
@@ -65,17 +61,17 @@ export interface ICrudRouteContextBase {
     entity?: Record<string, any>;
 }
 
-export interface ICrudRouteContext extends ICrudRouteContextBase {
+export interface ICrudRouteContext extends CrudRouteContextBase {
     primaryRequest: CrudRouteRequest;
     [key: string]: any;
 }
 
-export interface ICrudRouteActionContext extends ICrudRouteContextBase {
+export interface ICrudRouteActionContext extends CrudRouteContextBase {
     injector: Injector;
     context: ICrudRouteContext;
     endpoint: string;
-    dataSource?: ICrudDataSource;
-    onLeave?: (tree: ICrudTreeItem[]) => Promise<boolean>;
+    dataSource?: CrudDataSource;
+    onLeave?: (tree: CrudTreeItem[]) => Promise<boolean>;
 }
 
 export interface ICrudListColumn extends ITableColumn {
@@ -102,7 +98,7 @@ export type CrudColumnCustomizerFunc = (column: ICrudListColumn, injector: Injec
 
 export type CrudUpdateResourcesFunc = (resources: any, injector: Injector, response: any, context: ICrudRouteContext) => Promise<void>;
 
-export type CrudRouteLeaveFunc = (context: ICrudRouteActionContext, tree: ICrudTreeItem[]) => Promise<boolean>;
+export type CrudRouteLeaveFunc = (context: ICrudRouteActionContext, tree: CrudTreeItem[]) => Promise<boolean>;
 
 export type CrudButtonStatus = "primary" | "info" | "success" | "warning" | "danger" | "default";
 
@@ -128,9 +124,15 @@ export type CrudRouteRequest = "list" | "add" | "edit";
 
 export type CrudRouteMethod = "request" | "save" | "delete" | "import" | "export";
 
+export interface CrudRequestPath {
+    url: string;
+    options?: IRequestOptions;
+    params?: IHttpParams;
+}
+
 export type GetRequestPath = (
     context: ICrudRouteActionContext, reqType: CrudRouteRequest, method: CrudRouteMethod, importExport?: string
-) => string;
+) => string | CrudRequestPath;
 
 export type GetBackPath = (context: ICrudRouteActionContext) => string;
 

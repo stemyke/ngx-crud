@@ -12,7 +12,7 @@ import {ObjectUtils, StringUtils} from "@stemy/ngx-utils";
 import {
     CrudRouteMethod,
     CrudRouteRequest,
-    ICrudDataType,
+    CrudDataType,
     ICrudRouteActionContext,
     ICrudRouteSettings
 } from "../common-types";
@@ -60,8 +60,8 @@ export function getRequestPath(ctx: ICrudRouteActionContext, reqType: CrudRouteR
     return (reqType === "list") !== (method === "request") ? `${ctx.endpoint}/${id}` : ctx.endpoint;
 }
 
-export function getDataTransferType(dataType: string | ICrudDataType, primary: string): string {
-    const requestTypes: ICrudDataType = (typeof dataType == "string") ? {list: dataType}: dataType;
+export function getDataTransferType(dataType: string | CrudDataType, primary: string): string {
+    const requestTypes: CrudDataType = (typeof dataType == "string") ? {list: dataType}: dataType;
     if (ObjectUtils.isString(requestTypes.prefixed) && requestTypes.prefixed) {
         return requestTypes[primary] || StringUtils.ucFirst(primary) + requestTypes.prefixed;
     }

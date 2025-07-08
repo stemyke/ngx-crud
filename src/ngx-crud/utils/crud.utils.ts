@@ -7,13 +7,13 @@ import {
     CrudButtonPropSetting,
     CrudRouteRequest,
     GetDataType,
-    ICrudDataType,
+    CrudDataType,
     ICrudRouteActionContext,
     ICrudRouteData,
     ICrudRouteOptions,
     ICrudRouteParams,
     ICrudRouteSettings,
-    ICrudTreeItem
+    CrudTreeItem
 } from "../common-types";
 import {getDataTransferType, getNavigateBackPath, getRequestPath, getRoutePath} from "./route.utils";
 import {ContextResolverService} from "../services/context-resolver.service";
@@ -32,7 +32,7 @@ export async function defaultCrudAction(ctx: ICrudRouteActionContext, item: any,
     await router.navigateByUrl(path);
 }
 
-export async function defaultLeaveFunction(ctx: ICrudRouteActionContext, tree: ICrudTreeItem[]): Promise<boolean> {
+export async function defaultLeaveFunction(ctx: ICrudRouteActionContext, tree: CrudTreeItem[]): Promise<boolean> {
     if (ctx && ObjectUtils.isFunction(ctx.onLeave)) {
         return ctx.onLeave(tree);
     }
@@ -136,7 +136,7 @@ export function createCrudRoute(id: string,
     };
 }
 
-export function createCrudRoutes(id: string, endpoint: string, dataType: string | ICrudDataType | GetDataType, options?: ICrudRouteOptions): IRoute[] {
+export function createCrudRoutes(id: string, endpoint: string, dataType: string | CrudDataType | GetDataType, options?: ICrudRouteOptions): IRoute[] {
     options = options || {};
     const params = Object.entries(options.defaultParams || {});
     const mode = options.mode || "routes";

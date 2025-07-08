@@ -10,6 +10,7 @@ import {
     ViewChild,
     ViewEncapsulation
 } from "@angular/core";
+import {ActivatedRoute, ActivatedRouteSnapshot, Router} from "@angular/router";
 import {Subscription} from "rxjs";
 import {
     API_SERVICE,
@@ -24,24 +25,26 @@ import {
     IToasterService,
     ObjectUtils,
     OpenApiService,
+    IRequestOptions,
     TOASTER_SERVICE
 } from "@stemy/ngx-utils";
 import {DynamicFormService} from "@stemy/ngx-dynamic-form";
 
 import {
     ACTIONS_COLUMN_TITLE,
+    CrudRouteMethod,
+    CrudRouteRequest,
+    CrudTreeItem,
     FILTER_PARAM_NAME,
     ICrudComponent,
     ICrudRouteActionContext,
     ICrudRouteButton,
     ICrudRouteContext,
     ICrudRouteSettings,
-    ICrudTreeItem,
     QUERY_PARAM_NAME
 } from "../../common-types";
-import {CrudService} from "../../services/crud.service";
 import {selectBtnProp} from "../../utils/crud.utils";
-import {ActivatedRoute, ActivatedRouteSnapshot, Router} from "@angular/router";
+import {CrudService} from "../../services/crud.service";
 import {CrudWrapperComponent} from "../crud-wrapper/crud-wrapper.component";
 
 @Component({
@@ -142,7 +145,18 @@ export class BaseCrudComponent implements ICrudComponent, OnInit, OnDestroy {
         };
     }
 
-    protected async onLeave(tree: ICrudTreeItem[]): Promise<boolean> {
+    getRequestPath(context: ICrudRouteActionContext, reqType: CrudRouteRequest, method: CrudRouteMethod, importExport?: string): [url: string, options: IRequestOptions] {
+        const path = this.settings.getRequestPath(context, reqType, method, importExport);
+        if (!path || ObjectUtils.isString(path)) {
+            return [String(path || ""), {params: {}}];
+        }
+        const url = path.url || "";
+        const options = path.options || {};
+        options.params = Object.assign(options.params || {}, path.params || {});
+        return [url, options];
+    }
+
+    protected async onLeave(tree: CrudTreeItem[]): Promise<boolean> {
         return true;
     }
 

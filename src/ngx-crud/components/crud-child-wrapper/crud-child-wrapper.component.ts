@@ -3,7 +3,7 @@ import {RouterOutlet} from "@angular/router";
 import {IRoute, ObservableUtils} from "@stemy/ngx-utils";
 import {Subscription} from "rxjs";
 
-import {ICrudOutletState, ICrudRouteLink} from "../../common-types";
+import {CrudOutletState, CrudRouteLink} from "../../common-types";
 import {checkIsDialog, getSnapshotPath, getSnapshotTree} from "../../utils/route.utils";
 import {CrudWrapperComponent, defaultOutletState} from "../crud-wrapper/crud-wrapper.component";
 
@@ -87,7 +87,7 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
         this.afterSub?.unsubscribe();
     }
 
-    getState(outlet: RouterOutlet): ICrudOutletState {
+    getState(outlet: RouterOutlet): CrudOutletState {
 
         if (!outlet) return defaultOutletState;
 
@@ -96,21 +96,24 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
         const children = (this.data?.children || []) as IRoute[];
         const links = settings?.useTabs ? children.filter(r => r.outlet === outlet.name && r.data?.name).map(r => {
             return {
-                title: r.data.name,
-                active: false,
+                value: r.data.page,
+                label: r.data.name,
                 path: getSnapshotTree(snapshot, [{outlets: {[outlet.name]: r.path}}]),
                 data: r.data
-            } as ICrudRouteLink;
+            } as CrudRouteLink;
         }) : [];
+        const main: CrudRouteLink = links.length && settings.hideMain && this.data
+            ? {
+                value: this.data.page,
+                label: 'menu.' + this.data.id,
+                path: getSnapshotTree(snapshot, []),
+                data: this.data
+            }
+            : null;
 
         if (!outlet.isActivated) {
-            if (links.length && settings.hideMain) {
-                links.unshift({
-                    title: 'menu.' + this.data?.id,
-                    active: true,
-                    path: getSnapshotTree(snapshot, []),
-                    data: this.data
-                });
+            if (main) {
+                links.unshift(main);
             }
             return {
                 ...defaultOutletState,
@@ -121,16 +124,8 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
         const activatedSnapshot = outlet.activatedRoute.snapshot;
         const {data, params} = activatedSnapshot;
 
-        if (links.length && settings.hideMain) {
-            links.forEach(link => {
-                link.active = data.page === link.data.page;
-            });
-            links.unshift({
-                title: 'menu.' + this.data?.id,
-                active: false,
-                path: getSnapshotTree(activatedSnapshot, "", true),
-                data: this.data
-            });
+        if (main) {
+            links.unshift(main);
         }
 
         return {
@@ -156,6 +151,10 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
         const url = getSnapshotPath(outlet.activatedRoute.snapshot, this.urlSerializer, "", true);
         this.router.navigateByUrl(url);
         return true;
+    }
+
+    navigate(link: CrudRouteLink): void {
+        this.router.navigateByUrl(link.path);
     }
 
     protected findCloseElement(target: EventTarget): HTMLElement {

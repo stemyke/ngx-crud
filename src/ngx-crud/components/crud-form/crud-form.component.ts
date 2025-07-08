@@ -6,7 +6,7 @@ import {filter} from "rxjs";
 import {FormFieldConfig, IDynamicForm} from "@stemy/ngx-dynamic-form";
 import {FileUtils, IAsyncMessage, ObjectUtils, ObservableUtils} from "@stemy/ngx-utils";
 
-import {ICrudComponent, ICrudRouteActionContext, ICrudTreeItem} from "../../common-types";
+import {ICrudComponent, ICrudRouteActionContext, CrudTreeItem} from "../../common-types";
 import {selectBtnProp} from "../../utils/crud.utils";
 import {BaseCrudComponent} from "../base/base-crud.component";
 
@@ -63,10 +63,10 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
 
     importFile = async (ie: string): Promise<IAsyncMessage> => {
         try {
-            const path = this.settings.getRequestPath(
+            const [path, options] = this.getRequestPath(
                 this.getActionContext(), this.settings.primaryRequest, "import", ie
             );
-            const response = await this.api.post(path, {file: this.files[ie]});
+            const response = await this.api.post(path, {file: this.files[ie]}, options);
             this.data = ObjectUtils.assign(this.data, response);
             return {
                 message: `message.import-${ie}.success`
@@ -81,10 +81,10 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
 
     exportFile = async (ie: string): Promise<IAsyncMessage> => {
         try {
-            const path = this.settings.getRequestPath(
+            const [path, options] = this.getRequestPath(
                 this.getActionContext(), this.settings.primaryRequest, "export", ie
             );
-            const response = await this.api.get(path, {responseType: "blob"});
+            const response = await this.api.get(path, {...options, responseType: "blob"});
             FileUtils.saveBlob(response, `export-${this.id}-${ie}.zip`);
             return {
                 message: `message.import-${ie}.success`
@@ -115,12 +115,12 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         const action = this.snapshot.data.id;
         try {
             data = ObjectUtils.assign(context, data);
-            const path = this.settings.getRequestPath(
+            const [path, options] = this.getRequestPath(
                 this.getActionContext(), this.settings.primaryRequest, "save"
             );
             const response = this.settings.primaryRequest === "edit"
-                ? await this.api.patch(path, data)
-                : await this.api.post(path, data);
+                ? await this.api.patch(path, data, options)
+                : await this.api.post(path, data, options);
             await this.settings.updateAdditionalResources(additionalResources, this.injector, response, this.context);
             // Form not changed anymore but updated
             this.formUpdated = this.formChanged() !== null;
@@ -155,7 +155,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         };
     }
 
-    protected async onLeave(tree: ICrudTreeItem[]): Promise<boolean> {
+    protected async onLeave(tree: CrudTreeItem[]): Promise<boolean> {
         if (this.formChanged()) {
             const ctx = await this.forms.serialize(this.formFields);
             const result = await new Promise<boolean>(resolve => {
@@ -178,7 +178,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         return true;
     }
 
-    protected refreshList(tree: ICrudTreeItem[]): void {
+    protected refreshList(tree: CrudTreeItem[]): void {
         if (!this.formUpdated) return;
         for (let item of tree) {
             const comp = item.component as ICrudComponent;
@@ -224,11 +224,11 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                     this.saveButton = selectBtnProp(this.settings.saveButton, this.getActionContext(), "save", "save");
 
                     try {
-                        const path = this.settings.getRequestPath(
+                        const [path, options] = this.getRequestPath(
                             this.getActionContext(), this.settings.primaryRequest, "request"
                         );
                         // Customize data
-                        const data = await this.api.get(path);
+                        const data = await this.api.get(path, options);
                         this.data = await this.settings.customizeFormData(data, this.injector, this.formFieldGroup, this.context) ?? data;
                         this.context = Object.assign(
                             {},
