@@ -10,13 +10,10 @@
         <li *ngFor="let ie of settings.importExports">
             <label>{{ 'label.import-export.' + snapshot.data.id + '.' + ie | translate }}</label>
             <upload [(ngModel)]="files[ie]" accept=".zip"></upload>
-            <button type="button" class="btn btn-primary" [async-method]="importFile" [context]="ie"
-                    *ngIf="files[ie]">
-                {{ 'button.import-zip' | translate }}
-            </button>
-            <button type="button" class="btn btn-primary" [async-method]="exportFile" [context]="ie">
-                {{ 'button.export-zip' | translate }}
-            </button>
+            @if (files[ie]) {
+                <btn label="button.import-zip" [async-method]="importFile" [context]="ie"></btn>
+            }
+            <btn label="button.export-zip" [async-method]="exportFile" [context]="ie"></btn>
         </li>
     </ul>
 </ng-template>
