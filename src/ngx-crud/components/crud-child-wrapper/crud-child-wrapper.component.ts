@@ -102,18 +102,15 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
                 data: r.data
             } as CrudRouteLink;
         }) : [];
-        const main: CrudRouteLink = links.length && settings.hideMain && this.data
-            ? {
-                value: this.data.page,
-                label: 'menu.' + this.data.id,
-                path: getSnapshotTree(snapshot, []),
-                data: this.data
-            }
-            : null;
 
         if (!outlet.isActivated) {
-            if (main) {
-                links.unshift(main);
+            if (links.length && settings.hideMain && this.data) {
+                links.unshift({
+                    value: this.data.page,
+                    label: 'menu.' + this.data.id,
+                    path: getSnapshotTree(snapshot, []),
+                    data: this.data
+                });
             }
             return {
                 ...defaultOutletState,
@@ -124,8 +121,13 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
         const activatedSnapshot = outlet.activatedRoute.snapshot;
         const {data, params} = activatedSnapshot;
 
-        if (main) {
-            links.unshift(main);
+        if (links.length && settings.hideMain && this.data) {
+            links.unshift({
+                value: this.data.page,
+                label: 'menu.' + this.data.id,
+                path: getSnapshotTree(activatedSnapshot, "", true),
+                data: this.data
+            });
         }
 
         return {
@@ -154,7 +156,8 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
     }
 
     navigate(link: CrudRouteLink): void {
-        this.router.navigateByUrl(link.path);
+        console.log("navigate", this.urlSerializer.serialize(link.path));
+        this.router.navigateByUrl(link.path, {replaceUrl: true});
     }
 
     protected findCloseElement(target: EventTarget): HTMLElement {
