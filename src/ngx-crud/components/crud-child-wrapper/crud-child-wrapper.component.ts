@@ -156,7 +156,6 @@ export class CrudChildWrapperComponent extends CrudWrapperComponent implements A
     }
 
     navigate(link: CrudRouteLink): void {
-        console.log("navigate", this.urlSerializer.serialize(link.path));
         this.router.navigateByUrl(link.path, {replaceUrl: true});
     }
 
