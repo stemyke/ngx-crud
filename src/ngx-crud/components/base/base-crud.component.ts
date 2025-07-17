@@ -25,7 +25,7 @@ import {
     IToasterService,
     ObjectUtils,
     OpenApiService,
-    IRequestOptions,
+    HttpRequestOptions,
     TOASTER_SERVICE
 } from "@stemy/ngx-utils";
 import {DynamicFormService} from "@stemy/ngx-dynamic-form";
@@ -105,7 +105,7 @@ export class BaseCrudComponent implements ICrudComponent, OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.context = this.snapshot.data.context;
-        this.subscription = this.auth.userChanged
+        this.subscription = this.events.userChanged
             .subscribe(() => this.generateButtons());
         if (!this.wrapper) return;
         this.wrapper.component = this;
@@ -145,7 +145,7 @@ export class BaseCrudComponent implements ICrudComponent, OnInit, OnDestroy {
         };
     }
 
-    getRequestPath(context: ICrudRouteActionContext, reqType: CrudRouteRequest, method: CrudRouteMethod, importExport?: string): [url: string, options: IRequestOptions] {
+    getRequestPath(context: ICrudRouteActionContext, reqType: CrudRouteRequest, method: CrudRouteMethod, importExport?: string): [url: string, options: HttpRequestOptions] {
         const path = this.settings.getRequestPath(context, reqType, method, importExport);
         if (!path || ObjectUtils.isString(path)) {
             return [String(path || ""), {params: {}}];

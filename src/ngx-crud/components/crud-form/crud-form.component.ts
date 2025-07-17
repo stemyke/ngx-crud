@@ -122,7 +122,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                 ? await this.api.patch(path, data, options)
                 : await this.api.post(path, data, options);
             await this.settings.updateAdditionalResources(additionalResources, this.injector, response, this.context);
-            // Form not changed anymore but updated
+            // The form isn't changed anymore but updated
             this.formUpdated = this.formChanged() !== null;
             this.formChanged.set(null);
             // Update context

@@ -2,13 +2,14 @@ import {Component, OnChanges, Type, ViewChild, ViewEncapsulation} from "@angular
 import {
     DynamicTableComponent,
     DynamicTableDragHandler,
-    IAsyncMessage, IconMap,
-    IOpenApiSchema,
+    IAsyncMessage,
+    IconMap,
     IPaginationData,
     ITableColumns,
     ITimer,
     ObjectUtils,
     ObservableUtils,
+    OpenApiSchema,
     TableDataLoader,
     TableFilterType,
     TimerUtils
@@ -47,7 +48,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
     addButton: string;
     selectedItem: any;
 
-    protected schema: IOpenApiSchema;
+    protected schema: OpenApiSchema;
     protected updateSettings: ITimer;
     protected filterParams: any;
 
@@ -242,7 +243,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                     }
                 },
                 {
-                    subjects: [this.events.languageChanged, this.auth.userChanged],
+                    subjects: [this.events.languageChanged, this.events.userChanged],
                     cb: () => {
                         if (!this.updateSettings) {
                             console.error(`UpdateSettings is not defined for some reason`, this.updateSettings);
@@ -275,6 +276,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
     refresh(): void {
         this.table?.refresh();
     }
+
     //
     // updateFilters(ev: IDynamicFormEvent): void {
     //     this.forms.serializeForm(ev.form).then(filter => {

@@ -3,15 +3,16 @@ import {ActivatedRouteSnapshot, Data, Params, UrlTree} from "@angular/router";
 import {Subject} from "rxjs";
 import {
     ButtonType,
-    IAsyncMessage, IHttpParams,
-    IOpenApiSchemaProperty,
+    IAsyncMessage,
+    OpenApiSchemaProperty,
+    HttpRequestOptions,
+    HttpRequestQuery,
     IPaginationData,
     IResolveFactory,
     IRoute,
     ITableColumn,
     ITableDragEvent,
     RouteValidator,
-    IRequestOptions,
     TabOption
 } from "@stemy/ngx-utils";
 import {FormFieldConfig, FormFieldCustomizer, FormFieldLabelCustomizer,} from "@stemy/ngx-dynamic-form";
@@ -76,7 +77,7 @@ export interface ICrudRouteActionContext extends CrudRouteContextBase {
 
 export interface ICrudListColumn extends ITableColumn {
     name: string;
-    property?: IOpenApiSchemaProperty;
+    property?: OpenApiSchemaProperty;
 }
 
 export type CrudButtonFunc = (context: ICrudRouteActionContext, item: any, button: string)
@@ -93,7 +94,7 @@ export type CrudButtonActionSetting =
 
 export type CrudDataCustomizerFunc = (data: any, injector: Injector, field: FormFieldConfig, context: ICrudRouteContext) => Promise<any>;
 
-export type CrudColumnCustomizerFunc = (column: ICrudListColumn, injector: Injector, property: IOpenApiSchemaProperty, params: Params, context: ICrudRouteContext)
+export type CrudColumnCustomizerFunc = (column: ICrudListColumn, injector: Injector, property: OpenApiSchemaProperty, params: Params, context: ICrudRouteContext)
     => Promise<ICrudListColumn | ICrudListColumn[]>;
 
 export type CrudUpdateResourcesFunc = (resources: any, injector: Injector, response: any, context: ICrudRouteContext) => Promise<void>;
@@ -126,8 +127,8 @@ export type CrudRouteMethod = "request" | "save" | "delete" | "import" | "export
 
 export interface CrudRequestPath {
     url: string;
-    options?: IRequestOptions;
-    params?: IHttpParams;
+    options?: HttpRequestOptions;
+    params?: HttpRequestQuery;
 }
 
 export type GetRequestPath = (

@@ -12,7 +12,7 @@ import {
 import {Subscription} from "rxjs";
 import {
     GlobalTemplateService,
-    IOpenApiSchemaProperty,
+    OpenApiSchemaProperty,
     ITimer,
     ILanguageService,
     TimerUtils,
@@ -34,7 +34,7 @@ export class CrudCellComponent implements OnInit, OnChanges, OnDestroy {
     @Input() item: {[col: string]: any};
     @Input() list: ICrudList;
     @Input() id: string;
-    @Input() property: IOpenApiSchemaProperty;
+    @Input() property: OpenApiSchemaProperty;
 
     multi: boolean;
     template: TemplateRef<any>;
