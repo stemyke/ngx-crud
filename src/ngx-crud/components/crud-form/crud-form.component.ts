@@ -56,7 +56,6 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     }
 
     reset() {
-        // this.forms.patchGroup(this.data, this.formModel, this.formGroup);
         this.form().reset();
         this.formChanged.set(null);
     }
@@ -213,6 +212,11 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         this.formFields = this.formFieldGroup.fieldGroup;
     }
 
+    protected async customizeFormData(data: any): Promise<any> {
+        return await this.settings.customizeFormData(data, this.injector, this.formFieldGroup, this.context)
+            ?? data;
+    }
+
     protected subToState() {
         this.subscription = ObservableUtils.multiSubscription(
             this.subscription,
@@ -229,7 +233,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                         );
                         // Customize data
                         const data = await this.api.get(path, options);
-                        this.data = await this.settings.customizeFormData(data, this.injector, this.formFieldGroup, this.context) ?? data;
+                        this.data = this.customizeFormData(data);
                         this.context = Object.assign(
                             {},
                             this.snapshot.data.context,
