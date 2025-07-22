@@ -17,6 +17,7 @@ import {
     AUTH_SERVICE,
     DIALOG_SERVICE,
     EventsService,
+    HttpRequestOptions,
     IApiService,
     IAsyncMessage,
     IAuthService,
@@ -25,7 +26,7 @@ import {
     IToasterService,
     ObjectUtils,
     OpenApiService,
-    HttpRequestOptions,
+    StringUtils,
     TOASTER_SERVICE
 } from "@stemy/ngx-utils";
 import {DynamicFormService} from "@stemy/ngx-dynamic-form";
@@ -172,6 +173,7 @@ export class BaseCrudComponent implements ICrudComponent, OnInit, OnDestroy {
             const res = {...btn} as ICrudRouteButton<string>;
             res.icon = selectBtnProp(btn.icon, actionCtx, btn.button, "");
             res.type = res.type || "secondary";
+            res.testId = res.testId || StringUtils.camelize(`${btn.button}-button`);
             return res;
         }) || [];
     }

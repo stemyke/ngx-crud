@@ -109,6 +109,7 @@ export interface ICrudRouteButton<IT = CrudButtonPropSetting> {
     hidden?: boolean | CrudButtonCheckFunc<boolean>;
     icon?: IT;
     type?: ButtonType;
+    testId?: string;
 }
 
 export interface ICrudRouteAction {

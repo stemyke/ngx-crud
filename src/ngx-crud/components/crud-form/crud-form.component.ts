@@ -233,7 +233,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                         );
                         // Customize data
                         const data = await this.api.get(path, options);
-                        this.data = this.customizeFormData(data);
+                        this.data = await this.customizeFormData(data);
                         this.context = Object.assign(
                             {},
                             this.snapshot.data.context,

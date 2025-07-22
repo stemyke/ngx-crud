@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-crud",
-    "version": "19.6.1",
+    "version": "19.6.2",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
@@ -29,7 +29,7 @@
         "@floating-ui/dom": "^1.7.1",
         "zone.js": "^0.15.1",
         "json5": "^2.2.3",
-        "@stemy/ngx-utils": ">=19.6.0",
+        "@stemy/ngx-utils": ">=19.6.3",
         "@ngx-formly/core": "^6.3.12",
         "@ngx-formly/bootstrap": "^6.3.12",
         "ngx-mask": "^17.1.8",
@@ -53,7 +53,7 @@
         "@floating-ui/dom": "^1.7.1",
         "zone.js": "^0.15.1",
         "json5": "^2.2.3",
-        "@stemy/ngx-utils": "^19.6.0",
+        "@stemy/ngx-utils": "^19.6.3",
         "@ngx-formly/core": "^6.3.12",
         "@ngx-formly/bootstrap": "^6.3.12",
         "ngx-mask": "^17.1.8",

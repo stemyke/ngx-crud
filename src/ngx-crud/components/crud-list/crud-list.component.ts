@@ -10,6 +10,7 @@ import {
     ObjectUtils,
     ObservableUtils,
     OpenApiSchema,
+    StringUtils,
     TableDataLoader,
     TableFilterType,
     TimerUtils
@@ -205,7 +206,8 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                             title: action.title,
                             icon,
                             status,
-                            action: (_, ev: MouseEvent) => this.callAction(action.id, item, ev)
+                            action: (_, ev: MouseEvent) => this.callAction(action.id, item, ev),
+                            testId: StringUtils.camelize(`${action.id}-button`)
                         };
                     }).filter(Boolean);
                     hasActions = hasActions && itemActions.length > 0;

@@ -1,6 +1,7 @@
 <ng-template #content>
     <ng-container *ngIf="dataLoader">
         <dynamic-table class="table mb-lg"
+                       [testId]="settings.id"
                        [columns]="tableColumns"
                        [showFilter]="settings.filter"
                        [dataLoader]="dataLoader"
@@ -29,10 +30,11 @@
 <ng-template #footer>
     <div class="crud-card-buttons">
         <ng-container *ngIf="addButton">
-            <btn (click)="addItem()" [icon]="addButton"></btn>
+            <btn data-testid="AddButton" (click)="addItem()" [icon]="addButton"></btn>
         </ng-container>
         <ng-container *ngFor="let button of buttons">
-            <btn [label]="settings.id + '.' + button.button"
+            <btn [attr.data-testid]="button.testId"
+                 [label]="settings.id + '.' + button.button"
                  [type]="button.type"
                  [async-method]="callButton"
                  [context]="button">

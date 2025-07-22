@@ -26,6 +26,7 @@
             @for (action of value; track action) {
                 <div class="crud-action">
                     <btn type="transparent"
+                         [attr.data-testid]="action.testId"
                          [icon]="action.icon"
                          [tooltip]="action.title"
                          [async-method]="action.action"></btn>
