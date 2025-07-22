@@ -12,15 +12,17 @@
                        [dragEnterFn]="dragEnterFn"
                        [dropFn]="dropFn"
                        #table>
-            <ng-template [pure]="true" [column]="columnNames" let-col="column" let-item="item">
-                <td [ngClass]="'column-' + col" (click)="callAction(settings.rowAction, item)">
+            <ng-template [pure]="true" [column]="columnNames" let-context let-column="column" let-item="item">
+                <td [ngClass]="'column-' + column"
+                    [attr.data-testid]="settings.id + '-' + column + '-' + context.rowIndex"
+                    (click)="callAction(settings.rowAction, item)">
                     <ng-container [ngComponentOutlet]="cellComponent"
                                   [ngComponentOutletInputs]="{
-                                        value: item | getValue: col,
+                                        value: item | getValue: column,
                                         item: item,
                                         list: this,
-                                        id: col,
-                                        property: tableColumns[col].property
+                                        id: column,
+                                        property: tableColumns[column].property
                                       }"></ng-container>
                 </td>
             </ng-template>
