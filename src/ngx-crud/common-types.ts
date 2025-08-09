@@ -3,19 +3,27 @@ import {ActivatedRouteSnapshot, Data, Params, UrlTree} from "@angular/router";
 import {Subject} from "rxjs";
 import {
     ButtonType,
-    IAsyncMessage,
-    OpenApiSchemaProperty,
     HttpRequestOptions,
     HttpRequestQuery,
+    IApiService,
+    IAsyncMessage,
     IPaginationData,
     IResolveFactory,
     IRoute,
     ITableColumn,
     ITableDragEvent,
+    OpenApiSchemaProperty,
     RouteValidator,
-    TabOption
+    TabOption,
+    TypedProvider
 } from "@stemy/ngx-utils";
-import {FormFieldConfig, FormFieldCustomizer, FormFieldLabelCustomizer,} from "@stemy/ngx-dynamic-form";
+import {
+    FormFieldChangeEvent,
+    FormFieldConfig,
+    FormFieldCustomizer,
+    FormFieldLabelCustomizer
+} from "@stemy/ngx-dynamic-form";
+import {CrudFormComponent} from "./components/crud-form/crud-form.component";
 
 // --- CRUD ---
 export interface CrudRouteLink extends TabOption {
@@ -48,9 +56,13 @@ export interface CrudDataType {
 
 export interface CrudDataSource {
     loadData: (page: number, itemsPerPage: number) => Promise<IPaginationData>;
+
     refresh(time?: number): void;
+
     setFilter(filter: string): void;
+
     setSorting(column: string): void;
+
     setQueryValue(col: string, value: string): void;
 }
 
@@ -64,6 +76,7 @@ export interface CrudRouteContextBase {
 
 export interface ICrudRouteContext extends CrudRouteContextBase {
     primaryRequest: CrudRouteRequest;
+
     [key: string]: any;
 }
 
@@ -140,7 +153,9 @@ export type GetBackPath = (context: ICrudRouteActionContext) => string;
 
 export type GetDataType = (context: ICrudRouteContext, injector: Injector) => string;
 
-export type CrudDragHandler<R = boolean> = (ev: ITableDragEvent, context: ICrudRouteActionContext, injector: Injector) => R;
+export type CrudDragHandlerFunc<R = boolean> = (ev: ITableDragEvent, context: ICrudRouteActionContext, injector: Injector) => R;
+
+export type CrudFormChangeFunc = (ev: FormFieldChangeEvent, context: ICrudRouteActionContext) => void;
 
 export interface ICrudRouteData {
     name?: string;
@@ -148,6 +163,20 @@ export interface ICrudRouteData {
     defaultPath?: string;
 
     [key: string]: any;
+}
+
+export interface CrudApiService {
+    get(url: string, options?: HttpRequestOptions): Promise<any>;
+
+    delete(url: string, options?: HttpRequestOptions): Promise<any>;
+
+    post(url: string, body?: any, options?: HttpRequestOptions): Promise<any>;
+
+    patch(url: string, body?: any, options?: HttpRequestOptions): Promise<any>;
+
+    list(url: string, params: HttpRequestQuery, options?: HttpRequestOptions): Promise<IPaginationData>;
+
+    makeListParams(page: number, itemsPerPage: number, orderBy?: string, orderDescending?: boolean, filter?: string): HttpRequestQuery;
 }
 
 export interface ICrudRouteParams {
@@ -175,6 +204,10 @@ export interface ICrudRouteParams {
     deleteButton?: CrudButtonPropSetting;
     deleteAction?: CrudButtonFunc;
     saveButton?: CrudButtonPropSetting;
+    /**
+     * If provided, this can change the used ApiService entirely
+     */
+    api?: TypedProvider<CrudApiService>;
     /**
      * Title of the action buttons list column
      */
@@ -286,15 +319,19 @@ export interface ICrudRouteParams {
     /**
      * Drag start handler in list component
      */
-    onDragStart?: CrudDragHandler;
+    onDragStart?: CrudDragHandlerFunc;
     /**
      * Drag enter handler in list component
      */
-    onDragEnter?: CrudDragHandler;
+    onDragEnter?: CrudDragHandlerFunc;
     /**
      * Drop handler in list component
      */
-    onDrop?: CrudDragHandler<void>;
+    onDrop?: CrudDragHandlerFunc<void>;
+    /**
+     * Drop handler in list component
+     */
+    onFormChanged?: CrudFormChangeFunc;
 }
 
 export interface ICrudRouteOptions extends ICrudRouteParams {
@@ -383,6 +420,8 @@ export const FILTER_PARAM_NAME = new InjectionToken<string>("filter-param-name")
 export const QUERY_PARAM_NAME = new InjectionToken<string>("query-param-name");
 
 export const COMPONENT_TYPES = new InjectionToken<ICrudComponentTypes>("crud-component-types");
+
+export const CRUD_API_SERVICE = new InjectionToken<IApiService>("crud-api-service");
 
 export const ACTIONS_COLUMN_TITLE = new InjectionToken<string>("actions-column-title");
 

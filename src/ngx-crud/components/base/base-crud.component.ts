@@ -13,17 +13,16 @@ import {
 import {ActivatedRoute, ActivatedRouteSnapshot, Router} from "@angular/router";
 import {Subscription} from "rxjs";
 import {
-    API_SERVICE,
     AUTH_SERVICE,
     DIALOG_SERVICE,
     EventsService,
     HttpRequestOptions,
-    IApiService,
     IAsyncMessage,
     IAuthService,
     IDialogService,
     ILanguageService,
     IToasterService,
+    LANGUAGE_SERVICE,
     ObjectUtils,
     OpenApiService,
     StringUtils,
@@ -33,6 +32,8 @@ import {DynamicFormService} from "@stemy/ngx-dynamic-form";
 
 import {
     ACTIONS_COLUMN_TITLE,
+    CRUD_API_SERVICE,
+    CrudApiService,
     CrudRouteMethod,
     CrudRouteRequest,
     CrudTreeItem,
@@ -69,10 +70,6 @@ export class BaseCrudComponent implements ICrudComponent, OnInit, OnDestroy {
         return this.route.snapshot;
     }
 
-    get language(): ILanguageService {
-        return this.api.language;
-    }
-
     get settings(): ICrudRouteSettings {
         return this.snapshot.data.settings;
     }
@@ -95,9 +92,10 @@ export class BaseCrudComponent implements ICrudComponent, OnInit, OnDestroy {
                 readonly events: EventsService,
                 readonly crud: CrudService,
                 @Inject(DIALOG_SERVICE) readonly dialog: IDialogService,
-                @Inject(API_SERVICE) readonly api: IApiService,
+                @Inject(CRUD_API_SERVICE) readonly api: CrudApiService,
                 @Inject(AUTH_SERVICE) readonly auth: IAuthService,
                 @Inject(TOASTER_SERVICE) readonly toaster: IToasterService,
+                @Inject(LANGUAGE_SERVICE) readonly language: ILanguageService,
                 @Inject(FILTER_PARAM_NAME) protected filterParamName: string,
                 @Inject(QUERY_PARAM_NAME) protected queryParamName: string,
                 @Inject(ACTIONS_COLUMN_TITLE) protected actionsTitle: string,

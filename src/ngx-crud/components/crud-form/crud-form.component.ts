@@ -3,7 +3,7 @@ import {HttpErrorResponse} from "@angular/common/http";
 import {rxResource} from "@angular/core/rxjs-interop";
 import {FormControl} from "@angular/forms";
 import {filter} from "rxjs";
-import {FormFieldConfig, IDynamicForm} from "@stemy/ngx-dynamic-form";
+import {FormFieldChangeEvent, FormFieldConfig, IDynamicForm} from "@stemy/ngx-dynamic-form";
 import {FileUtils, IAsyncMessage, ObjectUtils, ObservableUtils} from "@stemy/ngx-utils";
 
 import {ICrudComponent, ICrudRouteActionContext, CrudTreeItem} from "../../common-types";
@@ -264,5 +264,9 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                 timeout: 25
             })
         );
+    }
+
+    onFormChanges(ev: FormFieldChangeEvent) {
+        this.settings.onFormChanged?.(ev, this.getActionContext())
     }
 }

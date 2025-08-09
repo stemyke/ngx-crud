@@ -1,6 +1,6 @@
 import {Type} from "@angular/core";
 import {Route, Router} from "@angular/router";
-import {AuthGuard, IRoute, ObjectUtils} from "@stemy/ngx-utils";
+import {API_SERVICE, AuthGuard, IRoute, ObjectUtils} from "@stemy/ngx-utils";
 import {} from "@stemy/ngx-dynamic-form";
 
 import {
@@ -74,6 +74,9 @@ export function createCrudSettings(
         deleteButton: params?.deleteButton,
         deleteAction: params?.deleteAction,
         saveButton: params?.saveButton,
+        api: params?.api || {
+            useToken: API_SERVICE
+        },
         actionsTitle: params?.actionsTitle || "",
         customActions: params?.customActions || [],
         customButtons: params?.customButtons || [],
@@ -106,6 +109,7 @@ export function createCrudSettings(
         onDragStart: params?.onDragStart,
         onDragEnter: params?.onDragEnter,
         onDrop: params?.onDrop,
+        onFormChanged: params?.onFormChanged,
     };
 }
 

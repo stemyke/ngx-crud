@@ -27,6 +27,8 @@ export {
     GetRequestPath,
     GetBackPath,
     GetDataType,
+    CrudDragHandlerFunc,
+    CrudFormChangeFunc,
     ICrudRouteData,
     ICrudRouteParams,
     ICrudRouteOptions,

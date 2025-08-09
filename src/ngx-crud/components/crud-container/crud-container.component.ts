@@ -3,17 +3,18 @@ import {
     Component,
     ComponentRef,
     createComponent,
-    EnvironmentInjector, Injector,
+    Injector,
     OnDestroy,
     OnInit,
     ViewChild,
     ViewContainerRef,
     ViewEncapsulation
 } from "@angular/core";
-import {ActivatedRoute, Data, Router, UrlSerializer} from "@angular/router";
+import {ActivatedRoute, Data, Router} from "@angular/router";
 import {Subscription} from "rxjs";
+import {createTypedProvider} from "@stemy/ngx-utils";
 
-import {ICrudComponent, ICrudRouteSettings} from "../../common-types";
+import {CRUD_API_SERVICE, ICrudComponent, ICrudRouteSettings} from "../../common-types";
 import {CrudService} from "../../services/crud.service";
 
 @Component({
@@ -24,9 +25,9 @@ import {CrudService} from "../../services/crud.service";
 })
 export class CrudContainerComponent implements OnInit, OnDestroy {
 
-    @ViewChild('header', { read: ViewContainerRef, static: true }) header: ViewContainerRef;
-    @ViewChild('content', { read: ViewContainerRef, static: true }) content: ViewContainerRef;
-    @ViewChild('footer', { read: ViewContainerRef, static: true }) footer: ViewContainerRef;
+    @ViewChild("header", {read: ViewContainerRef, static: true}) header: ViewContainerRef;
+    @ViewChild("content", {read: ViewContainerRef, static: true}) content: ViewContainerRef;
+    @ViewChild("footer", {read: ViewContainerRef, static: true}) footer: ViewContainerRef;
 
     data: Data;
     settings: ICrudRouteSettings;
@@ -60,7 +61,13 @@ export class CrudContainerComponent implements OnInit, OnDestroy {
             }
             this.componentRef = createComponent(type, {
                 environmentInjector: this.appRef.injector,
-                elementInjector: this.injector
+                elementInjector: Injector.create({
+                    providers: [
+                        createTypedProvider(CRUD_API_SERVICE, this.settings.api)
+                    ],
+                    parent: this.injector,
+
+                })
             });
             this.appRef.attachView(this.componentRef.hostView);
             this.attach(this.componentRef.instance);

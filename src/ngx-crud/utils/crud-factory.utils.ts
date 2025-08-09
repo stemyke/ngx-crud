@@ -1,4 +1,4 @@
-import {cachedFactory, CachedProvider} from "@stemy/ngx-utils";
+import {cachedFactory, TypedProvider} from "@stemy/ngx-utils";
 
 import {
     CrudDataCustomizerFunc,
@@ -8,7 +8,7 @@ import {
     IUpdateResources
 } from "../common-types";
 
-export function customizeFormData(...providers: CachedProvider<IFormDataCustomizer>[]): CrudDataCustomizerFunc {
+export function customizeFormData(...providers: TypedProvider<IFormDataCustomizer>[]): CrudDataCustomizerFunc {
     const factory = cachedFactory(providers);
     return async (data, injector, model, context) => {
         const customizers = factory(injector);
@@ -19,7 +19,7 @@ export function customizeFormData(...providers: CachedProvider<IFormDataCustomiz
     }
 }
 
-export function customizeSerializedData(...providers: CachedProvider<ISerializedDataCustomizer>[]): CrudDataCustomizerFunc {
+export function customizeSerializedData(...providers: TypedProvider<ISerializedDataCustomizer>[]): CrudDataCustomizerFunc {
     const factory = cachedFactory(providers);
     return async (data, injector, model, context) => {
         const customizers = factory(injector);
@@ -31,7 +31,7 @@ export function customizeSerializedData(...providers: CachedProvider<ISerialized
     }
 }
 
-export function updateAdditionalResources(...providers: CachedProvider<IUpdateResources>[]): CrudUpdateResourcesFunc {
+export function updateAdditionalResources(...providers: TypedProvider<IUpdateResources>[]): CrudUpdateResourcesFunc {
     const factory = cachedFactory(providers);
     return async (resources, injector, response, context) => {
         const customizers = factory(injector);
