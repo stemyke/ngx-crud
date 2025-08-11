@@ -157,14 +157,6 @@ export type CrudDragHandlerFunc<R = boolean> = (ev: ITableDragEvent, context: IC
 
 export type CrudFormChangeFunc = (ev: FormFieldChangeEvent, context: ICrudRouteActionContext) => void;
 
-export interface ICrudRouteData {
-    name?: string;
-    icon?: string;
-    defaultPath?: string;
-
-    [key: string]: any;
-}
-
 export interface CrudApiService {
     get(url: string, options?: HttpRequestOptions): Promise<any>;
 
@@ -177,6 +169,14 @@ export interface CrudApiService {
     list(url: string, params: HttpRequestQuery, options?: HttpRequestOptions): Promise<IPaginationData>;
 
     makeListParams(page: number, itemsPerPage: number, orderBy?: string, orderDescending?: boolean, filter?: string): HttpRequestQuery;
+}
+
+export interface ICrudRouteData {
+    name?: string;
+    icon?: string;
+    defaultPath?: string;
+
+    [key: string]: any;
 }
 
 export interface ICrudRouteParams {

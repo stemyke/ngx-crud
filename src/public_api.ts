@@ -29,6 +29,7 @@ export {
     GetDataType,
     CrudDragHandlerFunc,
     CrudFormChangeFunc,
+    CrudApiService,
     ICrudRouteData,
     ICrudRouteParams,
     ICrudRouteOptions,
@@ -41,6 +42,7 @@ export {
     FILTER_PARAM_NAME,
     QUERY_PARAM_NAME,
     COMPONENT_TYPES,
+    CRUD_API_SERVICE,
     ACTIONS_COLUMN_TITLE,
     ICrudModuleConfig
 } from "./ngx-crud/common-types";
