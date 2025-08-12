@@ -65,7 +65,7 @@ export function createCrudSettings(
         mode: params?.mode || "routes",
         useTabs: params?.useTabs || false,
         hideMain: params?.hideMain || false,
-        addButton: params?.addButton,
+        addButton: params?.addButton ?? true,
         addAction: params?.addAction || defaultCrudAction,
         viewButton: params?.viewButton || false,
         viewAction: params?.viewAction || defaultCrudAction,
