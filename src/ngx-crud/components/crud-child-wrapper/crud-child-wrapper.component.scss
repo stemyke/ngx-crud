@@ -16,8 +16,6 @@
 .crud-wrapper.mode-dialog {
     position: relative;
 
-    --close-bg: rgba(0, 0, 0, 0.2);
-    --close-size: 14px;
     --close-distance: 16px;
     --close-top-distance: var(--close-distance);
     --close-right-distance: var(--close-distance);
@@ -31,7 +29,7 @@
     }
 
     .child-wrapper.mode-dialog {
-        z-index: 50;
+        z-index: 100;
         display: grid;
         place-items: center;
         pointer-events: none;
@@ -52,43 +50,10 @@
         pointer-events: auto;
         z-index: 1;
 
-        a.child-close-btn {
-
-            --rotation: 45deg;
-
+        close-btn.child-close-btn {
             position: absolute;
             top: var(--close-top-distance);
             right: var(--close-right-distance);
-            width: var(--close-size);
-            height: var(--close-size);
-            cursor: pointer;
-            transition: 0.2s ease;
-            background-color: transparent;
-            border-radius: 3px;
-
-            &:before, &:after {
-                content: '';
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                width: 80%;
-                transform: translate(-50%, -50%) rotate(var(--rotation));
-                height: 1px;
-                background: gray;
-                transition: 0.2s ease;
-            }
-
-            &:after {
-                --rotation: -45deg;
-            }
-
-            &:hover {
-                background-color: var(--close-bg);
-
-                &:before, &:after {
-                    background: black;
-                }
-            }
         }
     }
 }

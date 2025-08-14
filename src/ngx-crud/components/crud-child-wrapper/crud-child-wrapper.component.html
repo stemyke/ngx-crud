@@ -11,7 +11,9 @@
          (click)="close(before, $event)">
         <div class="child-content">
             <router-outlet name="before" #before="outlet"></router-outlet>
-            <a class="child-close-btn" (click)="close(before, $event)" *ngIf="beforeState.value.dialog"></a>
+            @if (beforeState.value.dialog) {
+                <close-btn class="child-close-btn" (click)="close(before, $event)"></close-btn>
+            }
         </div>
     </div>
     <ng-template #simpleWrapper>
@@ -29,7 +31,9 @@
          (click)="close(after, $event)">
         <div class="child-content">
             <router-outlet name="after" #after="outlet"></router-outlet>
-            <a class="child-close-btn" (click)="close(after, $event)" *ngIf="afterState.value.dialog"></a>
+            @if (afterState.value.dialog) {
+                <close-btn class="child-close-btn" (click)="close(after, $event)"></close-btn>
+            }
         </div>
     </div>
 </div>
