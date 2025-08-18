@@ -155,7 +155,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     }
 
     protected async onLeave(tree: CrudTreeItem[]): Promise<boolean> {
-        if (this.formChanged()) {
+        if (this.saveButton && this.formChanged()) {
             const ctx = await this.forms.serialize(this.formFields);
             const result = await new Promise<boolean>(resolve => {
                 this.dialog.confirm({
