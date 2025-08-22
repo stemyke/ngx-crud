@@ -2,6 +2,7 @@ import {InjectionToken, Injector, TemplateRef, Type} from "@angular/core";
 import {ActivatedRouteSnapshot, Data, Params, UrlTree} from "@angular/router";
 import {Subject} from "rxjs";
 import {
+    AsyncMethod,
     ButtonType,
     HttpRequestOptions,
     HttpRequestQuery,
@@ -21,7 +22,7 @@ import {
     FormFieldChangeEvent,
     FormFieldConfig,
     FormFieldCustomizer,
-    FormFieldLabelCustomizer
+    FormFieldLabelCustomizer, IDynamicForm
 } from "@stemy/ngx-dynamic-form";
 import {CrudFormComponent} from "./components/crud-form/crud-form.component";
 
@@ -71,6 +72,8 @@ export interface CrudRouteContextBase {
     params: Params;
     routeData: Data;
     page?: IPaginationData;
+    form?: IDynamicForm;
+    sendForm?: AsyncMethod;
     entity?: Record<string, any>;
 }
 

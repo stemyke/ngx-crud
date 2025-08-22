@@ -1,4 +1,4 @@
-import {Component, linkedSignal, OnInit, viewChild, ViewEncapsulation} from "@angular/core";
+import {Component, linkedSignal, OnInit, untracked, viewChild, ViewEncapsulation} from "@angular/core";
 import {HttpErrorResponse} from "@angular/common/http";
 import {rxResource} from "@angular/core/rxjs-interop";
 import {FormControl} from "@angular/forms";
@@ -148,9 +148,12 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
     }
 
     getActionContext(): ICrudRouteActionContext {
+        const form = untracked(() => this.form());
         return {
             ...super.getActionContext(),
-            entity: {...this.data, id: this.id},
+            form,
+            sendForm: (context) => this.sendForm(form, context),
+            entity: {...this.data, id: this.id}
         };
     }
 
