@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-crud",
-    "version": "19.6.10",
+    "version": "19.6.11",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
@@ -32,7 +32,7 @@
         "@stemy/ngx-utils": ">=19.6.9",
         "@ngx-formly/core": "^7.0.0",
         "@ngx-formly/bootstrap": "^7.0.0",
-        "ngx-mask": "^17.1.8",
+        "ngx-mask": "^19.0.7",
         "@stemy/ngx-dynamic-form": ">=19.6.5"
     },
     "devDependencies": {
@@ -56,7 +56,7 @@
         "@stemy/ngx-utils": "^19.6.9",
         "@ngx-formly/core": "^7.0.0",
         "@ngx-formly/bootstrap": "^7.0.0",
-        "ngx-mask": "^17.1.8",
+        "ngx-mask": "^19.0.7",
         "@stemy/ngx-dynamic-form": "^19.6.5",
         "@angular/platform-browser-dynamic": "^19.2.14",
         "@angular-devkit/build-angular": "^19.2.14",
