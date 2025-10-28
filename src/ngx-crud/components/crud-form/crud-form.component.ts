@@ -96,7 +96,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         }
     }
 
-    sendForm = async (form: IDynamicForm, context: any = {}): Promise<IAsyncMessage> => {
+    async sendForm(form: IDynamicForm, context: Record<string, any> = {}): Promise<IAsyncMessage> {
         let data: any = null;
         try {
             data = await this.forms.serializeForm(form, true);
@@ -131,8 +131,6 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
                 this.snapshot.data.context,
                 {entity: this.data}
             );
-            // Navigate to where its needed
-            await this.navigateBack();
             return {
                 message: `message.${action}.success`,
                 context: response
@@ -147,12 +145,27 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         }
     }
 
+    saveForm = async (form: IDynamicForm, context: Record<string, any> = {}): Promise<IAsyncMessage> => {
+        const response = await this.sendForm(form, context);
+        try {
+            // Navigate to where its needed
+            await this.navigateBack();
+            return response;
+        } catch (reason) {
+            throw {
+                message: `message.navigation.error`,
+                context: {reason}
+            }
+        }
+    }
+
     getActionContext(): ICrudRouteActionContext {
         const form = untracked(() => this.form());
         return {
             ...super.getActionContext(),
             form,
             sendForm: (context) => this.sendForm(form, context),
+            navigateBack: () => this.navigateBack(),
             entity: {...this.data, id: this.id}
         };
     }

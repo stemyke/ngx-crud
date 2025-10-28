@@ -9,7 +9,7 @@ import {
     IApiService,
     IAsyncMessage,
     IPaginationData,
-    IResolveFactory,
+    ResolveFactory,
     IRoute,
     ITableColumn,
     ITableDragEvent,
@@ -24,7 +24,6 @@ import {
     FormFieldCustomizer,
     FormFieldLabelCustomizer, IDynamicForm
 } from "@stemy/ngx-dynamic-form";
-import {CrudFormComponent} from "./components/crud-form/crud-form.component";
 
 // --- CRUD ---
 export interface CrudRouteLink extends TabOption {
@@ -74,12 +73,12 @@ export interface CrudRouteContextBase {
     page?: IPaginationData;
     form?: IDynamicForm;
     sendForm?: AsyncMethod;
+    navigateBack?: () => Promise<void>;
     entity?: Record<string, any>;
 }
 
 export interface ICrudRouteContext extends CrudRouteContextBase {
     primaryRequest: CrudRouteRequest;
-
     [key: string]: any;
 }
 
@@ -238,7 +237,7 @@ export interface ICrudRouteParams {
     /**
      * Defines custom auth guards for the child routes
      */
-    guards?: Array<IResolveFactory | RouteValidator>;
+    guards?: Array<ResolveFactory<RouteValidator> | RouteValidator>;
     /**
      * A leave handler for any child rute
      */
