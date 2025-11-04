@@ -344,6 +344,7 @@ export interface ICrudRouteOptions extends ICrudRouteParams {
     editRequest?: CrudRouteRequest;
     viewComponent?: Type<any>;
     viewRequest?: CrudRouteRequest;
+    containerComponent?: Type<any>;
     menu?: boolean;
     icon?: string;
     defaultParams?: Record<string, any>;
@@ -361,6 +362,7 @@ export interface ICrudRouteSettings extends Required<ICrudRouteParams> {
     primaryRequest: CrudRouteRequest;
     getDataType: GetDataType;
     component: Type<any>;
+    container: Type<any>;
 }
 
 export interface ICrudComponent {

@@ -54,7 +54,7 @@ export function selectBtnProp<T extends string>(prop: CrudButtonPropSetting<T>, 
 
 export function createCrudSettings(
     id: string, endpoint: string, primaryRequest: CrudRouteRequest,
-    getDataType: GetDataType, params?: ICrudRouteParams, component?: Type<any>
+    getDataType: GetDataType, params?: ICrudRouteParams, component?: Type<any>, container?: Type<any>
 ): ICrudRouteSettings {
     return {
         id,
@@ -62,6 +62,7 @@ export function createCrudSettings(
         primaryRequest,
         getDataType,
         component,
+        container,
         mode: params?.mode || "routes",
         useTabs: params?.useTabs || false,
         hideMain: params?.hideMain || false,
@@ -180,7 +181,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
         createCrudRoute(
             `add-${id}`,
             `${subPath}add`,
-            createCrudSettings(id, endpoint, options.addRequest || "add", getDataType, options, options.addComponent),
+            createCrudSettings(id, endpoint, options.addRequest || "add", getDataType, options, options.addComponent, options.containerComponent),
             {
                 mode: "none",
                 page: id,
@@ -194,7 +195,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
         createCrudRoute(
             `edit-${id}`,
             `${subPath}edit/:id`,
-            createCrudSettings(id, endpoint, options.editRequest || "edit", getDataType, options, options.editComponent),
+            createCrudSettings(id, endpoint, options.editRequest || "edit", getDataType, options, options.editComponent, options.containerComponent),
             {
                 mode: "none",
                 page: id,
@@ -208,7 +209,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
         createCrudRoute(
             `view-${id}`,
             `${subPath}view/:id`,
-            createCrudSettings(id, endpoint, options.viewRequest || "edit", getDataType, options, options.viewComponent),
+            createCrudSettings(id, endpoint, options.viewRequest || "edit", getDataType, options, options.viewComponent, options.containerComponent),
             {
                 mode: "none",
                 page: id,
@@ -225,7 +226,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
         createCrudRoute(
             id,
             path,
-            createCrudSettings(id, endpoint, "list", getDataType, options, options.listComponent),
+            createCrudSettings(id, endpoint, "list", getDataType, options, options.listComponent, options.containerComponent),
             {
                 name: options.menu !== false && !defaultPath.includes(":") ? `menu.${id}` : null,
                 icon: options.icon,

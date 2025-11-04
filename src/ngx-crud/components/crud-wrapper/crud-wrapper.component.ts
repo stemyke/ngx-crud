@@ -40,7 +40,6 @@ export class CrudWrapperComponent implements OnInit, OnDestroy {
                 protected urlSerializer: UrlSerializer) {
         this.data = {};
         this.settings = {} as any;
-        this.componentType = this.crud.getComponentType("container");
         this.beforeState = new BehaviorSubject(defaultOutletState);
         this.afterState = new BehaviorSubject(defaultOutletState);
     }
@@ -49,6 +48,7 @@ export class CrudWrapperComponent implements OnInit, OnDestroy {
         this.subscription = this.route.data.subscribe(data => {
             this.data = data;
             this.settings = data.settings as ICrudRouteSettings;
+            this.componentType = this.settings?.container || this.crud.getComponentType("container");
         });
     }
 
