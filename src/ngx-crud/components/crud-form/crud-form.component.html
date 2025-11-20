@@ -1,5 +1,5 @@
 <ng-template #content>
-    @if (formFieldGroup) {
+    @if (formFieldGroup && !loading) {
         <dynamic-form #crudForm
                       (onChanges)="onFormChanges($event)"
                       [data]="data"

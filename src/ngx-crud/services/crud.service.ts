@@ -36,6 +36,6 @@ export class CrudService implements CanDeactivate<any> {
         if (!settings || !settings.onLeave) return true;
         const tree = this.getTree(snapshot);
         const component = tree[tree.length - 1]?.component as ICrudComponent;
-        return settings.onLeave(component.getActionContext(), tree);
+        return !component?.getActionContext || await settings.onLeave(component.getActionContext(), tree);
     }
 }
