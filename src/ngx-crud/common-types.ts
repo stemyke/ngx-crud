@@ -160,6 +160,8 @@ export type CrudDragHandlerFunc<R = boolean> = (ev: ITableDragEvent, context: IC
 export type CrudFormChangeFunc = (ev: FormFieldChangeEvent, context: ICrudRouteActionContext) => void;
 
 export interface CrudApiService {
+    url(url: string): string;
+
     get(url: string, options?: HttpRequestOptions): Promise<any>;
 
     delete(url: string, options?: HttpRequestOptions): Promise<any>;

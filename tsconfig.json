@@ -16,6 +16,7 @@
         "experimentalDecorators": true,
         "target": "es2018",
         "useDefineForClassFields": false,
+        "skipLibCheck": true,
         "typeRoots": [
             "node_modules/@types"
         ],
