@@ -149,7 +149,9 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         const response = await this.sendForm(form, context);
         try {
             // Navigate to where its needed
-            await this.navigateBack();
+            if (response) {
+                await this.navigateBack();
+            }
             return response;
         } catch (reason) {
             throw {
