@@ -50,7 +50,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         super.ngOnInit();
         this.data = {};
         this.files = {};
-        this.loading = false;
+        this.loading = true;
         this.formUpdated = false;
         this.initForm().then(() => this.subToState());
     }

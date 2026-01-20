@@ -6,17 +6,19 @@
                       [useTabs]="formFieldGroup.props.useTabs"
                       [fields]="formFields">
         </dynamic-form>
+        <ul class="import-export">
+            <li *ngFor="let ie of settings.importExports">
+                <label>{{ 'label.import-export.' + snapshot.data.id + '.' + ie | translate }}</label>
+                <upload [(ngModel)]="files[ie]" accept=".zip"></upload>
+                @if (files[ie]) {
+                    <btn label="button.import-zip" [async-method]="importFile" [context]="ie"></btn>
+                }
+                <btn label="button.export-zip" [async-method]="exportFile" [context]="ie"></btn>
+            </li>
+        </ul>
+    } @else {
+        <div class="crud-card-loading"></div>
     }
-    <ul class="import-export">
-        <li *ngFor="let ie of settings.importExports">
-            <label>{{ 'label.import-export.' + snapshot.data.id + '.' + ie | translate }}</label>
-            <upload [(ngModel)]="files[ie]" accept=".zip"></upload>
-            @if (files[ie]) {
-                <btn label="button.import-zip" [async-method]="importFile" [context]="ie"></btn>
-            }
-            <btn label="button.export-zip" [async-method]="exportFile" [context]="ie"></btn>
-        </li>
-    </ul>
 </ng-template>
 <ng-template #footer>
     <div class="crud-card-buttons">
