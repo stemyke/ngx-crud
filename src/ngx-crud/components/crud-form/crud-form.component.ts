@@ -101,6 +101,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         try {
             data = await this.forms.serializeForm(form, true);
         } catch (e) {
+            console.warn(`Form validation error:`, e);
             return null;
         }
         let additionalResources = {};
