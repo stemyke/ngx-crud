@@ -31,7 +31,7 @@ import {ICrudList} from "../../common-types";
 export class CrudCellComponent implements OnInit, OnChanges, OnDestroy {
 
     @Input() value: any;
-    @Input() item: {[col: string]: any};
+    @Input() item: Record<string, any>;
     @Input() list: ICrudList;
     @Input() id: string;
     @Input() property: OpenApiSchemaProperty;

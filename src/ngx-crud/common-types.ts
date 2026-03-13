@@ -16,7 +16,7 @@ import {
     OpenApiSchemaProperty,
     RouteValidator,
     TabOption,
-    TypedProvider
+    TypedProvider, MaybePromise, IRouteData
 } from "@stemy/ngx-utils";
 import {
     FormFieldChangeEvent,
@@ -109,8 +109,10 @@ export type CrudButtonActionSetting =
 
 export type CrudDataCustomizerFunc = (data: any, injector: Injector, field: FormFieldConfig, context: ICrudRouteContext) => Promise<any>;
 
+export type CrudColumnResult = MaybePromise<ICrudListColumn | ICrudListColumn[]>;
+
 export type CrudColumnCustomizerFunc = (column: ICrudListColumn, injector: Injector, property: OpenApiSchemaProperty, params: Params, context: ICrudRouteContext)
-    => Promise<ICrudListColumn | ICrudListColumn[]>;
+    => CrudColumnResult;
 
 export type CrudUpdateResourcesFunc = (resources: any, injector: Injector, response: any, context: ICrudRouteContext) => Promise<void>;
 
@@ -352,9 +354,13 @@ export interface ICrudRouteOptions extends ICrudRouteParams {
     defaultParams?: Record<string, any>;
     outlet?: string;
     listChildren?: IRoute[];
+    listData?: IRouteData;
     addChildren?: IRoute[];
+    addData?: IRouteData;
     editChildren?: IRoute[];
+    editData?: IRouteData;
     viewChildren?: IRoute[];
+    viewData?: IRouteData;
     formChildren?: IRoute[];
 }
 

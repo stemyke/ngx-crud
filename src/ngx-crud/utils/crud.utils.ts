@@ -1,6 +1,14 @@
 import {Type} from "@angular/core";
 import {Route, Router} from "@angular/router";
-import {API_SERVICE, AuthGuard, IRoute, ObjectUtils} from "@stemy/ngx-utils";
+import {
+    API_SERVICE,
+    AuthGuard,
+    IRoute,
+    ITableColumns,
+    ObjectUtils,
+    OpenApiSchema, OpenApiSchemaProperty,
+    TableFilterType
+} from "@stemy/ngx-utils";
 import {} from "@stemy/ngx-dynamic-form";
 
 import {
@@ -13,7 +21,7 @@ import {
     ICrudRouteOptions,
     ICrudRouteParams,
     ICrudRouteSettings,
-    CrudTreeItem
+    CrudTreeItem, CrudColumnCustomizerFunc, ICrudListColumn, CrudColumnResult
 } from "../common-types";
 import {getDataTransferType, getNavigateBackPath, getRequestPath, getRoutePath} from "./route.utils";
 import {ContextResolverService} from "../services/context-resolver.service";
@@ -183,6 +191,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
             `${subPath}add`,
             createCrudSettings(id, endpoint, options.addRequest || "add", getDataType, options, options.addComponent, options.containerComponent),
             {
+                ...(options.addData || {}),
                 mode: "none",
                 page: id,
             },
@@ -197,6 +206,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
             `${subPath}edit/:id`,
             createCrudSettings(id, endpoint, options.editRequest || "edit", getDataType, options, options.editComponent, options.containerComponent),
             {
+                ...(options.editData || {}),
                 mode: "none",
                 page: id,
             },
@@ -211,6 +221,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
             `${subPath}view/:id`,
             createCrudSettings(id, endpoint, options.viewRequest || "edit", getDataType, options, options.viewComponent, options.containerComponent),
             {
+                ...(options.viewData || {}),
                 mode: "none",
                 page: id,
             },
@@ -228,6 +239,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
             path,
             createCrudSettings(id, endpoint, "list", getDataType, options, options.listComponent, options.containerComponent),
             {
+                ...(options.listData || {}),
                 name: options.menu !== false && !defaultPath.includes(":") ? `menu.${id}` : null,
                 icon: options.icon,
                 actionOutlet: isInline ? formOutlet : "primary",
@@ -243,4 +255,75 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
         ),
         ...(isInline ? [] : formRoutes)
     ];
+}
+
+export async function createTableColumnsForSchema(
+    schema: OpenApiSchema,
+    id: string,
+    labelPrefix: string = "",
+    actionsTitle: string = undefined,
+    query: boolean = false,
+    customizer: (column: ICrudListColumn, property: OpenApiSchemaProperty) => CrudColumnResult
+): Promise<ITableColumns> {
+
+    const columns = {} as ITableColumns;
+    const actionsKey = `${id}-actions`;
+    const props = schema.properties;
+    const propNames = ObjectUtils.isString(actionsTitle) ? Object.keys(props).concat(actionsKey) : Object.keys(props);
+
+    for (const name of propNames) {
+        const property = props[name] || {
+            id: actionsKey,
+            type: "actions",
+            format: "array",
+            column: true,
+            disableSort: true,
+            disableFilter: true,
+        };
+        if (property.column === false) continue;
+        const title = name === actionsKey
+            ? actionsTitle
+            : `${labelPrefix}.${name}`;
+        let filterType: TableFilterType = null;
+        switch (property.type) {
+            case "array":
+                if (property.items?.enum) {
+                    filterType = "enum";
+                }
+                break;
+            case "string":
+                if (property.enum) {
+                    filterType = "enum";
+                } else if (property.format !== "date") {
+                    filterType = "text";
+                }
+                break;
+            case "boolean":
+                filterType = "checkbox";
+                break;
+        }
+        const column: ICrudListColumn = {
+            name,
+            title,
+            sort: property.disableSort ? null : name,
+            filter: query && filterType && !property.disableFilter,
+            filterType,
+            enum: property.enum || property.items?.enum || [],
+            enumPrefix: property.enumPrefix,
+            property,
+        };
+        const result = !customizer ? column : await customizer(column, property);
+        if (!result) {
+            continue;
+        }
+        if (Array.isArray(result)) {
+            result.forEach(c => {
+                columns[c.name] = c;
+            });
+            continue;
+        }
+        columns[result.name] = result;
+    }
+
+    return columns;
 }

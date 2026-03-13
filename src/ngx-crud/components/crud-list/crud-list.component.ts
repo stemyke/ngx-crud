@@ -17,7 +17,7 @@ import {
 } from "@stemy/ngx-utils";
 import {FormFieldConfig} from "@stemy/ngx-dynamic-form";
 import {CrudButtonActionSetting, ICrudList, ICrudRouteActionContext, ICrudRouteSettings} from "../../common-types"
-import {selectBtnProp} from "../../utils/crud.utils";
+import {createTableColumnsForSchema, selectBtnProp} from "../../utils/crud.utils";
 import {BaseCrudComponent} from "../base/base-crud.component";
 
 const defaultIcons: IconMap = {
@@ -105,68 +105,19 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
             const actionCtx = this.getActionContext();
             this.addButton = selectBtnProp(canAdd, actionCtx, "add", "plus", null);
             // --- Start creating table settings ---
-            const columns = {} as ITableColumns;
             const actionsKey = `${settings.id}-actions`;
-            const props = this.schema.properties;
-            const propNames = Object.keys(props).concat(actionsKey);
             const labelPrefix = settings.labelPrefix || settings.id;
-            for (const name of propNames) {
-                const property = props[name] || {
-                    id: actionsKey,
-                    type: "actions",
-                    format: "array",
-                    column: true,
-                    disableSort: true,
-                    disableFilter: true,
-                };
-                if (property.column === false) continue;
-                const title = name === actionsKey
-                    ? settings.actionsTitle || this.actionsTitle
-                    : `${labelPrefix}.${name}`;
-                let filterType: TableFilterType = null;
-                switch (property.type) {
-                    case "array":
-                        if (property.items?.enum) {
-                            filterType = "enum";
-                        }
-                        break;
-                    case "string":
-                        if (property.enum) {
-                            filterType = "enum";
-                        } else if (property.format !== "date") {
-                            filterType = "text";
-                        }
-                        break;
-                    case "boolean":
-                        filterType = "checkbox";
-                        break;
-                }
-                const column = await settings.customizeListColumn(
-                    {
-                        name,
-                        title,
-                        sort: property.disableSort ? null : name,
-                        filter: settings.query && filterType && !property.disableFilter,
-                        filterType,
-                        enum: property.enum || property.items?.enum || [],
-                        enumPrefix: property.enumPrefix,
-                        property,
-                    },
-                    this.injector, property, this.snapshot.params, this.context
-                );
-                if (!column) {
-                    continue;
-                }
-                if (Array.isArray(column)) {
-                    column.forEach(c => {
-                        columns[c.name] = c;
-                    });
-                    continue;
-                }
-                columns[column.name] = column;
-            }
-            this.tableColumns = columns;
-            this.columnNames = Object.keys(columns);
+            this.tableColumns = await createTableColumnsForSchema(
+                this.schema,
+                settings.id,
+                settings.labelPrefix || settings.id,
+                settings.actionsTitle || this.actionsTitle,
+                settings.query,
+                (column, property) => settings.customizeListColumn(
+                    column, this.injector, property, this.snapshot.params, this.context
+                )
+            );
+            this.columnNames = Object.keys(this.tableColumns);
             // --- Create data loader ---
             this.dataLoader = async (page, rowsPerPage, orderBy, orderDescending, filter, query) => {
                 const [path, options] = this.getRequestPath(
@@ -206,7 +157,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                             title: action.title,
                             icon,
                             status,
-                            action: (_, ev: MouseEvent) => this.callAction(action.id, item, ev),
+                            action: (it: any, ev: MouseEvent) => this.callAction(action.id, it, ev),
                             testId: StringUtils.camelize(`${action.id}-button`)
                         };
                     }).filter(Boolean);
@@ -214,7 +165,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                     item[actionsKey] = itemActions;
                 });
                 //  --- Add/remove actions column ---
-                this.tableColumns = Object.assign({}, columns);
+                this.tableColumns = Object.assign({}, this.tableColumns);
                 if (!hasActions) {
                     delete this.tableColumns[actionsKey];
                 }
