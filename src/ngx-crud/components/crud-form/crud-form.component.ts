@@ -231,6 +231,45 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
         this.formFields = this.formFieldGroup.fieldGroup;
     }
 
+    protected async loadData(): Promise<any> {
+        this.loading = true;
+        this.id = this.snapshot.params.id;
+        this.saveButton = selectBtnProp(this.settings.saveButton, this.getActionContext(), "save", "save");
+
+        try {
+            const [path, options] = this.getRequestPath(
+                this.getActionContext(), this.settings.primaryRequest, "request"
+            );
+            // Customize data
+            const data = await this.api.get(path, options);
+            this.data = await this.customizeFormData(data);
+            this.context = Object.assign(
+                {},
+                this.snapshot.data.context,
+                {entity: this.data}
+            );
+            this.formChanged.set(null);
+            this.generateButtons();
+        } catch (res) {
+            if (res instanceof HttpErrorResponse) {
+                const errorObj = res.message || res.error;
+                const error = ObjectUtils.isObject(errorObj) ? `${errorObj.message}` : `${res.error}`;
+                const action = `load-${this.id}`;
+                this.toaster.error(error
+                        ? (error.indexOf("Error") > -1 ? `message.${action}.error` : error)
+                        : `message.${action}.error`,
+                    {reason: res.error}
+                );
+            } else {
+                console.log(`Error happened in form, should navigate back`, res);
+            }
+            await this.navigateBack();
+            return;
+        }
+        this.formChanged.set(null);
+        this.loading = false;
+    }
+
     protected async customizeFormData(data: any): Promise<any> {
         return await this.settings.customizeFormData(data, this.injector, this.formFieldGroup, this.context)
             ?? data;
@@ -242,42 +281,7 @@ export class CrudFormComponent extends BaseCrudComponent implements OnInit {
             ObservableUtils.subscribe({
                 subjects: [this.route.data, this.route.params],
                 cb: async () => {
-                    this.loading = true;
-                    this.id = this.snapshot.params.id;
-                    this.saveButton = selectBtnProp(this.settings.saveButton, this.getActionContext(), "save", "save");
-
-                    try {
-                        const [path, options] = this.getRequestPath(
-                            this.getActionContext(), this.settings.primaryRequest, "request"
-                        );
-                        // Customize data
-                        const data = await this.api.get(path, options);
-                        this.data = await this.customizeFormData(data);
-                        this.context = Object.assign(
-                            {},
-                            this.snapshot.data.context,
-                            {entity: this.data}
-                        );
-                        this.formChanged.set(null);
-                        this.generateButtons();
-                    } catch (res) {
-                        if (res instanceof HttpErrorResponse) {
-                            const errorObj = res.message || res.error;
-                            const error = ObjectUtils.isObject(errorObj) ? `${errorObj.message}` : `${res.error}`;
-                            const action = `load-${this.id}`;
-                            this.toaster.error(error
-                                    ? (error.indexOf("Error") > -1 ? `message.${action}.error` : error)
-                                    : `message.${action}.error`,
-                                {reason: res.error}
-                            );
-                        } else {
-                            console.log(`Error happened in form, should navigate back`, res);
-                        }
-                        await this.navigateBack();
-                        return;
-                    }
-                    this.formChanged.set(null);
-                    this.loading = false;
+                    await this.loadData();
                     this.cdr.detectChanges();
                 },
                 timeout: 25
