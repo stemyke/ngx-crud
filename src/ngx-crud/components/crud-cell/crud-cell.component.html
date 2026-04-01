@@ -1,53 +1,47 @@
-<ng-template #defaultTemplate>
-    <ng-container [ngSwitch]="property?.type">
-        <div *ngSwitchCase="'file'" class="upload">
-            <ul class="images" *ngIf="!multi">
-                <li class="image" *ngIf="value" [ngStyle]="{backgroundImage: value}"></li>
-            </ul>
-            <ul class="images" *ngIf="multi">
-                <li class="image" *ngFor="let image of value; let i = index" [ngStyle]="{backgroundImage: image}"></li>
-            </ul>
-        </div>
-        <div *ngSwitchCase="'boolean'" class="checkbox">
-            <icon [name]="value ? 'check' : 'xmark'"></icon>
-        </div>
-        <ng-container *ngSwitchCase="'date'">
-            {{ value | date: dateFormat }}
+<ng-container [ngSwitch]="property?.type">
+    <div *ngSwitchCase="'file'" class="upload">
+        <ul class="images" *ngIf="!multi">
+            <li class="image" *ngIf="value" [ngStyle]="{backgroundImage: value}"></li>
+        </ul>
+        <ul class="images" *ngIf="multi">
+            <li class="image" *ngFor="let image of value" [ngStyle]="{backgroundImage: image}"></li>
+        </ul>
+    </div>
+    <div *ngSwitchCase="'boolean'" class="checkbox">
+        <icon [name]="value ? 'check' : 'xmark'"></icon>
+    </div>
+    <ng-container *ngSwitchCase="'date'">
+        {{ value | date: dateFormat }}
+    </ng-container>
+    <ng-container *ngSwitchCase="'list'">
+        <ng-template #defaultList>
+            {{ value[property.labelField] || value.label || value.id }}
+        </ng-template>
+        <ng-container *ngIf="!value; else defaultList">
+            -
         </ng-container>
-        <ng-container *ngSwitchCase="'list'">
-            <ng-template #defaultList>
-                {{ value[property.labelField] || value.label || value.id }}
-            </ng-template>
-            <ng-container *ngIf="!value; else defaultList">
-                -
+    </ng-container>
+    <ng-container *ngSwitchCase="'actions'">
+        @for (action of value; track action) {
+            <div class="crud-action">
+                <btn type="transparent"
+                     [attr.data-testid]="action.testId"
+                     [icon]="action.icon"
+                     [tooltip]="action.title"
+                     [context]="item"
+                     [async-method]="action.action"></btn>
+                <div class="crud-action-status" [ngClass]="action.status || 'empty'"></div>
+            </div>
+        }
+    </ng-container>
+    <ng-container *ngSwitchDefault>
+        <ng-container [ngSwitch]="property?.format">
+            <ng-container *ngSwitchCase="'date'">
+                {{ value | date: dateFormat }}
             </ng-container>
-        </ng-container>
-        <ng-container *ngSwitchCase="'actions'">
-            @for (action of value; track action) {
-                <div class="crud-action">
-                    <btn type="transparent"
-                         [attr.data-testid]="action.testId"
-                         [icon]="action.icon"
-                         [tooltip]="action.title"
-                         [context]="item"
-                         [async-method]="action.action"></btn>
-                    <div class="crud-action-status" [ngClass]="action.status || 'empty'"></div>
-                </div>
-            }
-        </ng-container>
-        <ng-container *ngSwitchDefault>
-            <ng-container [ngSwitch]="property?.format">
-                <ng-container *ngSwitchCase="'date'">
-                    {{ value | date: dateFormat }}
-                </ng-container>
-                <ng-container *ngSwitchDefault>
-                    {{ value }}
-                </ng-container>
+            <ng-container *ngSwitchDefault>
+                {{ value ?? '-' }}
             </ng-container>
         </ng-container>
     </ng-container>
-</ng-template>
-<div [ngClass]="['crud-cell', 'crud-cell-' + property?.type]">
-    <ng-container [ngTemplateOutlet]="template || defaultTemplate"
-                  [ngTemplateOutletContext]="{property, value, item, list, defaultTemplate}"></ng-container>
-</div>
+</ng-container>

@@ -1,4 +1,4 @@
-import {Component, OnChanges, Type, ViewChild, ViewEncapsulation} from "@angular/core";
+import {Component, OnChanges, ViewChild, ViewEncapsulation} from "@angular/core";
 import {
     DynamicTableComponent,
     DynamicTableDragHandler,
@@ -12,7 +12,6 @@ import {
     OpenApiSchema,
     StringUtils,
     TableDataLoader,
-    TableFilterType,
     TimerUtils
 } from "@stemy/ngx-utils";
 import {FormFieldConfig} from "@stemy/ngx-dynamic-form";
@@ -39,27 +38,22 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
     queryData: Record<string, any>;
 
     tableColumns: ITableColumns;
-    cellComponent: Type<any>;
     data: IPaginationData;
     dragStartFn: DynamicTableDragHandler;
     dragEnterFn: DynamicTableDragHandler;
     dropFn: DynamicTableDragHandler<void>;
 
-    columnNames: string[];
     addButton: string;
     selectedItem: any;
 
     protected schema: OpenApiSchema;
     protected updateSettings: ITimer;
-    protected filterParams: any;
 
     @ViewChild("table")
     protected table: DynamicTableComponent;
 
     ngOnInit(): void {
         super.ngOnInit();
-        this.tableColumns = null;
-        this.cellComponent = this.crud.getComponentType("cell");
         this.data = {
             total: 0,
             items: [],
@@ -117,7 +111,6 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                     column, this.injector, property, this.snapshot.params, this.context
                 )
             );
-            this.columnNames = Object.keys(this.tableColumns);
             // --- Create data loader ---
             this.dataLoader = async (page, rowsPerPage, orderBy, orderDescending, filter, query) => {
                 const [path, options] = this.getRequestPath(
@@ -237,7 +230,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
     //     });
     // }
 
-    async callAction(setting: CrudButtonActionSetting, item?: any, ev?: MouseEvent): Promise<IAsyncMessage> {
+    async callAction(setting: CrudButtonActionSetting, item?: Record<string, any>, ev?: MouseEvent): Promise<IAsyncMessage> {
         ev?.stopPropagation();
         const action = !setting
             ? null

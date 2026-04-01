@@ -39,7 +39,7 @@ export {
     IFormDataCustomizer,
     ISerializedDataCustomizer,
     IUpdateResources,
-    ICrudComponentTypes,
+    CrudComponentTypes,
     FILTER_PARAM_NAME,
     QUERY_PARAM_NAME,
     COMPONENT_TYPES,

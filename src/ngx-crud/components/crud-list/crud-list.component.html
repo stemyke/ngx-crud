@@ -1,6 +1,7 @@
 <ng-template #content>
     <ng-container *ngIf="dataLoader">
         <dynamic-table class="table mb-lg"
+                       globalTemplatePrefix="crud"
                        [testId]="settings.id"
                        [columns]="tableColumns"
                        [showFilter]="settings.filter"
@@ -11,20 +12,14 @@
                        [dragStartFn]="dragStartFn"
                        [dragEnterFn]="dragEnterFn"
                        [dropFn]="dropFn"
+                       (onClick)="callAction(settings.rowAction, $event)"
                        #table>
-            <ng-template [pure]="true" [column]="columnNames" let-context let-column="column" let-item="item">
-                <td [ngClass]="'column-' + column"
-                    [attr.data-testid]="settings.id + '-' + column + '-' + context.rowIndex"
-                    (click)="callAction(settings.rowAction, item)">
-                    <ng-container [ngComponentOutlet]="cellComponent"
-                                  [ngComponentOutletInputs]="{
-                                        value: item | getValue: column,
-                                        item: item,
-                                        list: this,
-                                        id: column,
-                                        property: tableColumns[column].property
-                                      }"></ng-container>
-                </td>
+            <ng-template #fallbackTemplate let-value="value" let-id="id" let-item="item">
+                <crud-cell [value]="value"
+                           [item]="item"
+                           [list]="this"
+                           [id]="id"
+                           [property]="tableColumns[id].property"></crud-cell>
             </ng-template>
         </dynamic-table>
     </ng-container>

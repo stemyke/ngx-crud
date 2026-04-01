@@ -416,31 +416,30 @@ export interface IUpdateResources {
 
 // --- Components configuration ---
 
-export interface ICrudComponentTypes {
-    list?: Type<any>;
-    add?: Type<any>;
-    edit?: Type<any>;
-    view?: Type<any>;
-    cell?: Type<any>;
-    container?: Type<any>;
+export interface CrudComponentTypes {
+    list: Type<any>;
+    add: Type<any>;
+    edit: Type<any>;
+    view: Type<any>;
+    container: Type<any>;
 }
 
 // --- Module Configuration ---
 
-export const FILTER_PARAM_NAME = new InjectionToken<string>("filter-param-name");
+export const FILTER_PARAM_NAME = new InjectionToken<string>("FILTER_PARAM_NAME");
 
-export const QUERY_PARAM_NAME = new InjectionToken<string>("query-param-name");
+export const QUERY_PARAM_NAME = new InjectionToken<string>("QUERY_PARAM_NAME");
 
-export const COMPONENT_TYPES = new InjectionToken<ICrudComponentTypes>("crud-component-types");
+export const COMPONENT_TYPES = new InjectionToken<CrudComponentTypes>("COMPONENT_TYPES");
 
-export const CRUD_API_SERVICE = new InjectionToken<IApiService>("crud-api-service");
+export const CRUD_API_SERVICE = new InjectionToken<IApiService>("CRUD_API_SERVICE");
 
-export const ACTIONS_COLUMN_TITLE = new InjectionToken<string>("actions-column-title");
+export const ACTIONS_COLUMN_TITLE = new InjectionToken<string>("ACTIONS_COLUMN_TITLE");
 
 export interface ICrudModuleConfig {
     filterParamName?: string;
     queryParamName?: string;
-    componentTypes?: ICrudComponentTypes;
+    componentTypes?: Partial<CrudComponentTypes>;
     /**
      * Default title of the actions column in list component
      */

@@ -9,7 +9,7 @@ import {
     ACTIONS_COLUMN_TITLE,
     COMPONENT_TYPES,
     FILTER_PARAM_NAME,
-    ICrudComponentTypes,
+    CrudComponentTypes,
     ICrudModuleConfig,
     QUERY_PARAM_NAME,
 } from "./common-types";
@@ -67,9 +67,8 @@ export class NgxCrudModule {
                     add: CrudFormComponent,
                     edit: CrudFormComponent,
                     view: CrudFormComponent,
-                    cell: CrudCellComponent,
                     container: CrudContainerComponent,
-                } as ICrudComponentTypes, config?.componentTypes || {})
+                } as CrudComponentTypes, config?.componentTypes || {})
             },
             {
                 provide: ACTIONS_COLUMN_TITLE,

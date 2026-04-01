@@ -1,34 +1,16 @@
-import {
-    ChangeDetectorRef,
-    Component,
-    Inject,
-    Input,
-    OnChanges,
-    OnDestroy,
-    OnInit,
-    TemplateRef,
-    ViewEncapsulation
-} from "@angular/core";
-import {Subscription} from "rxjs";
-import {
-    GlobalTemplateService,
-    OpenApiSchemaProperty,
-    ITimer,
-    ILanguageService,
-    TimerUtils,
-    LANGUAGE_SERVICE
-} from "@stemy/ngx-utils";
+import {Component, Inject, Input, OnChanges, ViewEncapsulation} from "@angular/core";
+import {ILanguageService, LANGUAGE_SERVICE, OpenApiSchemaProperty} from "@stemy/ngx-utils";
 
 import {ICrudList} from "../../common-types";
 
 @Component({
     standalone: false,
-    selector: "base-crud-cell",
+    selector: "crud-cell",
     styleUrls: ["./crud-cell.component.scss"],
     templateUrl: "./crud-cell.component.html",
     encapsulation: ViewEncapsulation.None
 })
-export class CrudCellComponent implements OnInit, OnChanges, OnDestroy {
+export class CrudCellComponent implements OnChanges {
 
     @Input() value: any;
     @Input() item: Record<string, any>;
@@ -37,10 +19,6 @@ export class CrudCellComponent implements OnInit, OnChanges, OnDestroy {
     @Input() property: OpenApiSchemaProperty;
 
     multi: boolean;
-    template: TemplateRef<any>;
-
-    protected updateTimer: ITimer;
-    protected listener: Subscription;
 
     get dateFormat(): string {
         switch (this.language.currentLanguage) {
@@ -50,31 +28,11 @@ export class CrudCellComponent implements OnInit, OnChanges, OnDestroy {
         return "MM/dd/yyyy - HH:mm";
     }
 
-    constructor(readonly cdr: ChangeDetectorRef,
-                readonly globalTemplates: GlobalTemplateService,
-                @Inject(LANGUAGE_SERVICE) readonly language: ILanguageService) {
+    constructor(@Inject(LANGUAGE_SERVICE) readonly language: ILanguageService) {
         this.multi = false;
-        this.updateTimer = TimerUtils.createTimeout();
-        this.listener = null;
-    }
-
-    ngOnInit(): void {
-        this.listener = this.globalTemplates.templatesUpdated.subscribe(() => {
-            this.updateTemplate();
-        });
     }
 
     ngOnChanges() {
         this.multi = Array.isArray(this.value);
-        this.updateTemplate();
-    }
-
-    ngOnDestroy(): void {
-        this.listener?.unsubscribe();
-    }
-
-    protected updateTemplate(): void {
-        this.template = this.globalTemplates.get(`crud-col-${this.id}`);
-        this.cdr.detectChanges();
     }
 }

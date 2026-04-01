@@ -1,15 +1,15 @@
-import {Inject, Injectable, Injector, Optional, Type} from "@angular/core";
+import {Inject, Injectable, Optional, Type} from "@angular/core";
 import {ActivatedRouteSnapshot, CanDeactivate, ChildrenOutletContexts} from "@angular/router";
-import {COMPONENT_TYPES, ICrudComponent, ICrudComponentTypes, ICrudRouteSettings, CrudTreeItem} from "../common-types";
+import {COMPONENT_TYPES, CrudComponentTypes, CrudTreeItem, ICrudComponent, ICrudRouteSettings} from "../common-types";
 
 @Injectable()
 export class CrudService implements CanDeactivate<any> {
 
-    constructor(@Inject(COMPONENT_TYPES) readonly componentTypes: ICrudComponentTypes,
+    constructor(@Inject(COMPONENT_TYPES) readonly componentTypes: CrudComponentTypes,
                 @Optional() readonly contexts: ChildrenOutletContexts = null) {
     }
 
-    getComponentType(type: keyof ICrudComponentTypes): Type<any> {
+    getComponentType(type: keyof CrudComponentTypes): Type<any> {
         return this.componentTypes[type];
     }
 
