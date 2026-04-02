@@ -57,6 +57,7 @@ import {CrudWrapperComponent} from "../crud-wrapper/crud-wrapper.component";
 })
 export class BaseCrudComponent implements ICrudComponent, OnInit, OnDestroy {
 
+    settings: ICrudRouteSettings;
     context: ICrudRouteContext;
     buttons: ICrudRouteButton<string>[];
 
@@ -70,10 +71,6 @@ export class BaseCrudComponent implements ICrudComponent, OnInit, OnDestroy {
         return this.route.snapshot;
     }
 
-    get settings(): ICrudRouteSettings {
-        return this.snapshot.data.settings;
-    }
-
     get endpoint(): string {
         const params = this.snapshot.pathFromRoot.reduce((res, s) => {
             return Object.assign(res, s.params || {});
@@ -84,7 +81,6 @@ export class BaseCrudComponent implements ICrudComponent, OnInit, OnDestroy {
     }
 
     constructor(readonly cdr: ChangeDetectorRef,
-                readonly route: ActivatedRoute,
                 readonly router: Router,
                 readonly injector: Injector,
                 readonly openApi: OpenApiService,
@@ -96,14 +92,22 @@ export class BaseCrudComponent implements ICrudComponent, OnInit, OnDestroy {
                 @Inject(AUTH_SERVICE) readonly auth: IAuthService,
                 @Inject(TOASTER_SERVICE) readonly toaster: IToasterService,
                 @Inject(LANGUAGE_SERVICE) readonly language: ILanguageService,
-                @Inject(FILTER_PARAM_NAME) protected filterParamName: string,
-                @Inject(QUERY_PARAM_NAME) protected queryParamName: string,
-                @Inject(ACTIONS_COLUMN_TITLE) protected actionsTitle: string,
-                @Optional() protected wrapper: CrudWrapperComponent) {
+                @Inject(FILTER_PARAM_NAME) protected readonly filterParamName: string,
+                @Inject(QUERY_PARAM_NAME) protected readonly queryParamName: string,
+                @Inject(ACTIONS_COLUMN_TITLE) protected readonly actionsTitle: string,
+                @Optional() protected readonly route: ActivatedRoute,
+                @Optional() protected readonly wrapper: CrudWrapperComponent) {
     }
 
     ngOnInit(): void {
-        this.context = this.snapshot.data.context;
+        const snapshot: Record<string, any> = this.snapshot || {};
+        const {primaryRequest} = this.settings || {primaryRequest: "list"};
+        this.context = Object.assign({
+            snapshot: this.snapshot,
+            routeData: snapshot.data,
+            params: snapshot.params,
+            primaryRequest
+        }, this.snapshot.data?.context || {});
         this.subscription = this.events.userChanged
             .subscribe(() => this.generateButtons());
         if (!this.wrapper) return;

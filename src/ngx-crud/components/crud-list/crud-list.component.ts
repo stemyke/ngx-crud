@@ -10,7 +10,7 @@ import {
     ObjectUtils,
     ObservableUtils,
     OpenApiSchema,
-    StringUtils,
+    StringUtils, TableDataItems,
     TableDataLoader,
     TimerUtils
 } from "@stemy/ngx-utils";
@@ -34,6 +34,8 @@ const defaultIcons: IconMap = {
 export class CrudListComponent extends BaseCrudComponent implements OnChanges, ICrudList {
 
     dataLoader: TableDataLoader;
+    dataItems: TableDataItems;
+
     queryFieldGroup: FormFieldConfig;
     queryData: Record<string, any>;
 
@@ -106,13 +108,14 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                 settings.id,
                 settings.labelPrefix || settings.id,
                 settings.actionsTitle || this.actionsTitle,
-                settings.query,
+                settings.listQuery,
+                settings.listSort,
                 (column, property) => settings.customizeListColumn(
                     column, this.injector, property, this.snapshot.params, this.context
                 )
             );
             // --- Create data loader ---
-            this.dataLoader = async (page, rowsPerPage, orderBy, orderDescending, filter, query) => {
+            this.dataLoader = async (page, itemsPerPage, orderBy, orderDescending, filter, query) => {
                 const [path, options] = this.getRequestPath(
                     this.getActionContext(), settings.primaryRequest, "request"
                 );
@@ -134,7 +137,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                     },
                     ...settings.customActions,
                 ];
-                const params = this.api.makeListParams(page, rowsPerPage, orderBy, orderDescending);
+                const params = this.api.makeListParams(page, itemsPerPage, orderBy, orderDescending);
                 params[this.filterParamName] = filter;
                 params[this.queryParamName] = query;
 
@@ -178,6 +181,9 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
 
                 return {...data};
             };
+            this.dataItems = settings.listPreview
+                ? (await this.dataLoader(1, settings.itemsPerPage, settings.orderBy, settings.orderDescending, "", {})).items
+                : null;
         }, 50);
         this.subscription = ObservableUtils.multiSubscription(
             this.subscription,
@@ -192,7 +198,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                     subjects: [this.events.languageChanged, this.events.userChanged],
                     cb: () => {
                         if (!this.updateSettings) {
-                            console.error(`UpdateSettings is not defined for some reason`, this.updateSettings);
+                            console.error(`UpdateSettings is not defined for some reason`);
                             return;
                         }
                         this.updateSettings.run();

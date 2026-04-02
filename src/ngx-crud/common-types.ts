@@ -231,14 +231,6 @@ export interface ICrudRouteParams {
      */
     labelPrefix?: string;
     /**
-     * Defines if filtering with basic keywords in the list if enabled
-     */
-    filter?: boolean;
-    /**
-     * Defines if querying for list fields are enabled in general
-     */
-    query?: boolean;
-    /**
      * Defines custom auth guards for the child routes
      */
     guards?: Array<ResolveFactory<RouteValidator> | RouteValidator>;
@@ -294,6 +286,22 @@ export interface ICrudRouteParams {
      * Here with an already created entity you can update additional resources attached to it
      */
     updateAdditionalResources?: CrudUpdateResourcesFunc;
+    /**
+     * Defines if filtering with basic keywords in the list if enabled
+     */
+    listFilter?: boolean;
+    /**
+     * Defines if querying for list fields are enabled in general
+     */
+    listQuery?: boolean;
+    /**
+     * Defines if sorting for list fields are enabled in general (defaults to true)
+     */
+    listSort?: boolean;
+    /**
+     * If this option is enabled, then the list will only display the first page of the response without any pagination
+     */
+    listPreview?: boolean;
     /**
      * Dependency subjects to be checked if we should refresh the list
      */
@@ -373,9 +381,15 @@ export interface ICrudRouteSettings extends Required<ICrudRouteParams> {
     container: Type<any>;
 }
 
+export interface ICrudContainerComponent {
+    data: Data;
+    settings: ICrudRouteSettings;
+}
+
 export interface ICrudComponent {
+    settings: ICrudRouteSettings;
+
     readonly context: ICrudRouteContext;
-    readonly settings: ICrudRouteSettings;
     readonly header: TemplateRef<any>;
     readonly content: TemplateRef<any>;
     readonly footer: TemplateRef<any>;

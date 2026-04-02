@@ -16,6 +16,6 @@ export class ContextResolverService implements Resolve<ICrudRouteContext> {
             params: snapshot.params,
             primaryRequest: settings.primaryRequest
         } as ICrudRouteContext;
-        return await settings.loadContext(context, this.injector) ?? context;
+        return await settings.loadContext(context, this.injector);
     }
 }

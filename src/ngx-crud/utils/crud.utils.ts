@@ -90,10 +90,6 @@ export function createCrudSettings(
         customActions: params?.customActions || [],
         customButtons: params?.customButtons || [],
         labelPrefix: params?.labelPrefix || "",
-        filter: params?.filter || false,
-        // In case if filter is enabled it should also be enabled explicitly to display both,
-        // if not then it should be explicitly disabled to make it disappear
-        query: params?.filter ? params.query || false : params?.query !== false,
         guards: params?.guards || [],
         onLeave: params?.onLeave || defaultLeaveFunction,
         importExports: primaryRequest == "edit" ? (params?.importExports || []) : [],
@@ -108,6 +104,12 @@ export function createCrudSettings(
         customizeFormData: params?.customizeFormData || returnCb,
         customizeSerializedData: params?.customizeSerializedData || returnCb,
         updateAdditionalResources: params?.updateAdditionalResources || noopCb,
+        listFilter: Boolean(params?.listFilter ?? false),
+        // In case if filter is enabled it should also be enabled explicitly to display both,
+        // if not then it should be explicitly disabled to make it disappear
+        listQuery: params?.listFilter ? params.listQuery || false : params?.listQuery !== false,
+        listSort: Boolean(params?.listSort ?? true),
+        listPreview: params?.listPreview || false,
         listDependencies: params?.listDependencies || [],
         itemsListed: params?.itemsListed || noopCb,
         itemsPerPage: params?.itemsPerPage || 25,
@@ -263,6 +265,7 @@ export async function createTableColumnsForSchema(
     labelPrefix: string = "",
     actionsTitle: string = undefined,
     query: boolean = false,
+    sort: boolean = true,
     customizer: (column: ICrudListColumn, property: OpenApiSchemaProperty) => CrudColumnResult
 ): Promise<ITableColumns> {
 
@@ -305,7 +308,7 @@ export async function createTableColumnsForSchema(
         const column: ICrudListColumn = {
             name,
             title,
-            sort: property.disableSort ? null : name,
+            sort: sort && !property.disableSort ? name : null,
             filter: query && filterType && !property.disableFilter,
             filterType,
             enum: property.enum || property.items?.enum || [],

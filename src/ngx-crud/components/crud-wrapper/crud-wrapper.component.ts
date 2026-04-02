@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit, Type, ViewEncapsulation} from "@angular/core";
+import {ChangeDetectorRef, Component, Input, OnDestroy, OnInit, Type, ViewEncapsulation} from "@angular/core";
 import {ActivatedRoute, Data, Router, UrlSerializer} from "@angular/router";
 import {BehaviorSubject, Subscription} from "rxjs";
 
@@ -25,13 +25,24 @@ export const defaultOutletState = {
 export class CrudWrapperComponent implements OnInit, OnDestroy {
 
     data: Data;
-    settings: ICrudRouteSettings;
     componentType: Type<any>;
+    componentInputs: Record<string, any>;
     beforeState: BehaviorSubject<CrudOutletState>;
     afterState: BehaviorSubject<CrudOutletState>;
     component: any;
 
     protected subscription: Subscription;
+    protected routeSettings: ICrudRouteSettings;
+
+    @Input()
+    set settings(value: ICrudRouteSettings) {
+        this.routeSettings = value;
+        this.updateComponent();
+    }
+
+    get settings(): ICrudRouteSettings {
+        return this.routeSettings || this.data.settings;
+    }
 
     constructor(protected route: ActivatedRoute,
                 protected router: Router,
@@ -39,7 +50,6 @@ export class CrudWrapperComponent implements OnInit, OnDestroy {
                 protected cdr: ChangeDetectorRef,
                 protected urlSerializer: UrlSerializer) {
         this.data = {};
-        this.settings = {} as any;
         this.beforeState = new BehaviorSubject(defaultOutletState);
         this.afterState = new BehaviorSubject(defaultOutletState);
     }
@@ -47,12 +57,19 @@ export class CrudWrapperComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.subscription = this.route.data.subscribe(data => {
             this.data = data;
-            this.settings = data.settings as ICrudRouteSettings;
-            this.componentType = this.settings?.container || this.crud.getComponentType("container");
+            this.updateComponent();
         });
     }
 
     ngOnDestroy() {
         this.subscription?.unsubscribe();
+    }
+
+    protected updateComponent(): void {
+        this.componentType = this.settings?.container || this.crud.getComponentType("container");
+        this.componentInputs = {
+            data: this.data,
+            settings: this.settings,
+        };
     }
 }
