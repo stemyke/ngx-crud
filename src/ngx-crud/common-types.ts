@@ -55,7 +55,7 @@ export interface CrudDataType {
 }
 
 export interface CrudDataSource {
-    loadData: (page: number, itemsPerPage: number) => Promise<IPaginationData>;
+    loadData: (page: number, itemsPerPage: number, controller?: AbortController) => Promise<IPaginationData>;
 
     refresh(time?: number): void;
 
@@ -302,6 +302,14 @@ export interface ICrudRouteParams {
      * If this option is enabled, then the list will only display the first page of the response without any pagination
      */
     listPreview?: boolean;
+    /**
+     * Defines a debounce time in ms which the crud list will use when paginating
+     */
+    listUpdateTime?: number;
+    /**
+     * Defines a debounce time in ms which the crud list will use when filter changes
+     */
+    listFilterTime?: number;
     /**
      * Dependency subjects to be checked if we should refresh the list
      */

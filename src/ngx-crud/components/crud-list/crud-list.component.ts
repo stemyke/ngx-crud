@@ -115,7 +115,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                 )
             );
             // --- Create data loader ---
-            this.dataLoader = async (page, itemsPerPage, orderBy, orderDescending, filter, query) => {
+            this.dataLoader = async (page, itemsPerPage, orderBy, orderDescending, filter, query, controller) => {
                 const [path, options] = this.getRequestPath(
                     this.getActionContext(), settings.primaryRequest, "request"
                 );
@@ -141,7 +141,10 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                 params[this.filterParamName] = filter;
                 params[this.queryParamName] = query;
 
-                const data = await this.api.list(path, params, options);
+                const data = await this.api.list(path, params, {
+                    ...options,
+                    controller
+                });
                 let {total, items, meta} = Object.assign({total: 0, items: [], meta: {}}, data);
                 let hasActions = true;
                 // --- Process items actions ---
@@ -182,7 +185,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                 return {...data};
             };
             this.dataItems = settings.listPreview
-                ? (await this.dataLoader(1, settings.itemsPerPage, settings.orderBy, settings.orderDescending, "", {})).items
+                ? (await this.dataLoader(1, settings.itemsPerPage, settings.orderBy, settings.orderDescending, "", {}, null)).items
                 : null;
         }, 50);
         this.subscription = ObservableUtils.multiSubscription(

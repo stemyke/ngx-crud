@@ -110,6 +110,8 @@ export function createCrudSettings(
         listQuery: params?.listFilter ? params.listQuery || false : params?.listQuery !== false,
         listSort: Boolean(params?.listSort ?? true),
         listPreview: params?.listPreview || false,
+        listUpdateTime: params?.listUpdateTime ?? 500,
+        listFilterTime: params?.listFilterTime ?? 500,
         listDependencies: params?.listDependencies || [],
         itemsListed: params?.itemsListed || noopCb,
         itemsPerPage: params?.itemsPerPage || 25,
