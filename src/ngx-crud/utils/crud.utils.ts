@@ -193,7 +193,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
         createCrudRoute(
             `add-${id}`,
             `${subPath}add`,
-            createCrudSettings(id, endpoint, options.addRequest || "add", getDataType, options, options.addComponent, options.containerComponent),
+            createCrudSettings(`add-${id}`, endpoint, options.addRequest || "add", getDataType, options, options.addComponent, options.containerComponent),
             {
                 ...(options.addData || {}),
                 mode: "none",
@@ -208,7 +208,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
         createCrudRoute(
             `edit-${id}`,
             `${subPath}edit/:id`,
-            createCrudSettings(id, endpoint, options.editRequest || "edit", getDataType, options, options.editComponent, options.containerComponent),
+            createCrudSettings(`edit-${id}`, endpoint, options.editRequest || "edit", getDataType, options, options.editComponent, options.containerComponent),
             {
                 ...(options.editData || {}),
                 mode: "none",
@@ -223,7 +223,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
         createCrudRoute(
             `view-${id}`,
             `${subPath}view/:id`,
-            createCrudSettings(id, endpoint, options.viewRequest || "edit", getDataType, options, options.viewComponent, options.containerComponent),
+            createCrudSettings(`view-${id}`, endpoint, options.viewRequest || "edit", getDataType, options, options.viewComponent, options.containerComponent),
             {
                 ...(options.viewData || {}),
                 mode: "none",
