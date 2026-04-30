@@ -1,5 +1,5 @@
 import {Type} from "@angular/core";
-import {Route, Router} from "@angular/router";
+import {ActivatedRouteSnapshot, Route, Router} from "@angular/router";
 import {
     API_SERVICE,
     AuthGuard,
@@ -31,12 +31,16 @@ import {CrudWrapperComponent} from "../components/crud-wrapper/crud-wrapper.comp
 import {CrudChildWrapperComponent} from "../components/crud-child-wrapper/crud-child-wrapper.component";
 import {CrudService} from "../services/crud.service";
 
-export async function defaultCrudAction(ctx: ICrudRouteActionContext, item: any, button: string) {
-    const router = ctx.injector.get(Router);
+export function defaultCrudPath(ctx: ICrudRouteActionContext, item: any, button: string): string {
     const snapshot = ctx.context.snapshot;
     const route = !item ? button : `${button}/${item._id || item.id}`;
     const outlet = snapshot.data.actionOutlet || "primary";
-    const path = getRoutePath(ctx, [{outlets: {[outlet]: route}}]);
+    return getRoutePath(ctx, [{outlets: {[outlet]: route}}]);
+}
+
+export async function defaultCrudAction(ctx: ICrudRouteActionContext, item: any, button: string) {
+    const router = ctx.injector.get(Router);
+    const path = defaultCrudPath(ctx, item, button);
     await router.navigateByUrl(path);
 }
 
@@ -64,6 +68,7 @@ export function createCrudSettings(
     id: string, endpoint: string, primaryRequest: CrudRouteRequest,
     getDataType: GetDataType, params?: ICrudRouteParams, component?: Type<any>, container?: Type<any>
 ): ICrudRouteSettings {
+    const titlePrefix = primaryRequest === "list" ? `` : `${primaryRequest}-`;
     return {
         id,
         endpoint,
@@ -71,6 +76,7 @@ export function createCrudSettings(
         getDataType,
         component,
         container,
+        title: `title.${titlePrefix}${id}`,
         mode: params?.mode || "routes",
         useTabs: params?.useTabs || false,
         hideMain: params?.hideMain || false,
@@ -193,7 +199,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
         createCrudRoute(
             `add-${id}`,
             `${subPath}add`,
-            createCrudSettings(`add-${id}`, endpoint, options.addRequest || "add", getDataType, options, options.addComponent, options.containerComponent),
+            createCrudSettings(id, endpoint, options.addRequest || "add", getDataType, options, options.addComponent, options.containerComponent),
             {
                 ...(options.addData || {}),
                 mode: "none",
@@ -208,7 +214,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
         createCrudRoute(
             `edit-${id}`,
             `${subPath}edit/:id`,
-            createCrudSettings(`edit-${id}`, endpoint, options.editRequest || "edit", getDataType, options, options.editComponent, options.containerComponent),
+            createCrudSettings(id, endpoint, options.editRequest || "edit", getDataType, options, options.editComponent, options.containerComponent),
             {
                 ...(options.editData || {}),
                 mode: "none",
@@ -223,7 +229,7 @@ export function createCrudRoutes(id: string, endpoint: string, dataType: string 
         createCrudRoute(
             `view-${id}`,
             `${subPath}view/:id`,
-            createCrudSettings(`view-${id}`, endpoint, options.viewRequest || "edit", getDataType, options, options.viewComponent, options.containerComponent),
+            createCrudSettings(id, endpoint, options.viewRequest || "edit", getDataType, options, options.viewComponent, options.containerComponent),
             {
                 ...(options.viewData || {}),
                 mode: "none",

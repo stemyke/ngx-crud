@@ -10,13 +10,14 @@ import {
     ObjectUtils,
     ObservableUtils,
     OpenApiSchema,
-    StringUtils, TableDataItems,
+    StringUtils,
+    TableDataItems,
     TableDataLoader,
     TimerUtils
 } from "@stemy/ngx-utils";
 import {FormFieldConfig} from "@stemy/ngx-dynamic-form";
 import {CrudButtonActionSetting, ICrudList, ICrudRouteActionContext, ICrudRouteSettings} from "../../common-types"
-import {createTableColumnsForSchema, selectBtnProp} from "../../utils/crud.utils";
+import {createTableColumnsForSchema, defaultCrudPath, selectBtnProp} from "../../utils/crud.utils";
 import {BaseCrudComponent} from "../base/base-crud.component";
 
 const defaultIcons: IconMap = {
@@ -24,6 +25,8 @@ const defaultIcons: IconMap = {
     edit: "pencil",
     delete: "trash"
 };
+
+const actionsWithPath = ["view", "edit"];
 
 @Component({
     standalone: false,
@@ -119,6 +122,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                 const [path, options] = this.getRequestPath(
                     this.getActionContext(), settings.primaryRequest, "request"
                 );
+                const actionCtx = this.getActionContext();
                 const actions = [
                     {
                         id: "view",
@@ -157,6 +161,8 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                             icon,
                             status,
                             action: (it: any, ev: MouseEvent) => this.callAction(action.id, it, ev),
+                            path: actionsWithPath.includes(action.id)
+                                ? defaultCrudPath(actionCtx, item, action.id) : null,
                             testId: StringUtils.camelize(`${action.id}-button`)
                         };
                     }).filter(Boolean);

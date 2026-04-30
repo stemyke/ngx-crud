@@ -27,7 +27,6 @@ import {
 
 // --- CRUD ---
 export interface CrudRouteLink extends TabOption {
-    path?: UrlTree;
     data?: Data;
 }
 
@@ -139,7 +138,7 @@ export interface ICrudRouteAction {
 
 export type CrudDisplayMode = "routes" | "inline" | "dialog";
 
-export type CrudRouteRequest = "list" | "add" | "edit";
+export type CrudRouteRequest = "list" | "add" | "edit" | "view";
 
 export type CrudRouteMethod = "request" | "save" | "delete" | "import" | "export";
 
@@ -387,6 +386,7 @@ export interface ICrudRouteSettings extends Required<ICrudRouteParams> {
     getDataType: GetDataType;
     component: Type<any>;
     container: Type<any>;
+    title: string;
 }
 
 export interface ICrudContainerComponent {
