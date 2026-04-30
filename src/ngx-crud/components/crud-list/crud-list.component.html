@@ -3,6 +3,7 @@
         <dynamic-table class="table mb-lg"
                        globalTemplatePrefix="crud"
                        [testId]="settings.id"
+                       [placeholder]="'placeholder.search-for-' + settings.id"
                        [columns]="tableColumns"
                        [showFilter]="settings.listFilter"
                        [data]="dataItems"
