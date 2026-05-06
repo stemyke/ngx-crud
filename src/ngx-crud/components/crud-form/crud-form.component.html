@@ -3,8 +3,7 @@
         <dynamic-form #crudForm
                       (onValueChanges)="onFormChanges($event)"
                       [data]="data"
-                      [useTabs]="formFieldGroup.props.useTabs"
-                      [fields]="formFields">
+                      [fields]="formFieldGroup">
         </dynamic-form>
         <ul class="import-export">
             <li *ngFor="let ie of settings.importExports">

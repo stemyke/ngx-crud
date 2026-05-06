@@ -1,6 +1,6 @@
 {
     "name": "@stemy/ngx-crud",
-    "version": "19.9.7",
+    "version": "19.9.8",
     "license": "MIT",
     "scripts": {
         "ng": "ng",
@@ -13,11 +13,11 @@
     "author": "stemy <balazs.stemler@metrix.co.hu>",
     "peerDependencies": {
         "@stemy/ngx-utils": ">=19.9.22",
-        "@stemy/ngx-dynamic-form": ">=19.9.4"
+        "@stemy/ngx-dynamic-form": ">=19.9.13"
     },
     "devDependencies": {
         "@stemy/ngx-utils": "^19.9.22",
-        "@stemy/ngx-dynamic-form": "^19.9.4",
+        "@stemy/ngx-dynamic-form": "^19.9.13",
         "ng-packagr": "^19.2.2",
         "tslib": "^2.3.0",
         "cpy": "^12.1.0",
