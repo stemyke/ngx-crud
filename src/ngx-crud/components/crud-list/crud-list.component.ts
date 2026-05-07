@@ -1,7 +1,7 @@
 import {Component, OnChanges, ViewChild, ViewEncapsulation} from "@angular/core";
 import {
     DynamicTableComponent,
-    DynamicTableDragHandler,
+    DynamicTableDragHandler, HttpRequestQuery,
     IAsyncMessage,
     IconMap,
     IPaginationData,
@@ -15,10 +15,11 @@ import {
     TableDataLoader,
     TimerUtils
 } from "@stemy/ngx-utils";
-import {FormFieldConfig} from "@stemy/ngx-dynamic-form";
+import {FormFieldConfig, FormSerializeResult} from "@stemy/ngx-dynamic-form";
 import {CrudButtonActionSetting, ICrudList, ICrudRouteActionContext, ICrudRouteSettings} from "../../common-types"
 import {createTableColumnsForSchema, defaultCrudPath, selectBtnProp} from "../../utils/crud.utils";
 import {BaseCrudComponent} from "../base/base-crud.component";
+import {FormFieldChangeEvent} from "@stemy/ngx-dynamic-form/ngx-dynamic-form/common-types";
 
 const defaultIcons: IconMap = {
     view: "eye",
@@ -36,11 +37,11 @@ const actionsWithPath = ["view", "edit"];
 })
 export class CrudListComponent extends BaseCrudComponent implements OnChanges, ICrudList {
 
+    queryFields: FormFieldConfig[];
+    queryData: Record<string, any>;
+
     dataLoader: TableDataLoader;
     dataItems: TableDataItems;
-
-    queryFieldGroup: FormFieldConfig;
-    queryData: Record<string, any>;
 
     tableColumns: ITableColumns;
     data: IPaginationData;
@@ -52,6 +53,7 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
     selectedItem: any;
 
     protected schema: OpenApiSchema;
+    protected filterParams: FormSerializeResult;
     protected updateSettings: ITimer;
 
     @ViewChild("table")
@@ -77,27 +79,43 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
         const subjects = ObjectUtils.isArray(dependencies)
             ? dependencies
             : (ObjectUtils.isFunction(dependencies) ? dependencies(this.injector) : []);
+        this.filterParams = {};
         this.updateSettings = TimerUtils.createTimeout(async () => {
             const settings = this.settings;
             if (!settings) return;
-
-            // --- Update query models ---
+            // --- Update schema ---
             const requestType = settings.getDataType(this.context, this.injector);
-            this.queryFieldGroup = settings.queryForm ? await this.forms.getFormFieldGroupForSchema(requestType) : null;
             this.schema = await this.openApi.getSchema(requestType);
             if (!this.schema) {
                 console.log(`Schema by name "${requestType}" not found`);
                 return;
             }
-            // --- Check if we can add a new entity ---
+            // --- Update query models ---
+            const queryFields = settings.listQuery
+                ? await this.forms.getFormFieldsForSchema(`Query${requestType}`, {
+                    labelPrefix: settings.labelPrefix || settings.id,
+                    labelCustomizer: settings.customizeFormLabel,
+                    testId: settings.id,
+                    context: this.context,
+                    fieldCustomizer: settings.customizeFormField
+                })
+                : [];
+            this.queryFields = queryFields.length > 0 ? queryFields : null;
+            this.queryData = {};
+            // --- Check if we can add a new entity ---.
             let canAdd = settings.addButton;
-            if (canAdd || this.queryFieldGroup) {
-                try {
-                    const [path, options] = this.getRequestPath(
-                        this.getActionContext(), settings.primaryRequest, "save"
-                    );
-                    this.queryData = await this.api.get(path, options);
-                } catch (e) {
+            if (canAdd || this.queryFields) {
+                const [path, options] = canAdd || this.queryFields ? this.getRequestPath(
+                    this.getActionContext(), settings.primaryRequest, "save"
+                ) : [];
+                if (path) {
+                    try {
+                        const defaultData = await this.api.get(path, options);
+                        this.queryData = Object.assign({}, this.queryData, defaultData);
+                    } catch (e) {
+                        canAdd = false;
+                    }
+                } else {
                     canAdd = false;
                 }
             }
@@ -141,14 +159,30 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
                     },
                     ...settings.customActions,
                 ];
-                const params = this.api.makeListParams(page, itemsPerPage, orderBy, orderDescending);
-                params[this.filterParamName] = filter;
-                params[this.queryParamName] = query;
+                // --- Build the base query params ---
+                const params: HttpRequestQuery = {
+                    // Original values from the "getRequestPath" method
+                    ...(options.params || {}),
+                    // Serialized "query form" values
+                    ...(this.filterParams || {}),
+                    // Base list parameters
+                    ...this.api.makeListParams(page, itemsPerPage, orderBy, orderDescending)
+                };
+                // --- What came from the fixed request, or from the serialized query form, otherwise what we typed into the dynamic table search field
+                params[this.filterParamName] = params[this.filterParamName] || filter;
+                // --- Build complex query filter params ---
+                params[this.queryParamName] = {
+                    // First, what was put into it maybe from the "getRequestPath" method
+                    ...(params[this.queryParamName] || {}),
+                    // Then what we set in the dynamic table headers
+                    ...query
+                };
 
                 const data = await this.api.list(path, params, {
                     ...options,
                     controller
                 });
+
                 let {total, items, meta} = Object.assign({total: 0, items: [], meta: {}}, data);
                 let hasActions = true;
                 // --- Process items actions ---
@@ -238,12 +272,12 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
         this.table?.refresh();
     }
 
-    //
-    // updateFilters(ev: IDynamicFormEvent): void {
-    //     this.forms.serializeForm(ev.form).then(filter => {
-    //         this.filterParams = filter;
-    //     });
-    // }
+    updateFilters(ev: FormFieldChangeEvent): void {
+        ev.form.serialize(false).then(filter => {
+            this.filterParams = filter;
+            this.refresh();
+        });
+    }
 
     async callAction(setting: CrudButtonActionSetting, item?: Record<string, any>, ev?: MouseEvent): Promise<IAsyncMessage> {
         ev?.stopPropagation();

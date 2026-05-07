@@ -57,7 +57,8 @@ export function getRequestPath(ctx: ICrudRouteActionContext, reqType: CrudRouteR
     if (reqType === "edit") {
         return `${ctx.endpoint}/${id}`;
     }
-    return (reqType === "list") !== (method === "request") ? `${ctx.endpoint}/${id}` : ctx.endpoint;
+    return (reqType === "list") !== (method === "request")
+        ? `${ctx.endpoint}/${id}` : ctx.endpoint;
 }
 
 export function getDataTransferType(dataType: string | CrudDataType, primary: string): string {

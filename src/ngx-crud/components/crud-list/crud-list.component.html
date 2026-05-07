@@ -1,5 +1,12 @@
 <ng-template #content>
-    <ng-container *ngIf="dataLoader">
+    @if (queryFields) {
+        <dynamic-form (onInit)="updateFilters($event)"
+                      (onValueChanges)="updateFilters($event)"
+                      [data]="queryData"
+                      [fields]="queryFields">
+        </dynamic-form>
+    }
+    @if (dataLoader) {
         <dynamic-table class="table mb-lg"
                        globalTemplatePrefix="crud"
                        [testId]="settings.id"
@@ -26,7 +33,7 @@
                            [property]="tableColumns[id].property"></crud-cell>
             </ng-template>
         </dynamic-table>
-    </ng-container>
+    }
 </ng-template>
 <ng-template #footer>
     <div class="crud-card-buttons">

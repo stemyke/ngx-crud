@@ -330,10 +330,6 @@ export interface ICrudRouteParams {
      */
     orderDescending?: boolean;
     /**
-     * Displays an extra form based on the specified JSON schema in list component that helps in complex query
-     */
-    queryForm?: boolean;
-    /**
      * Sets if list metadata should be displayed
      */
     displayMeta?: boolean;
