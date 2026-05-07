@@ -104,10 +104,10 @@ export class CrudListComponent extends BaseCrudComponent implements OnChanges, I
             this.queryData = {};
             // --- Check if we can add a new entity ---.
             let canAdd = settings.addButton;
-            if (canAdd || this.queryFields) {
-                const [path, options] = canAdd || this.queryFields ? this.getRequestPath(
+            if (canAdd) {
+                const [path, options] = this.getRequestPath(
                     this.getActionContext(), settings.primaryRequest, "save"
-                ) : [];
+                );
                 if (path) {
                     try {
                         const defaultData = await this.api.get(path, options);
